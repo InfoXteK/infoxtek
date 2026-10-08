@@ -36,7 +36,7 @@ ${cta}`);
 page('/why-choose-us/', `Why Choose Us | ${site.name}`, 'Experienced, proactive and tailored IT support built for long-term partnerships.',
   `${head('Why choose us', 'Five reasons clients stay with us.')}<section class="sec"><div class="wrap">${reasonList}</div></section>${cta}`, [['Why Choose Us', '/why-choose-us/']]);
 
-page('/services/', `Our Services | ${site.name}`, 'Cloud, managed IT, network, disaster recovery and consulting services from InfoXtek.',
+page('/services/', `Our Services | ${site.name}`, 'Cloud, managed IT, network, disaster recovery and consulting services from InfoXteK.',
   `${head('Our services', 'Six service areas, one accountable team.')}<section class="sec"><div class="wrap">${cards(services, (s) => `<article class="card rv">${icon(s.icon)}<h2><a href="/services/${s.slug}/">${esc(s.title)}</a></h2><p>${esc(s.summary)}</p></article>`)}</div></section>${cta}`, [['Our Services', '/services/']]);
 for (const s of services) {
   page(`/services/${s.slug}/`, `${s.title} | ${site.name}`, s.summary,
@@ -51,14 +51,14 @@ for (const s of services) {
 page('/industries/', `Industries | ${site.name}`, 'IT services for agriculture, banking and financial services, education, energy and utilities, and government.',
   `${head('Industries we serve', 'Every sector has its own risks and rules.')}<section class="sec"><div class="wrap">${cards(industries, (i) => `<article class="card"><h2>${esc(i.name)}</h2><p>${esc(i.summary)}</p></article>`)}</div></section>${cta}`, [['Industries', '/industries/']]);
 
-page('/tools-tips/', `Tools & Tips | ${site.name}`, 'Practical cyber security, backup, AI and cloud tips from InfoXtek.',
+page('/tools-tips/', `Tools & Tips | ${site.name}`, 'Practical cyber security, backup, AI and cloud tips from InfoXteK.',
   `${head('Tools and tips', 'Practical advice on security, recovery, AI and cloud.')}<section class="sec"><div class="wrap">${tips.map((g) => `<h2 class="rv">${esc(g.g)}</h2>${cards(g.i, (x) => `<article class="card rv"><h3>${esc(x.t)}</h3><p>${esc(x.d)}</p></article>`)}`).join('<div class="gap"></div>')}${resources.length ? `<h2>Downloads</h2><ul class="list">${resources.map((r) => `<li><a href="${esc(r.href)}">${esc(r.title)}</a><p>${esc(r.text)}</p></li>`).join('')}</ul>` : ''}</div></section>${cta}`, [['Tools & Tips', '/tools-tips/']]);
 
 page('/book-online/', `Book Online | ${site.name}`, 'Request IT support, software implementation, home entertainment setup or remote tech support.',
   `${head('Book online', 'Choose the service you need, then send us a request.')}<section class="sec"><div class="wrap">${cards(bookings, (b) => `<article class="card"><h2>${esc(b.title)}</h2><p>${esc(b.text)}</p><a class="btn small" href="/contact/?service=${encodeURIComponent(b.title)}">Request this service</a></article>`)}<p class="note">Online scheduling and pricing are not connected yet. Requests go through the contact form.</p></div></section>`, [['Book Online', '/book-online/']]);
 
 const details = [contact.email && `<li>Email: <a href="mailto:${esc(contact.email)}">${esc(contact.email)}</a></li>`, contact.phone && `<li>Phone: ${esc(contact.phone)}</li>`, contact.address && `<li>Address: ${esc(contact.address)}</li>`].filter(Boolean);
-page('/contact/', `Contact Us | ${site.name}`, 'Contact InfoXtek to discuss your IT needs.',
+page('/contact/', `Contact Us | ${site.name}`, 'Contact InfoXteK to discuss your IT needs.',
   `${head('Contact us', 'Tell us about your project or problem.')}<section class="sec"><div class="wrap two">
 <form id="contact-form" novalidate${contact.formEndpoint ? ` data-endpoint="${esc(contact.formEndpoint)}"` : ''}>
 <label for="name">Name</label><input id="name" name="name" autocomplete="name" required maxlength="120"><p class="err" id="name-e" hidden></p>
@@ -82,10 +82,10 @@ const layout = (p) => {
 <meta http-equiv="Content-Security-Policy" content="${esc(csp)}"><meta name="referrer" content="strict-origin-when-cross-origin">${p.noindex ? '<meta name="robots" content="noindex">' : ''}
 <title>${esc(p.title)}</title><meta name="description" content="${esc(p.description)}"><link rel="canonical" href="${url(p.path)}">
 <meta property="og:type" content="website"><meta property="og:site_name" content="${esc(site.name)}"><meta property="og:title" content="${esc(p.title)}"><meta property="og:description" content="${esc(p.description)}"><meta property="og:url" content="${url(p.path)}"><meta name="twitter:card" content="summary">
-<meta name="theme-color" content="#3b4cca"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/site.css?v=${VERSION}">
+<meta name="theme-color" content="#3b4cca"><link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png"><link rel="icon" href="/favicon.png" sizes="128x128" type="image/png"><link rel="apple-touch-icon" href="/favicon.png"><link rel="stylesheet" href="/assets/site.css?v=${VERSION}">
 <script type="application/ld+json">${ld(jsonld)}</script></head>
 <body><a class="skip" href="#main">Skip to content</a>
-<header class="top"><div class="wrap bar"><a class="logo" href="/">${esc(site.name)}</a>
+<header class="top"><div class="wrap bar"><a class="logo" href="/" aria-label="${esc(site.name)} home"><img src="/assets/logo.png" width="34" height="44" alt=""><span>Info<b>X</b>te<b>K</b></span></a>
 <button class="menu" aria-expanded="false" aria-controls="nav">Menu</button>
 <nav id="nav" aria-label="Main">${nav.map((n) => `<a href="${n.path}"${cur(n.path)}>${esc(n.label)}</a>`).join('')}<a class="btn small" href="/book-online/"${cur('/book-online/')}>Book Online</a></nav></div></header>
 ${p.crumbs.length ? `<nav class="crumbs wrap" aria-label="Breadcrumb">${crumbs.map((c, i) => (i < crumbs.length - 1 ? `<a href="${c[1]}">${esc(c[0])}</a>` : `<span aria-current="page">${esc(c[0])}</span>`)).join(' / ')}</nav>` : ''}

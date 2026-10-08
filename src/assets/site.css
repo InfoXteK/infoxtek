@@ -81,3 +81,4 @@ nav#nav.open{display:flex}.hero{padding:3rem 0}.stack li:nth-child(even){margin-
 @keyframes netmove{to{background-position:240px 240px}}@keyframes scan{0%,100%{top:-120px}50%{top:100%}}@keyframes bob{50%{transform:translateY(-12px)}}
 @media(max-width:820px){.floaters{display:none}}
 @media(prefers-reduced-motion:reduce){.netbg,.band::before,.netbg::after,.floaters span{animation:none}}
+.logo{display:flex;align-items:center;gap:.6rem}.logo img{height:44px;width:auto}.logo b{color:#2b86d1}

@@ -1,18 +1,18 @@
 // SINGLE SOURCE OF TRUTH. Edit content here; templates in scripts/build.mjs never hold business copy.
 // Values marked VERIFY are unknown. Leave null until confirmed. Nothing here is invented company data.
 export const site = {
-  name: 'InfoXtek',
+  name: 'InfoXteK',
   url: 'https://infoXtek.com',
   tagline: 'Dependable IT, planned around your business.',
   description:
-    'InfoXtek provides cloud solutions, managed IT services, network solutions, disaster recovery and IT consulting for growing organizations.',
+    'InfoXteK provides cloud solutions, managed IT services, network solutions, disaster recovery and IT consulting for growing organizations.',
   locale: 'en',
 };
 
 export const contact = {
   email: 'infoxtekcorp@gmail.com',        // VERIFY: real company email
   phone: '+971545414237',        // VERIFY: real company phone
-  address: 'International City, Dubai.',   // VERIFY: real company address
+  address: 'International City, Dubai.',       // VERIFY: real company address
   formEndpoint: null, // Optional https:// URL of a form provider you approve. null = form is not connected.
   social: [],         // e.g. [{ label: 'LinkedIn', href: 'https://...' }]
 };
