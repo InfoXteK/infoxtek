@@ -10,9 +10,9 @@ export const site = {
 };
 
 export const contact = {
-  email: 'infoxtekcorp@gmail.com',        // VERIFY: real company email
-  phone: '+971545414237',        // VERIFY: real company phone
-  address: 'International City, Dubai.',        // VERIFY: real company address
+  email: 'infoxtekcorp@gmail.com', // provided by owner
+  phone: null,        // VERIFY: real company phone
+  address: null,      // VERIFY: real company address
   formEndpoint: null, // Optional https:// URL of a form provider you approve. null = form is not connected.
   social: [],         // e.g. [{ label: 'LinkedIn', href: 'https://...' }]
 };
@@ -26,49 +26,58 @@ export const nav = [
   { label: 'Contact Us', path: '/contact/' },
 ];
 
+export const platforms = ['Microsoft Azure', 'AWS', 'Alibaba Cloud', 'Microsoft 365', 'Intune', 'Entra ID', 'VMware', 'Hyper-V', 'Veeam', 'Acronis', 'Quorum', 'HPE 3PAR', 'NetApp', 'Forcepoint DLP', 'FortiDLP', 'Taegis XDR', 'Sophos MDR', 'SentinelOne', 'Kaspersky', 'CrowdStrike', 'Microsoft Defender', 'Check Point', 'Proofpoint', 'FortiGate', 'Forcepoint NGFW', 'ClearPass', 'BeyondTrust'];
+
 export const services = [
   { slug: 'cloud-solutions', title: 'Cloud Solutions', icon: 'cloud',
     summary: 'Plan, migrate and run workloads on Azure, AWS and Alibaba Cloud with cost and security built in.',
-    intro: 'We assess your applications, choose the right landing zone, and migrate with minimal downtime. Governance, tagging, cost controls and identity are set up before the first workload moves.',
-    steps: ['Discover: inventory servers, dependencies, licences and data sensitivity', 'Design: landing zone, network, identity, backup and monitoring', 'Migrate: rehost, replatform or refactor in planned waves', 'Operate: patching, cost reviews and performance tuning'],
-    stacks: [{ g: 'Cloud platforms', i: ['Microsoft Azure', 'Amazon Web Services', 'Alibaba Cloud'] }, { g: 'Identity and governance', i: ['Microsoft Entra ID', 'Azure Policy', 'AWS IAM'] }, { g: 'Protection', i: ['Veeam', 'Acronis Cyber Protect'] }],
+    intro: 'We assess your applications, choose the right landing zone and migrate with minimal downtime. Identity, governance and monitoring are in place before the first workload moves.',
+    steps: ['Discover: inventory servers, dependencies and data sensitivity', 'Design: landing zone, network, identity and backup', 'Migrate: rehost, replatform or refactor in planned waves', 'Operate: patching, audits and performance tuning'],
+    caps: ['Configure and tune Azure virtual machines and services for performance, availability and compliance', 'Build and maintain hybrid environments linking on-premises systems to the cloud', 'Administer Microsoft 365: provisioning, licensing and secure mailbox configuration', 'Run system audits and impact assessments before and after migration', 'Assess hosting, integration and security needs for enterprise AI agent server workloads'],
+    stacks: [{ g: 'Cloud platforms', i: ['Microsoft Azure', 'Amazon Web Services', 'Alibaba Cloud'] }, { g: 'Productivity and identity', i: ['Microsoft 365', 'Microsoft Entra ID', 'Active Directory'] }, { g: 'Protection', i: ['Veeam', 'Acronis'] }],
     outcomes: ['Predictable cloud spend', 'Right-sized, secured workloads', 'A documented, repeatable environment'] },
   { slug: 'cloud-desktop', title: 'Cloud Desktop', icon: 'desktop',
-    summary: 'Secure virtual desktops and managed devices so staff work safely from anywhere.',
-    intro: 'Staff get a consistent desktop on any approved device while data stays in your tenant. Access is tied to identity, device health and conditional access rules.',
-    steps: ['Profile users and applications to size the desktop pool', 'Build images and publish apps from Azure or AWS', 'Enrol devices and enforce policy with Intune', 'Apply conditional access and monitor sessions'],
-    stacks: [{ g: 'Desktop platforms', i: ['Azure Virtual Desktop', 'Windows 365', 'Amazon WorkSpaces'] }, { g: 'Device and identity', i: ['Microsoft Intune', 'Microsoft Entra ID', 'Conditional Access'] }, { g: 'Endpoint protection', i: ['Microsoft Defender', 'CrowdStrike Falcon'] }],
-    outcomes: ['Fast onboarding and offboarding', 'Company data off personal devices', 'One policy across every endpoint'] },
+    summary: 'Managed desktops, virtual machines and devices so staff work safely from anywhere.',
+    intro: 'Staff get a consistent, policy-controlled desktop on approved devices while company data stays protected. Access is tied to identity and device compliance.',
+    steps: ['Profile users, applications and devices', 'Build images and virtual machines on Hyper-V, VMware or Azure', 'Enrol devices and enforce policy with Intune', 'Apply identity and access rules and monitor compliance'],
+    caps: ['Configure Intune MDM: device compliance, restrictions and application management for laptops, desktops, tablets and Android devices', 'Manage Microsoft Entra ID and Active Directory: authentication, group policy and user provisioning', 'Administer Hyper-V and VMware ESXi/vSphere: VM provisioning, resource optimization and high availability', 'Roll out endpoint security policies alongside device management'],
+    stacks: [{ g: 'Device management', i: ['Microsoft Intune', 'Group Policy', 'ManageEngine'] }, { g: 'Virtualization', i: ['VMware ESXi', 'vSphere', 'Hyper-V', 'Azure VMs'] }, { g: 'Identity', i: ['Microsoft Entra ID', 'Active Directory'] }],
+    outcomes: ['Fast onboarding and offboarding', 'Company data protected on every device', 'One policy across the fleet'] },
   { slug: 'managed-it', title: 'Managed IT Services', icon: 'gear',
-    summary: 'Proactive monitoring, patching, help desk and security operations for your whole environment.',
-    intro: 'A named team watches your systems, patches them on a schedule and answers your staff. Monthly reporting shows what was fixed, what is at risk and what to plan next.',
-    steps: ['Onboard: asset inventory, baselines and runbooks', 'Monitor: alerts, patch status and backup health', 'Support: help desk with agreed response times', 'Review: monthly reports and a technology roadmap'],
-    stacks: [{ g: 'Endpoint and identity', i: ['Microsoft Intune', 'Microsoft Entra ID', 'Microsoft Defender'] }, { g: 'Security operations', i: ['Microsoft Sentinel', 'Secureworks Taegis', 'CrowdStrike Falcon'] }, { g: 'Backup', i: ['Veeam', 'Acronis'] }],
+    summary: 'Proactive monitoring, patching, help desk and application support for your whole environment.',
+    intro: 'A named team monitors your systems, patches them on a schedule and supports your staff. Reports show what was fixed, what is at risk and what to plan next.',
+    steps: ['Onboard: inventory, baselines and runbooks', 'Monitor: availability, patch status and backup health', 'Support: help desk with root-cause analysis', 'Review: audits, reports and a roadmap'],
+    caps: ['Centralized patch management with ManageEngine across endpoints and servers', 'Track CVSS vulnerability scores and drive prioritized patching of critical and high findings', 'Administer Active Directory, DNS, DHCP and Group Policy', '2nd-level support and root-cause analysis for escalated issues across systems, networks and applications', 'System audits, impact assessments and hardening', 'Application administration and integration for ECM Workflow, Genesys, Salesforce CRM and SharePoint', 'Network and service monitoring with outage alerting; automation of repetitive admin tasks'],
+    stacks: [{ g: 'Patching and endpoints', i: ['ManageEngine', 'Microsoft Intune', 'EDR agents'] }, { g: 'Platforms', i: ['Microsoft 365', 'Active Directory', 'Hyper-V', 'VMware'] }, { g: 'Business applications', i: ['SharePoint', 'Salesforce CRM', 'Genesys', 'ECM Workflow'] }],
     outcomes: ['Fewer outages and surprises', 'Clear reporting for management', 'Predictable monthly IT cost'] },
   { slug: 'network-solutions', title: 'Network Solutions', icon: 'network',
-    summary: 'Secure wired, wireless and remote-access networks with policy-based access control.',
-    intro: 'We design segmented networks, firewalls and wireless that follow least privilege. Who and what connects is decided by identity and device posture, not just a password.',
-    steps: ['Assess: topology, capacity, wireless surveys and risks', 'Design: segmentation, firewalls, VPN and zero-trust access', 'Deploy: configure, test and document', 'Audit: periodic security reviews and rule clean-up'],
-    stacks: [{ g: 'Access control', i: ['Aruba ClearPass', 'Microsoft Entra ID'] }, { g: 'Firewall and threat prevention', i: ['Check Point', 'Fortinet'] }, { g: 'Email and web', i: ['Proofpoint', 'Microsoft Defender'] }],
-    outcomes: ['Only trusted users and devices connect', 'Segmented networks limit the blast radius', 'Documented, auditable configuration'] },
+    summary: 'Firewalls, VPN, wireless and identity-based network access control.',
+    intro: 'We design segmented networks and firewalls that follow least privilege. Who and what connects is decided by identity and device posture, not just a password.',
+    steps: ['Assess: topology, traffic and risks', 'Design: segmentation, firewall policy, VPN and access control', 'Deploy: configure, test and document', 'Audit: log review and rule clean-up'],
+    caps: ['FortiGate and Forcepoint NGFW policy administration: rules, VIPs, port forwarding, traffic inspection and perimeter defense', 'VLANs, routing, DNS and DHCP design and support', 'VPN for secure, encrypted remote user authentication', 'ClearPass NAC deployment and monitoring for identity-based access', 'Event log and traffic analysis, network troubleshooting and root-cause analysis', 'Cisco, Aruba and UniFi equipment'],
+    stacks: [{ g: 'Firewalls', i: ['FortiGate', 'Forcepoint NGFW', 'Check Point'] }, { g: 'Access control', i: ['Aruba ClearPass', 'Microsoft Entra ID'] }, { g: 'Switching and wireless', i: ['Cisco', 'Aruba', 'UniFi'] }],
+    outcomes: ['Only trusted users and devices connect', 'Segmentation limits the blast radius', 'Documented, auditable configuration'] },
   { slug: 'disaster-recovery', title: 'Disaster Recovery', icon: 'shield',
-    summary: 'Backup, replication and tested recovery plans using Veeam, Acronis and Quorum onQ.',
-    intro: 'We define how much data you can lose (RPO) and how fast you must be back (RTO), then match the tooling to it. Recovery is tested on a schedule, so the plan is proven before you need it.',
-    steps: ['Business impact analysis: rank systems by RTO and RPO', 'Design: 3-2-1 backups with an immutable or offline copy', 'Implement: backup jobs, replication and runbooks', 'Test: scheduled restore and failover drills with reports'],
-    stacks: [{ g: 'Backup and replication', i: ['Veeam Backup & Replication', 'Acronis Cyber Protect', 'Quorum onQ'] }, { g: 'Cloud targets', i: ['Azure Backup', 'Amazon S3', 'Alibaba OSS'] }, { g: 'Ransomware resilience', i: ['Immutable storage', 'Offline copies', 'Restore testing'] }],
+    summary: 'Backup, storage and tested recovery using Veeam, Acronis, Quorum, HPE 3PAR and NetApp.',
+    intro: 'We set recovery targets (RPO and RTO) with you, then match tooling to them. Recovery is tested on a schedule so the plan is proven before it is needed.',
+    steps: ['Business impact analysis and recovery targets', 'Design: multiple copies including an offline or immutable one', 'Implement: backup jobs, replication and runbooks', 'Test: scheduled restore and failover drills'],
+    caps: ['Configure, manage and monitor Veeam, Quorum, HPE 3PAR and MSA storage for backup integrity and DR readiness', 'Plan and run storage migrations, including to NetApp', 'Acronis backup for Microsoft 365: mailboxes, OneDrive and SharePoint', 'Oracle RMAN backup operations for consistent, recoverable databases', 'NAS-based backups with retention policies and recovery procedures', 'Backup success monitoring and recovery-time improvement'],
+    stacks: [{ g: 'Backup and recovery', i: ['Veeam Backup & Replication', 'Acronis', 'Quorum onQ', 'Oracle RMAN'] }, { g: 'Storage', i: ['HPE 3PAR', 'HPE MSA', 'NetApp', 'NAS'] }, { g: 'Cloud targets', i: ['Azure Backup', 'Amazon S3', 'Alibaba OSS'] }],
     outcomes: ['Defined recovery targets', 'Ransomware-resistant backups', 'Evidence of successful recovery tests'] },
   { slug: 'cyber-security', title: 'Cyber Security', icon: 'lock',
-    summary: 'Layered protection: endpoint, email, data loss prevention, identity and 24/7 detection.',
-    intro: 'We combine prevention and detection: endpoints, email, identity and data are each protected, and logs flow to a central view for investigation and response.',
-    steps: ['Assess: risk review, configuration and identity audit', 'Protect: endpoint, email and DLP controls', 'Detect: SIEM and managed detection and response', 'Respond: playbooks, containment and lessons learned'],
-    stacks: [{ g: 'Endpoint and XDR', i: ['CrowdStrike Falcon', 'Microsoft Defender', 'Sophos', 'Kaspersky'] }, { g: 'SIEM and detection', i: ['Microsoft Sentinel', 'Secureworks Taegis'] }, { g: 'Data loss prevention', i: ['Forcepoint DLP', 'FortiDLP', 'Microsoft Purview'] }, { g: 'Email and network', i: ['Proofpoint', 'Check Point', 'Aruba ClearPass'] }],
-    outcomes: ['Fewer successful attacks', 'Faster detection and response', 'Sensitive data kept from leaving'] },
+    summary: 'Data loss prevention, XDR/EDR, email security, privileged access and vulnerability management.',
+    intro: 'We layer prevention and detection: data, endpoints, email, identity and privileged accounts are each protected, and alerts feed an investigation and response process.',
+    steps: ['Assess: risk review, configuration and identity audit', 'Protect: DLP, endpoint, email and privileged access controls', 'Detect: XDR, EDR and managed detection and response', 'Respond: containment, root-cause analysis and remediation tracking'],
+    caps: ['Forcepoint DLP policies across endpoints: data classification, flow analysis and incident handling', 'Taegis XDR, Sophos MDR, SentinelOne and Kaspersky EDR: policy creation, access restrictions and automated response', 'Microsoft Defender and Check Point email security against phishing, malware and spam', 'Azure Information Protection: sensitivity labels and auto-labeling rules', 'BeyondTrust Password Safe: privileged access policies, credential rotation and audit', 'Review regulator and audit findings and track remediation to closure', 'CVSS-based vulnerability management and system hardening'],
+    stacks: [{ g: 'Data protection', i: ['Forcepoint DLP', 'FortiDLP', 'Azure Information Protection'] }, { g: 'Detection and response', i: ['Taegis XDR', 'Sophos MDR', 'SentinelOne', 'Kaspersky EDR', 'CrowdStrike'] }, { g: 'Email and access', i: ['Microsoft Defender', 'Check Point', 'Proofpoint', 'BeyondTrust', 'ClearPass'] }],
+    outcomes: ['Less sensitive data leaving the business', 'Faster detection and response', 'Controlled, audited privileged access'] },
   { slug: 'support-consulting', title: 'Support Consulting', icon: 'chat',
-    summary: 'Independent advice on technology strategy, vendor selection and projects.',
-    intro: 'When you need a second opinion or extra hands, we assess options, compare vendors fairly and guide implementation so projects land on time.',
-    steps: ['Understand goals, constraints and budget', 'Assess current state and options', 'Recommend with costs, risks and a roadmap', 'Support delivery and hand over'],
-    stacks: [{ g: 'Typical topics', i: ['Cloud strategy', 'Security posture', 'Licensing', 'Vendor selection'] }],
-    outcomes: ['Decisions backed by evidence', 'Fewer costly mistakes', 'A clear multi-year roadmap'] },
+    summary: 'Systems analysis, solution design and vendor guidance for IT projects.',
+    intro: 'We turn business and operational requirements into technical solutions across identity, endpoint, network and application platforms, and guide delivery.',
+    steps: ['Understand goals, constraints and budget', 'Analyse current systems and options', 'Recommend with costs, risks and a roadmap', 'Support delivery, documentation and handover'],
+    caps: ['Systems analysis and solution design', 'System integration and application support', 'Impact assessments and IT governance', 'Change management and technical documentation', 'Vendor management and selection'],
+    stacks: [{ g: 'Typical topics', i: ['Identity and endpoint', 'Network security', 'Backup and recovery', 'Cloud strategy', 'Vendor selection'] }],
+    outcomes: ['Decisions backed by evidence', 'Fewer costly mistakes', 'A clear roadmap'] },
 ];
 
 export const reasons = [

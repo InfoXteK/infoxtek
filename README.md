@@ -5,7 +5,7 @@ Beginner? Follow `docs/SETUP_GUIDE_NAMECHEAP.md` instead of the short steps belo
 ## Edit the content
 Open `src/config/site.mjs`. Change text there. Put real email, phone and address into the `contact` block (they are `null` until you add them).
 
-## Preview on your computer
+## Preview on your computer (optional, developers only)
 1. Install Node.js 20 or newer from nodejs.org.
 2. Open a terminal in this folder.
 3. Run `npm run dev`. Open the address it prints (starts at http://127.0.0.1:3000).

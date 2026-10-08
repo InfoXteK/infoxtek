@@ -68,3 +68,4 @@ nav#nav.open{display:flex}.hero{padding:3rem 0}.stack li:nth-child(even){margin-
 @keyframes pulse{50%{transform:scale(1.4);opacity:.6}}@keyframes drift{to{transform:translate(40px,30px)}}
 @media(max-width:820px){.art{display:none}}
 @media(prefers-reduced-motion:reduce){.js .rv{opacity:1;transform:none}.hero::before,.hero::after,.orbit circle,.nodes circle{animation:none}}
+.ticks.cols{columns:2;column-gap:2.5rem}.ticks.cols li{break-inside:avoid}@media(max-width:820px){.ticks.cols{columns:1}}
