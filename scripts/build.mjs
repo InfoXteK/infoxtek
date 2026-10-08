@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync, mkdirSync, cpSync, rmSync, existsSync } from 'node:fs';
-import { site, contact, nav, platforms, services, reasons, industries, bookings, resources, testimonials } from '../src/config/site.mjs';
+import { site, contact, nav, platforms, services, reasons, industries, bookings, resources, testimonials, tips } from '../src/config/site.mjs';
 
 const VERSION = JSON.parse(readFileSync('package.json', 'utf8')).version;
 const OUT = 'dist';
@@ -22,7 +22,7 @@ const reasonList = `<ol class="reasons">${reasons.map((r) => `<li><strong>${esc(
 const cards = (arr, fn) => `<div class="grid">${arr.map(fn).join('')}</div>`;
 
 page('/', `${site.name} | ${site.tagline}`, site.description, `
-<section class="hero"><div class="wrap hero-grid">
+<section class="hero"><div class="netbg" aria-hidden="true"></div><div class="floaters" aria-hidden="true"><span>AI</span><span>ZERO TRUST</span><span>XDR</span><span>DLP</span><span>LLM</span><span>MFA</span><span>SIEM</span><span>EDR</span></div><div class="wrap hero-grid">
 <div><h1>${esc(site.tagline)}</h1><p class="lead">${esc(site.description)}</p>
 <p class="actions"><a class="btn" href="/contact/">Request a consultation</a><a class="btn ghost" href="/services/">See our services</a></p></div>
 <div class="art"><svg viewBox="0 0 320 260" aria-hidden="true"><g class="orbit"><circle cx="160" cy="130" r="100"/><circle cx="160" cy="130" r="62"/></g><g class="nodes"><circle cx="160" cy="30" r="9"/><circle cx="260" cy="130" r="9"/><circle cx="160" cy="230" r="9"/><circle cx="60" cy="130" r="9"/><circle cx="222" cy="68" r="7"/><circle cx="98" cy="192" r="7"/></g><path class="core" d="M160 96l34 14v26c0 22-15 36-34 42-19-6-34-20-34-42v-26z"/></svg></div><ul class="stack" aria-label="What we manage">${services.map((s) => `<li><a href="/services/${s.slug}/">${esc(s.title)}</a></li>`).join('')}</ul>
@@ -51,10 +51,8 @@ for (const s of services) {
 page('/industries/', `Industries | ${site.name}`, 'IT services for agriculture, banking and financial services, education, energy and utilities, and government.',
   `${head('Industries we serve', 'Every sector has its own risks and rules.')}<section class="sec"><div class="wrap">${cards(industries, (i) => `<article class="card"><h2>${esc(i.name)}</h2><p>${esc(i.summary)}</p></article>`)}</div></section>${cta}`, [['Industries', '/industries/']]);
 
-page('/tools-tips/', `Tools & Tips | ${site.name}`, 'Practical IT resources and tips from InfoXtek.',
-  `${head('Tools and tips', 'Practical IT resources.')}<section class="sec"><div class="wrap narrow">${resources.length
-    ? `<ul class="list">${resources.map((r) => `<li><a href="${esc(r.href)}">${esc(r.title)}</a><p>${esc(r.text)}</p></li>`).join('')}</ul>`
-    : '<p class="note">No resources have been published yet. Add entries to <code>resources</code> in <code>src/config/site.mjs</code>.</p>'}</div></section>`, [['Tools & Tips', '/tools-tips/']]);
+page('/tools-tips/', `Tools & Tips | ${site.name}`, 'Practical cyber security, backup, AI and cloud tips from InfoXtek.',
+  `${head('Tools and tips', 'Practical advice on security, recovery, AI and cloud.')}<section class="sec"><div class="wrap">${tips.map((g) => `<h2 class="rv">${esc(g.g)}</h2>${cards(g.i, (x) => `<article class="card rv"><h3>${esc(x.t)}</h3><p>${esc(x.d)}</p></article>`)}`).join('<div class="gap"></div>')}${resources.length ? `<h2>Downloads</h2><ul class="list">${resources.map((r) => `<li><a href="${esc(r.href)}">${esc(r.title)}</a><p>${esc(r.text)}</p></li>`).join('')}</ul>` : ''}</div></section>${cta}`, [['Tools & Tips', '/tools-tips/']]);
 
 page('/book-online/', `Book Online | ${site.name}`, 'Request IT support, software implementation, home entertainment setup or remote tech support.',
   `${head('Book online', 'Choose the service you need, then send us a request.')}<section class="sec"><div class="wrap">${cards(bookings, (b) => `<article class="card"><h2>${esc(b.title)}</h2><p>${esc(b.text)}</p><a class="btn small" href="/contact/?service=${encodeURIComponent(b.title)}">Request this service</a></article>`)}<p class="note">Online scheduling and pricing are not connected yet. Requests go through the contact form.</p></div></section>`, [['Book Online', '/book-online/']]);

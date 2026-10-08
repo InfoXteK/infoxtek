@@ -106,3 +106,26 @@ export const bookings = [
 // Add real downloadable resources: { title, text, href } (href = path under /public or https URL).
 export const resources = [];
 export const testimonials = []; // Add only real, permitted quotes: { quote, name, role }
+
+export const tips = [
+  { g: 'Cyber security', i: [
+    { t: 'Turn on multi-factor authentication', d: 'Require it for email, admin accounts and remote access first.' },
+    { t: 'Patch on a schedule', d: 'Fix critical and high CVSS findings first, on endpoints and servers alike.' },
+    { t: 'Treat unexpected links and attachments as suspect', d: 'Report suspicious email instead of deleting it so others are protected too.' },
+    { t: 'Limit privileged access', d: 'Give people only the access they need and review admin accounts regularly.' } ] },
+  { g: 'Backup and recovery', i: [
+    { t: 'Follow 3-2-1', d: 'Keep three copies on two types of media, with one copy offsite.' },
+    { t: 'Keep one copy offline or immutable', d: 'Ransomware cannot encrypt what it cannot reach.' },
+    { t: 'Test restores, not just backup jobs', d: 'A green backup job does not prove you can recover.' },
+    { t: 'Write down RTO and RPO', d: 'Agree how long each key system can be down and how much data you can lose.' } ] },
+  { g: 'AI at work', i: [
+    { t: 'Keep confidential data out of public AI tools', d: 'Provide approved tools and make the rule clear to staff.' },
+    { t: 'Use DLP to catch sensitive data before it leaves', d: 'Classify data and set policies for uploads, paste and email.' },
+    { t: 'Verify AI output before acting on it', d: 'Treat it as a draft, especially for code, contracts and figures.' },
+    { t: 'Review what AI assistants and agents can access', d: 'Apply least privilege and sensitivity labels to the data they reach.' } ] },
+  { g: 'Cloud and devices', i: [
+    { t: 'Enrol every device in management', d: 'Require encryption, screen lock and up-to-date software.' },
+    { t: 'Use conditional access', d: 'Only compliant devices and verified users reach company data.' },
+    { t: 'Review cloud costs monthly', d: 'Remove unused resources and right-size what remains.' },
+    { t: 'Keep an inventory', d: 'Know your devices, software, licences and who owns each.' } ] },
+];
