@@ -1,4 +1,4 @@
-# InfoXtek Future Reference (v1.0.0)
+# InfoXtek Future Reference (v1.1.0)
 
 ## State
 Built and checked locally: 13 pages + 404, sitemap, robots, CSP, JSON-LD, GitHub Actions workflow, dev server.
@@ -47,3 +47,7 @@ No dependencies, no remote scripts/fonts/analytics. All config text is HTML-esca
 
 ## Next session
 Read CLAUDE.md, check git status, ask for real contact details, GitHub username, form provider; then deploy and verify DNS.
+
+- v1.1.0 (port 3001): services expanded to 7 (added Cyber Security) with intro, delivery steps, outcomes and vendor groups per service; icons, animated hero (CSS only), scroll reveal (respects reduced motion), vendor strip. Vendor names are text only (no logos, no partnership claims; footnote on trademarks). Owner-provided email set in config.
+- Not matched to Wix: Wix photos/graphics not copied (stock/licensed); no per-service diagrams or imagery yet; Wix testimonial (John Smith, ABC Company) is template text and was not used.
+- Verify vendor list and capability wording with the business before launch.

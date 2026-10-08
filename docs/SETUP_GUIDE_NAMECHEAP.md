@@ -51,31 +51,76 @@ Do not invent details. Anything you leave as `null` is simply not shown.
 
 ---
 
-## Part 3. Install two free programs (10 minutes)
+## Part 3. Nothing to install
 
-1. **Node.js** (needed to build the site): go to nodejs.org, download the version marked **LTS**, run the installer, click Next until it finishes.
-2. **GitHub Desktop** (uploads the site without typing commands): go to desktop.github.com, download, install.
+Everything runs on GitHub and in your web browser. You do **not** need Node.js, GitHub Desktop, or any program. GitHub builds and hosts the site for you.
 
 ---
 
 ## Part 4. Create a free GitHub account (5 minutes)
 
 1. Go to github.com and click **Sign up**. Use your email, choose a username, and verify your email.
-2. **Write down your username.** You need it in Part 6. Example: if it is `infoxtek-corp`, your address is `infoxtek-corp.github.io`.
+2. **Write down your username.** You need it in Part 7. Example: if it is `infoxtek-corp`, your address is `infoxtek-corp.github.io`.
 
 ---
 
-## Part 5. Upload the site to GitHub (10 minutes)
+## Part 5. Upload the site using only your browser (10 minutes)
 
-1. Open **GitHub Desktop** and sign in with your GitHub account.
-2. Menu **File, Add local repository**. Click **Choose...** and select the `infoxtek` folder.
-3. It says "this directory does not appear to be a Git repository". Click the blue link **create a repository**, then click **Create repository**.
-4. In the left list you will see all the files. Bottom left, type `First version` in the Summary box and click **Commit to main**.
-5. Click **Publish repository** (top bar).
-   - Name: `infoxtek`
-   - **Untick** "Keep this code private". (GitHub Pages is free only for public repositories. The site is public anyway. Never put passwords in these files.)
-   - Click **Publish repository**.
-6. In your browser, go to `https://github.com/YOUR-USERNAME/infoxtek`. You should see your files, including the `.github` folder.
+1. On github.com click the **+** (top right), then **New repository**.
+   - Repository name: `infoxtek`
+   - Choose **Public**. (GitHub Pages is free only for public repositories. Never put passwords in these files.)
+   - Leave all the other boxes empty. Click **Create repository**.
+2. On the empty repository page click the link **uploading an existing file**.
+3. On your computer open the unzipped `infoxtek` folder and make hidden files visible (see Part 1 tip). Go **inside** the folder, press **Ctrl + A** (Windows) or **Command + A** (Mac) to select everything inside, and **drag it all into the browser window**.
+4. Wait until every file shows as uploaded. Scroll down, leave "Commit directly to the main branch" selected, and click the green **Commit changes**.
+5. Check the repository page. You must see these items: `.github`, `public`, `scripts`, `src`, `docs`, `package.json`.
+
+**If `.github` is missing** (the most common problem, because it is a hidden folder), add that one file by hand:
+1. Click **Add file**, then **Create new file**.
+2. In the name box type exactly `.github/workflows/deploy.yml` (typing each `/` creates the folder).
+3. Open `deploy.yml` from your computer in Notepad/TextEdit, copy everything, and paste it into the big box. Or paste the text from the box below.
+4. Click **Commit changes**, then **Commit changes** again.
+
+```
+name: Deploy to GitHub Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run build
+      - run: npm run check
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.d.outputs.page_url }}
+    steps:
+      - id: d
+        uses: actions/deploy-pages@v4
+```
+
+Spaces at the start of lines matter. Paste it exactly.
 
 ---
 
@@ -87,7 +132,7 @@ Do not invent details. Anything you leave as `null` is simply not shown.
 4. Back in Settings, Pages, find **Custom domain**. Type `infoXtek.com` and click **Save**.
    - A warning that DNS is not ready yet is normal. Continue to Part 7.
 
-Do not judge the site by opening `YOUR-USERNAME.github.io/infoxtek`. It will look broken until your domain is connected. To preview earlier, open a terminal in the folder and run `npm run dev`.
+Do not judge the site by opening `YOUR-USERNAME.github.io/infoxtek`. It will look broken until your domain is connected. Your real preview is https://infoXtek.com once Part 7 and 8 are done.
 
 **Recommended (1 minute): verify your domain** so nobody else can claim it.
 GitHub profile picture (top right), **Settings**, **Pages** (left menu), **Add a domain**, type `infoXtek.com`. GitHub shows a TXT record: a host starting with `_github-pages-challenge-` and a value. Add it in Namecheap exactly like Part 7 step 6, then click **Verify** on GitHub (can take a few minutes to hours).
@@ -127,11 +172,11 @@ GitHub profile picture (top right), **Settings**, **Pages** (left menu), **Add a
 
 ---
 
-## Part 9. Changing the website later
+## Part 9. Changing the website later (browser only)
 
-1. Edit `src/config/site.mjs` and save.
-2. Open GitHub Desktop. Your change appears in the list. Type a short summary (e.g. `Update phone number`), click **Commit to main**, then **Push origin**.
-3. Wait 2 minutes. The site updates itself (watch the Actions tab for a green tick).
+1. Go to `github.com/YOUR-USERNAME/infoxtek`, open `src`, then `config`, then click `site.mjs`.
+2. Click the **pencil icon** (Edit), change the text, and click **Commit changes**, then **Commit changes** again.
+3. Wait 2 minutes. The site updates itself (watch the **Actions** tab for a green tick).
 
 To add a service, copy one `{ slug: ..., title: ..., ... }` block inside `services`, paste it below, and change the words. The new page appears automatically.
 
@@ -143,7 +188,7 @@ To add a service, copy one `{ slug: ..., title: ..., ... }` block inside `servic
 
 | Problem | Fix |
 |---|---|
-| Red cross in Actions tab | Click it, then the red step, and read the message. Most common: the `.github` folder was not uploaded. Check it appears in your repository on github.com. |
+| Red cross in Actions tab | See the section "If the Actions run fails" below. The GitHub email never says why; you must open the log. |
 | "Enforce HTTPS" is greyed out | DNS is not ready or the certificate is still being created. Wait a few hours. Re-check Part 7. |
 | Site shows a Namecheap parking page | Old records not deleted (Part 7, step 5), or Nameservers not set to BasicDNS. |
 | 404 "There isn't a GitHub Pages site here" | Settings, Pages, Source must be **GitHub Actions**. Re-run the workflow in Actions. |
@@ -152,3 +197,25 @@ To add a service, copy one `{ slug: ..., title: ..., ... }` block inside `servic
 | Domain still not working after 24 hours | Remove the custom domain in GitHub Pages, save, add it back, and recheck DNS records. |
 
 If you get stuck, copy the exact error message and ask for help.
+
+---
+
+## If the Actions run fails (red cross)
+
+The email from GitHub only says "build failed". The reason is in the log:
+
+1. Repository, **Actions** tab, click the failed run (top of the list).
+2. Scroll to the bottom of the page: **Annotations** lists the error messages. Read them.
+3. Click **build** (left side), then click the step marked with a red cross to open it. The last 5 to 10 lines say what is wrong.
+
+| Message in the red step | Meaning | Fix |
+|---|---|---|
+| `SyntaxError` and `site.mjs` | A typo when you edited your details | Open `src/config/site.mjs`. Each detail needs quotes and a comma, e.g. `email: 'hello@infoxtek.com',` Straight quotes only, not curly quotes. |
+| `Cannot find module` or `ENOENT` | A file or folder was not uploaded | Make sure the repo has: `package.json`, `scripts/build.mjs`, `scripts/check.mjs`, `src/config/site.mjs`, `src/assets/site.css`, `src/assets/site.js`, `public/favicon.svg`, `public/CNAME`. Upload what is missing (Add file, Upload files). |
+| `FAIL` lines from `npm run check` | The safety check found a problem | Send the FAIL lines for help. |
+| `Get Pages site failed` or `Pages is not enabled` | Pages setting not saved | Settings, Pages, Source: choose **GitHub Actions** again. Then Actions, the failed run, **Re-run all jobs**. |
+| `Resource not accessible by integration` | Workflow permission blocked | Settings, Actions, General, Workflow permissions: choose **Read and write permissions**, Save, then re-run. |
+
+After any fix, re-run: Actions, the failed run, **Re-run all jobs**.
+
+**"The .github folder shows as one folder `.github/workflows`":** this is normal. GitHub joins a folder and its only subfolder into one row. Click it and you should see `deploy.yml`.

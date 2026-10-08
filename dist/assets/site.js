@@ -31,3 +31,10 @@
     } catch { status.textContent = 'Sending failed. Please try again or use the contact details on this page.'; }
   });
 })();
+(() => {
+  const els = document.querySelectorAll('.rv');
+  if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  document.documentElement.classList.add('js');
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.12 });
+  els.forEach((el) => io.observe(el));
+})();
