@@ -12,7 +12,7 @@ export const site = {
 export const contact = {
   email: 'infoxtekcorp@gmail.com',        // VERIFY: real company email
   phone: '+971545414237',        // VERIFY: real company phone
-  address: 'International City, Dubai.',       // VERIFY: real company address
+  address: 'International City, Dubai.',        // VERIFY: real company address
   formEndpoint: null, // Optional https:// URL of a form provider you approve. null = form is not connected.
   social: [],         // e.g. [{ label: 'LinkedIn', href: 'https://...' }]
 };
@@ -135,6 +135,13 @@ export const services = [
     caps: ['Managed hosting with CDN and SSL', 'Daily backups and restore testing', 'Security updates and uptime monitoring', 'Support and small changes'],
     stacks: [{ g: 'Platforms', i: ['Azure', 'AWS', 'Alibaba Cloud', 'GitHub Pages'] }],
     outcomes: ['Fewer outages', 'Safe, current software', 'One contact for problems'] },
+  { slug: 'ai-solutions', grp: 'Digital & Software', title: 'AI Solutions', icon: 'chip',
+    summary: 'Practical AI assistants and automation, with data protection built in.',
+    intro: 'We help you use AI on your own documents and processes without leaking sensitive data: the right use cases, the right guardrails, and access controls from the start.',
+    steps: ['Pick use cases with clear business value', 'Prepare and classify the data', 'Build the assistant or automation with guardrails', 'Monitor quality, cost and data protection'],
+    caps: ['AI assistants that answer from your approved documents', 'Workflow automation for repetitive tasks', 'Data classification and DLP policies for AI use', 'Access control, logging and review of AI agents and their servers'],
+    stacks: [{ g: 'Typical platforms', i: ['Microsoft Copilot', 'Azure OpenAI', 'Python', 'Power Automate'] }, { g: 'Protection', i: ['Sensitivity labels', 'DLP', 'Entra ID access control'] }],
+    outcomes: ['Faster routine work', 'Sensitive data kept out of public AI tools', 'Clear rules for staff'] },
 ];
 
 export const reasons = [

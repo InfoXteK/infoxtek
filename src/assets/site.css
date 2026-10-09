@@ -158,3 +158,7 @@ nav#nav.open{display:flex}.hero{padding:3rem 0}.stack li:nth-child(even){margin-
 [data-style=flat] .top{background:#fff;border-bottom:4px solid var(--indigo)}[data-style=fluent] .top{background:rgba(243,246,250,.85);backdrop-filter:blur(20px)}
 [data-style=bento] .band{background:linear-gradient(120deg,#e7ebff,#dff5f6)}[data-style=skeuo] .band{background:linear-gradient(#e9ecf1,#cfd5de);border-bottom:2px solid #8b93a1}
 [data-style=brutal] .band::before,[data-style=flat] .band::before{display:none}
+/* v1.9 themed backdrops */
+.band{position:relative}.bgart{position:absolute;inset:0;width:100%;height:100%;color:var(--indigo);opacity:.4;pointer-events:none;-webkit-mask-image:linear-gradient(90deg,transparent 15%,#000 75%);mask-image:linear-gradient(90deg,transparent 15%,#000 75%)}
+.band::before{display:none}.c2{color:var(--teal)}.env{color:var(--indigo);opacity:.3;pointer-events:none}
+@media(prefers-reduced-motion:reduce){.bgart *,.env *{animation:none}}

@@ -1,3 +1,4 @@
+import { nn } from './kit.mjs';
 // Illustrative scenario animations. n: [label,x,y,kind] (kind r=threat, s=control); f: [route(node indexes), colour r|g|b]; l: log lines.
 export const scenes = {
   'cloud-solutions': { n: [['On-premises', 70, 150], ['Landing zone', 270, 150, 's'], ['Azure', 490, 60], ['AWS', 490, 150], ['Alibaba Cloud', 490, 240]], f: [[[0, 1, 2], 'b'], [[0, 1, 3], 'b'], [[0, 1, 4], 'b']], l: ['Discovery maps servers and dependencies', 'Landing zone applies policy and identity', 'Wave 1 migrated with minimal downtime', 'Cost review removes idle resources'] },
@@ -87,3 +88,10 @@ export const custom = {
         K.txt(320, 280, 'Desktop', { c: 'm', show: [[0.5, 0.58]] }), K.txt(320, 280, 'Tablet', { c: 'm', show: [[0.58, 0.74]] }), K.txt(320, 280, 'Phone', { c: 'm', show: [[0.74, 0.8]] }), K.txt(320, 280, 'Published: fast, accessible, responsive', { c: 'g', show: [[0.8, 1]] }),
         K.txt(560, 100, 'palette', { c: 'm', show: [[0, 0.25]] }), '<circle cx="540" cy="120" r="9" fill="#3b4cca"/><circle cx="565" cy="120" r="9" fill="#0e9aa7"/><circle cx="590" cy="120" r="9" fill="#f59e0b"/>'].join('') },
 };
+
+custom['ai-solutions'] = { l: ['A user asks a question in the AI assistant', 'Policy and DLP check the prompt before the model sees it', 'The model retrieves facts from approved company documents', 'Confidential data is blocked; the answer cites its sources'],
+  d: (K) => [K.box(8, 40, 100, 34, 'User prompt'), K.box(8, 120, 100, 34, 'Confidential data', { k: 'r' }), K.box(150, 80, 100, 46, 'Policy + DLP', { k: 's' }), K.cyl(150, 210, 90, 56, 'Company docs'), K.box(290, 224, 100, 34, 'Index + embed'),
+    `<g class="c2">${nn(330, 120, [3, 4, 3], 55, 30)}</g>`, K.box(540, 100, 90, 44, 'Answer'), K.line(108, 57, 150, 100), K.line(108, 137, 150, 110, { c: 'red' }), K.line(250, 103, 330, 120), K.line(440, 120, 540, 122), K.line(240, 238, 290, 241), K.line(390, 241, 400, 150),
+    K.pkt([[108, 57], [150, 100], [250, 103], [330, 120]], '#3b4cca', 0.02, 0.22, 6), K.txt(200, 66, 'checked', { c: 'g', show: [[0.12, 0.3]] }), K.pkt([[240, 238], [290, 241], [400, 150]], '#0e9aa7', 0.32, 0.2),
+    K.pkt([[108, 137], [150, 110]], '#d64545', 0.58, 0.08), K.ring(150, 110, '#d64545', 0.66, 0.8), K.txt(200, 176, 'Blocked by DLP', { c: 'r', show: [[0.66, 0.84]] }),
+    K.pkt([[440, 120], [540, 122]], '#16a34a', 0.84, 0.1), K.txt(585, 160, 'with sources', { c: 'g', show: [[0.86, 1]] })].join('') };

@@ -1,4 +1,4 @@
-# InfoXteK: Complete Claude Reference (v1.8.0, port 3008)
+# InfoXteK: Complete Claude Reference (v1.9.0, port 3009)
 Living record from the start of the project. Update on every change. Repository and docs are the source of truth.
 
 ## 1. Identity
@@ -17,8 +17,9 @@ Living record from the start of the project. Update on every change. Repository 
 7. v1.4.0 logo mark + favicons; brand spelled InfoXteK; supplied wordmark image reads "iFiNeX" so not used.
 8. v1.5.0 eight digital services added (15 total), per-service scenario animations (SVG SMIL + log ticker, config in scenes.mjs, labelled illustrative), hue per service header.
 9. v1.6.0 per-page design styles; logo X and K blue (earlier Xt was a mistake).
-10. v1.8.0 owner said all animations looked the same: replaced generic engine with a scene kit (src/config/kit.mjs: zones, boxes, cylinders, lamps, ECG heartbeat, packets, rings, bars, moves, all on one 12s loop) and 12 bespoke scenarios in scenes.mjs `custom`. Still generic (to redo): support-consulting, mobile-applications, full-stack-apps. Added per-style header/nav/band chrome in CSS so every style looks distinct.
-11. v1.7.0 Products page (Net-Monit, PC Admin Tools, iFiNeX) with download placeholders; this reference.
+10. v1.9.0 owner said backgrounds/UI/animations still felt the same and wanted each page themed to its topic (AI = AI lab, cyber = cyber lab, DR = data centre): added 16th service AI Solutions; src/config/envs.mjs themed backdrops (one per service and most pages) drawn behind each page header and inside the scenario panel; per-service accent colours (`accents` in build.mjs, body[data-svc]); AI Solutions scene (prompt, policy/DLP guardrail, model, RAG from company docs).
+11. v1.8.0 owner said all animations looked the same: replaced generic engine with a scene kit (src/config/kit.mjs: zones, boxes, cylinders, lamps, ECG heartbeat, packets, rings, bars, moves, all on one 12s loop) and 12 bespoke scenarios in scenes.mjs `custom`. Still generic (to redo): support-consulting, mobile-applications, full-stack-apps. Added per-style header/nav/band chrome in CSS so every style looks distinct.
+12. v1.7.0 Products page (Net-Monit, PC Admin Tools, iFiNeX) with download placeholders; this reference.
 
 ## 3. Rules and decisions
 - Light, premium theme by default. Dark only on Cyber Security (holographic/cyberpunk) and Full Stack (OLED), explicitly requested.
@@ -64,3 +65,7 @@ Read CLAUDE.md and this file; ask owner for logo original, phone/address, form p
 - Each custom scene is `{l:[4 log lines], d:(K)=>svg string}`; time ranges are fractions of a shared 12s loop; log ticker runs 4 x 3s in the same loop. SMIL only (no JS); reduced-motion pauses via site.js.
 - Disaster Recovery: Primary DC (Node A active, Node B HA, SAN) and DR site (DR node, replica); ECG heartbeat across sites 0-31%, heartbeat lost 33-50% (primary lamp red), HA/GSLB director promotes DR 50-84% and redirects users, failback 85-100%. Cyber: attacker vs 4 layers (email, firewall, EDR/XDR, DLP) with SIEM alerts. Network: 802.1X + ClearPass, rogue device to quarantine VLAN, VPN tunnel. Cloud Solutions: wave migration + cost bar. Cloud Desktop: Entra ID/Intune/conditional access vs unmanaged phone. Managed IT: lamps, alert, ticket, patch bar. SEO: rank climb. Marketing: funnel. E-commerce: WAF, tokenised payment, delivery truck. Hosting: edge/CDN, backup, failover to standby. Web apps: WAF, LB, cache, DB, 429. Web design: stage lamps and responsive resize.
 - Verified: XML well-formed and keyTimes valid for all service SVGs. NOT verified: visual layout/overlaps and animation timing in a real browser (no renderer available); expect small text/position fixes after the owner's first look.
+
+## 13. Themed backdrops (v1.9.0)
+- Map (envs.mjs): disaster-recovery server racks with blinking LEDs + ECG heartbeat (data centre); cyber-security falling hex matrix + radar sweep (cyber lab/SOC); network-solutions switch topology with flowing links; cloud-solutions drifting clouds; cloud-desktop and managed-it monitor walls (managed-it adds heartbeat line); ai-solutions neural network (nn in kit.mjs); web-applications code typing; mobile-applications phones with notification; web-design and support-consulting wireframe + palette; seo rising bars + magnifier; digital-marketing broadcast waves; full-stack-apps layered stack; ecommerce shelves + moving cart; hosting-maintenance globe with edge nodes. Pages: why-choose-us bars, industries globe, products stack, tools-tips code, contact clouds, book-online racks, services topology. Home keeps its own hero.
+- Still using the generic packet scene (themed backdrop only): support-consulting, mobile-applications, full-stack-apps. XML validity of all SVGs verified; visuals and motion not verified in a browser.
