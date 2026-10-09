@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync, mkdirSync, cpSync, rmSync, existsSync } from 'node:fs';
 import { scenes } from '../src/config/scenes.mjs';
-import { site, contact, nav, platforms, services, reasons, industries, bookings, resources, testimonials, tips } from '../src/config/site.mjs';
+import { site, contact, nav, platforms, services, reasons, industries, bookings, resources, testimonials, tips, products } from '../src/config/site.mjs';
 
 const VERSION = JSON.parse(readFileSync('package.json', 'utf8')).version;
 const OUT = 'dist';
@@ -24,7 +24,7 @@ const sceneSvg = (sc, title) => {
   return `<div class="scene rv"><svg viewBox="0 0 640 300" role="img" aria-label="${esc(title)} scenario animation"><g class="lk">${lines}</g>${boxes}${pk}</svg><ul class="logs" aria-hidden="true">${sc.l.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></div>`;
 };
 const styleMap = { '/': 'bento', '/why-choose-us/': 'minimal', '/industries/': 'flat', '/tools-tips/': 'clay', '/book-online/': 'material', '/contact/': 'neumorphism',
-  '/services/': 'fluent', '/services/cloud-solutions/': 'glass', '/services/cloud-desktop/': 'fluent', '/services/managed-it/': 'material', '/services/network-solutions/': 'bento', '/services/disaster-recovery/': 'skeuo',
+  '/services/': 'fluent', '/products/': 'glass', '/services/cloud-solutions/': 'glass', '/services/cloud-desktop/': 'fluent', '/services/managed-it/': 'material', '/services/network-solutions/': 'bento', '/services/disaster-recovery/': 'skeuo',
   '/services/cyber-security/': 'cyber', '/services/support-consulting/': 'minimal', '/services/web-applications/': 'neumorphism', '/services/mobile-applications/': 'liquid', '/services/web-design-development/': 'maximal',
   '/services/seo/': 'flat', '/services/digital-marketing/': 'brutal', '/services/full-stack-apps/': 'oled', '/services/ecommerce/': 'clay', '/services/hosting-maintenance/': 'material' };
 const pages = [];
@@ -61,6 +61,9 @@ for (const [si, s] of services.entries()) {
 <section class="sec alt"><div class="wrap"><h2>Technology we work with</h2><div class="grid">${s.stacks.map((g) => `<div class="card rv"><h3>${esc(g.g)}</h3><p class="chips">${g.i.map((x) => `<span>${esc(x)}</span>`).join('')}</p></div>`).join('')}</div><p class="note">Product names are trademarks of their owners and are listed to describe the platforms we support.</p></div></section>${cta}`,
     [['Our Services', '/services/'], [s.title, `/services/${s.slug}/`]]);
 }
+
+page('/products/', `Products | ${site.name}`, 'Net-Monit network monitoring, PC Admin Tools and the iFiNeX expense app from InfoXteK.',
+  `${head('Our products', 'Software we build and run ourselves.')}<section class="sec"><div class="wrap">${cards(products, (x) => `<article class="card rv" id="${x.slug}">${icon(x.icon)}<h2>${esc(x.title)}</h2><p><strong>${esc(x.tag)}</strong></p><p>${esc(x.summary)}</p><ul class="ticks">${x.points.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>${x.download ? `<a class="btn" href="${esc(x.download)}">Download</a>` : '<span class="btn ghost soon" aria-disabled="true">Download link coming soon</span>'}</article>`)}</div></section>${cta}`, [['Products', '/products/']]);
 
 page('/industries/', `Industries | ${site.name}`, 'IT services for agriculture, banking and financial services, education, energy and utilities, and government.',
   `${head('Industries we serve', 'Every sector has its own risks and rules.')}<section class="sec"><div class="wrap">${cards(industries, (i) => `<article class="card"><h2>${esc(i.name)}</h2><p>${esc(i.summary)}</p></article>`)}</div></section>${cta}`, [['Industries', '/industries/']]);

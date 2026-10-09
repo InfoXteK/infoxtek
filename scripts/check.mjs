@@ -11,7 +11,7 @@ for (const f of html) {
   for (const m of s.matchAll(/(?:href|src)="([^"]+)"/g)) {
     const u = m[1];
     if (/^(mailto:|#)/.test(u)) continue;
-    if (/^https?:\/\//.test(u)) { if (!/^https:\/\/infoXtek\.com/.test(u)) fail(`${f} external ref ${u}`); continue; }
+    if (/^https?:\/\//.test(u)) { if (!/^https:\/\/(infoXtek\.com|github\.com\/InfoXteK\/)/i.test(u)) fail(`${f} external ref ${u}`); continue; }
     const path = u.split(/[?#]/)[0]; const t = join('dist', path);
     if (!(existsSync(t) && (!statSync(t).isDirectory() || existsSync(join(t, 'index.html'))))) fail(`${f} broken link ${u}`);
   }

@@ -143,6 +143,7 @@ nav#nav.open{display:flex}.hero{padding:3rem 0}.stack li:nth-child(even){margin-
 [data-style=cyber]::after{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 3px)}
 [data-style=oled] .card{border:1px solid #1f1f1f}
 @media(max-width:820px){[data-style=cyber] nav#nav,[data-style=oled] nav#nav{background:var(--bg)}}
+.soon{cursor:default;opacity:.75}
 .band[data-h="0"]::before{filter:hue-rotate(0deg)}
 .band[data-h="1"]::before{filter:hue-rotate(22deg)}
 .band[data-h="2"]::before{filter:hue-rotate(44deg)}

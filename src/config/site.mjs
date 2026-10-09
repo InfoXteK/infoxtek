@@ -12,7 +12,7 @@ export const site = {
 export const contact = {
   email: 'infoxtekcorp@gmail.com',        // VERIFY: real company email
   phone: '+971545414237',        // VERIFY: real company phone
-  address: 'International City, Dubai.',      // VERIFY: real company address
+  address: 'International City, Dubai.',       // VERIFY: real company address
   formEndpoint: null, // Optional https:// URL of a form provider you approve. null = form is not connected.
   social: [],         // e.g. [{ label: 'LinkedIn', href: 'https://...' }]
 };
@@ -22,6 +22,7 @@ export const nav = [
   { label: 'Why Choose Us', path: '/why-choose-us/' },
   { label: 'Our Services', path: '/services/' },
   { label: 'Industries', path: '/industries/' },
+  { label: 'Products', path: '/products/' },
   { label: 'Tools & Tips', path: '/tools-tips/' },
   { label: 'Contact Us', path: '/contact/' },
 ];
@@ -184,4 +185,17 @@ export const tips = [
     { t: 'Use conditional access', d: 'Only compliant devices and verified users reach company data.' },
     { t: 'Review cloud costs monthly', d: 'Remove unused resources and right-size what remains.' },
     { t: 'Keep an inventory', d: 'Know your devices, software, licences and who owns each.' } ] },
+];
+
+// Products. Set `download` to a path like '/downloads/net-monit.zip' (file placed in public/downloads/) or an https://github.com/InfoXteK/... release URL. null = "coming soon".
+export const products = [
+  { slug: 'net-monit', title: 'Net-Monit', tag: 'Network monitoring', icon: 'network', download: null,
+    summary: 'A complete network monitoring tool with multi-level escalation alerts by email, SMS and phone call.',
+    points: ['Web application for Windows and Linux', 'Multi-level escalation: the right person is alerted, then the next level if nobody responds', 'Alert channels: email, SMS and voice call'] },
+  { slug: 'pc-admin-tools', title: 'PC Admin Tools', tag: 'Remote administration', icon: 'gear', download: null,
+    summary: 'Complete administration operations you can perform remotely across your network.',
+    points: ['Web edition and PowerShell edition', 'Run admin operations on PCs across the network from one place'] },
+  { slug: 'ifinex', title: 'iFiNeX', tag: 'Public mobile and web app', icon: 'phone', download: null,
+    summary: 'An expense tracker, card payment tracker and squad splitter in one app, for mobile and web.',
+    points: ['Expense tracker', 'Card payment tracker', 'Squad splitter for shared costs (formerly Squad Split)'] },
 ];
