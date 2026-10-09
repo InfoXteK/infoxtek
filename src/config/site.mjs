@@ -10,9 +10,9 @@ export const site = {
 };
 
 export const contact = {
-  email: 'infoxtekcorp@gmail.com',        // VERIFY: real company email
-  phone: '+971545414237',        // VERIFY: real company phone
-  address: 'International City, Dubai.',        // VERIFY: real company address
+  email: 'infoxtekcorp@gmail.com', // provided by owner
+  phone: null,        // VERIFY: real company phone
+  address: null,      // VERIFY: real company address
   formEndpoint: null, // Optional https:// URL of a form provider you approve. null = form is not connected.
   social: [],         // e.g. [{ label: 'LinkedIn', href: 'https://...' }]
 };
@@ -194,15 +194,40 @@ export const tips = [
     { t: 'Keep an inventory', d: 'Know your devices, software, licences and who owns each.' } ] },
 ];
 
-// Products. Set `download` to a path like '/downloads/net-monit.zip' (file placed in public/downloads/) or an https://github.com/InfoXteK/... release URL. null = "coming soon".
+// Products. download: path under public/downloads or an https://github.com/InfoXteK/ URL. page:true builds /products/<slug>/.
 export const products = [
-  { slug: 'net-monit', title: 'Net-Monit', tag: 'Network monitoring', icon: 'network', download: null,
-    summary: 'A complete network monitoring tool with multi-level escalation alerts by email, SMS and phone call.',
-    points: ['Web application for Windows and Linux', 'Multi-level escalation: the right person is alerted, then the next level if nobody responds', 'Alert channels: email, SMS and voice call'] },
-  { slug: 'pc-admin-tools', title: 'PC Admin Tools', tag: 'Remote administration', icon: 'gear', download: null,
-    summary: 'Complete administration operations you can perform remotely across your network.',
-    points: ['Web edition and PowerShell edition', 'Run admin operations on PCs across the network from one place'] },
+  { slug: 'net-monit', page: true, title: 'Net-Monit V11.0', tag: 'Network and infrastructure monitoring', icon: 'network', download: 'https://github.com/InfoXteK/Net-monit-V11.0',
+    summary: 'A production-grade, self-hosted network monitoring platform. Monitor ping latency, packet loss, CPU, memory, disk and bandwidth; track web application uptime and SSL expiry; run WAN speed tests; discover devices with a network scanner; and receive alerts with configurable thresholds, multi-level escalation and a full Acknowledge/Resolve workflow.',
+    points: ['Runs on your own server (Windows or Linux), no cloud needed', 'Multi-level escalation (L1, L2, L3) by email, SMS and voice call', 'Free vendor-issued license, 30-day trial'],
+    features: ['Ping, SNMP, SSH, PowerShell and HTTP/HTTPS checks, plus disk usage and service/task status', 'Web application uptime and SSL expiry monitoring', 'Built-in WAN speed test with a live gauge and rate-limit handling', 'TCP and UDP port scanning and device discovery', 'Per-device escalation levels, thresholds and notification timing', 'Acknowledge and Resolve alert workflow with a full audit log', 'Multi-user with Admin and Viewer roles, per-user dashboards', 'AES-encrypted credential storage, backup and restore of device configuration'],
+    start: ['Windows: right-click Setup.bat, Run as administrator (installs the service and opens http://localhost:50110)', 'Linux: sudo bash setup.sh', 'Manual: pip install -r requirements.txt, then python app.py'],
+    facts: ['Flask and SQLite, no external dependencies', 'Offline Ed25519-signed license keys, tied to one installation (Device ID and Activation Code)', 'No phone-home or cloud authentication'] },
+  { slug: 'pc-admin-tools', page: true, title: 'PC Admin Tools', tag: 'Remote administration and performance tuning', icon: 'gear', download: 'https://github.com/InfoXteK/PC_Admin_Tools',
+    summary: 'Best basic performance fine-tuning tool for admins and support persons. 36 remote operations run over WinRM against Windows machines, from a desktop app or a browser.',
+    points: ['Three editions: Python GUI, Web-Service and PowerShell GUI', '36 remote admin operations with confirmation for sensitive ones', 'Every session logged to a timestamped file'],
+    features: ['Same 36 operations and categories across all three editions', 'Sensitive operations (reboot, network interruption, long tasks) need explicit confirmation', 'Test Connection before running; choose the authentication transport', 'Timestamped log for every session', 'Targets need only WinRM enabled (Enable-PSRemoting -Force)'],
+    editions: [['Python GUI v2.1', 'Native Tkinter desktop app. Needs Python 3.9+ and pywinrm; double-click install_and_run.bat.'], ['Web-Service v2.1', 'Flask service on port 3030 for a whole subnet. Installs as a real Windows Service or Linux systemd unit. Use a trusted subnet or put it behind HTTPS.'], ['PowerShell GUI v2.7', 'WinForms tool with zero installs, Windows 7 SP1 or later. Run-AdminTool.bat requests administrator rights.']],
+    facts: ['Targets must be Windows with WinRM enabled', 'Web edition sends credentials over plain HTTP by default: restrict to a trusted network or add TLS'] },
   { slug: 'ifinex', title: 'iFiNeX', tag: 'Public mobile and web app', icon: 'phone', download: null,
     summary: 'An expense tracker, card payment tracker and squad splitter in one app, for mobile and web.',
     points: ['Expense tracker', 'Card payment tracker', 'Squad splitter for shared costs (formerly Squad Split)'] },
+];
+
+export const platformInfo = [
+  { slug: 'entra-id', chip: 'Entra ID', name: 'Microsoft Entra ID', tag: 'Cloud identity and access', style: 'fluent', svc: 'cloud-desktop',
+    what: 'Microsoft\'s cloud identity service (formerly Azure Active Directory). It signs users in to Microsoft 365, Azure and thousands of other apps, and decides who may access what.',
+    security: ['Multi-factor authentication and passwordless sign-in', 'Conditional Access: allow, block or require MFA based on user, device, location and risk', 'Role-based admin roles and privileged identity controls'],
+    ai: ['Risk-based sign-in and user-risk detection using machine learning', 'Signals feed Conditional Access so risky sessions are challenged automatically', 'AI-assisted security investigation tools are available in the wider Microsoft security stack'] },
+  { slug: 'veeam', chip: 'Veeam', name: 'Veeam Backup & Replication', tag: 'Backup, replication and recovery', style: 'skeuo', svc: 'disaster-recovery',
+    what: 'Backup and recovery software for virtual, physical and cloud workloads. It takes image-level restore points, replicates workloads, and can start a failed machine directly from backup.',
+    security: ['Immutable and hardened repositories so backups cannot be altered', '3-2-1 copy strategy: three copies, two media, one offsite or offline', 'Encryption of backup data and role-based access'],
+    ai: ['Malware and anomaly detection on backup data to spot ransomware activity', 'Helps choose a clean restore point after an attack', 'Automation of recovery testing and reporting'] },
+  { slug: 'forcepoint-dlp', chip: 'Forcepoint DLP', name: 'Forcepoint DLP', tag: 'Data loss prevention', style: 'glass', svc: 'cyber-security',
+    what: 'Data loss prevention software that finds and classifies sensitive data, then monitors or blocks it as it moves through endpoints, email, web and cloud apps.',
+    security: ['Policies for personal data, source code and regulated information', 'Block, encrypt, warn or log when data leaves via USB, email, upload or print', 'Incident review with evidence for investigators'],
+    ai: ['Machine-learning classification of unstructured data', 'Risk-adaptive protection that tightens controls as user risk rises', 'Policies that cover data sent to generative AI tools'] },
+  { slug: 'sentinelone', chip: 'SentinelOne', name: 'SentinelOne Singularity', tag: 'Endpoint detection and response', style: 'oled', svc: 'cyber-security',
+    what: 'An endpoint security platform (EDR/XDR) that watches process behaviour on each device, detects attacks and can respond automatically on the endpoint.',
+    security: ['Behavioural detection of malware, ransomware and fileless attacks', 'Automatic kill, quarantine and network isolation of infected hosts', 'Rollback to restore files changed by ransomware on supported systems'],
+    ai: ['On-device behavioural AI that works even when the machine is offline', 'AI-assisted threat hunting and investigation', 'Telemetry correlated across endpoints, identity and cloud'] },
 ];

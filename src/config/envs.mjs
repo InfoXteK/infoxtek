@@ -37,3 +37,5 @@ export const envs = {
   'hosting-maintenance': () => globe(),
 };
 export const pageEnv = { '/why-choose-us/': bars, '/industries/': globe, '/products/': stack, '/tools-tips/': code, '/contact/': clouds, '/book-online/': () => racks(8), '/services/': topo };
+pageEnv['/products/net-monit/'] = topo; pageEnv['/products/pc-admin-tools/'] = () => screens(4, 2); pageEnv['/products/'] = () => screens(4, 2); pageEnv['/platforms/'] = () => globe();
+pageEnv['/platforms/entra-id/'] = () => globe(); pageEnv['/platforms/veeam/'] = () => racks(8); pageEnv['/platforms/forcepoint-dlp/'] = () => matrix(); pageEnv['/platforms/sentinelone/'] = () => radar(500, 150, 115);

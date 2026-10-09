@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync, mkdirSync, cpSync, rmSync, existsSync } fr
 import { scenes, custom } from '../src/config/scenes.mjs';
 import { K, nn } from '../src/config/kit.mjs';
 import { envs, pageEnv } from '../src/config/envs.mjs';
-import { site, contact, nav, platforms, services, reasons, industries, bookings, resources, testimonials, tips, products } from '../src/config/site.mjs';
+import { site, contact, nav, platforms, services, reasons, industries, bookings, resources, testimonials, tips, products, platformInfo } from '../src/config/site.mjs';
 
 const VERSION = JSON.parse(readFileSync('package.json', 'utf8')).version;
 const OUT = 'dist';
@@ -29,7 +29,7 @@ const styleMap = { '/': 'bento', '/why-choose-us/': 'minimal', '/industries/': '
   '/services/': 'fluent', '/products/': 'glass', '/services/cloud-solutions/': 'glass', '/services/cloud-desktop/': 'fluent', '/services/managed-it/': 'material', '/services/network-solutions/': 'bento', '/services/disaster-recovery/': 'skeuo',
   '/services/cyber-security/': 'cyber', '/services/support-consulting/': 'minimal', '/services/web-applications/': 'neumorphism', '/services/ai-solutions/': 'liquid', '/services/mobile-applications/': 'liquid', '/services/web-design-development/': 'maximal',
   '/services/seo/': 'flat', '/services/digital-marketing/': 'brutal', '/services/full-stack-apps/': 'oled', '/services/ecommerce/': 'clay', '/services/hosting-maintenance/': 'material' };
-const customScene = (c, title, slug) => `<div class="scene rv"><svg viewBox="0 0 640 300" role="img" aria-label="${esc(title)} scenario animation"><g class="env c2">${(envs[slug] || (() => ''))()}</g>${c.d(K)}</svg><ul class="logs" aria-hidden="true">${c.l.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></div>`;
+const customScene = (c, title, ev) => `<div class="scene rv"><svg viewBox="0 0 640 300" role="img" aria-label="${esc(title)} scenario animation"><g class="env c2">${((typeof ev === 'function' ? ev : envs[ev]) || (() => ''))()}</g>${c.d(K)}</svg><ul class="logs" aria-hidden="true">${c.l.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></div>`;
 const accents = { 'cloud-solutions': ['#1e6fd9', '#00a6b8'], 'cloud-desktop': ['#0f6cbd', '#2b88d8'], 'managed-it': ['#3949ab', '#1f9d8f'], 'network-solutions': ['#00796b', '#3949ab'], 'disaster-recovery': ['#b45309', '#475569'], 'support-consulting': ['#334155', '#0e9aa7'], 'web-applications': ['#6d28d9', '#0284c7'], 'mobile-applications': ['#be185d', '#6d28d9'], 'web-design-development': ['#c2410c', '#be185d'], 'seo': ['#15803d', '#1d4ed8'], 'digital-marketing': ['#be123c', '#b45309'], 'ecommerce': ['#be185d', '#b45309'], 'hosting-maintenance': ['#0369a1', '#15803d'], 'ai-solutions': ['#6d28d9', '#0891b2'] };
 const pages = [];
 const page = (path, title, description, body, crumbs = []) => pages.push({ path, title, description, body, crumbs });
@@ -39,12 +39,12 @@ const reasonList = `<ol class="reasons">${reasons.map((r) => `<li><strong>${esc(
 const cards = (arr, fn) => `<div class="grid">${arr.map(fn).join('')}</div>`;
 
 page('/', `${site.name} | ${site.tagline}`, site.description, `
-<section class="hero"><div class="netbg" aria-hidden="true"></div><div class="floaters" aria-hidden="true"><span>AI</span><span>ZERO TRUST</span><span>XDR</span><span>DLP</span><span>LLM</span><span>MFA</span><span>SIEM</span><span>EDR</span></div><div class="wrap hero-grid">
+<section class="hero"><div class="netbg" aria-hidden="true"></div><div class="floaters" role="group" aria-label="Draggable skill chips"><span>AI</span><span>ZERO TRUST</span><span>XDR</span><span>DLP</span><span>LLM</span><span>MFA</span><span>SIEM</span><span>EDR</span><span>CLOUD</span><span>BACKUP</span><span>NAC</span><span>INTUNE</span></div><p class="hint">Drag the floating skills around</p><div class="wrap hero-grid">
 <div><h1>${esc(site.tagline)}</h1><p class="lead">${esc(site.description)}</p>
 <p class="actions"><a class="btn" href="/contact/">Request a consultation</a><a class="btn ghost" href="/services/">See our services</a></p></div>
 <div class="art"><svg viewBox="0 0 320 260" aria-hidden="true"><g class="orbit"><circle cx="160" cy="130" r="100"/><circle cx="160" cy="130" r="62"/></g><g class="nodes"><circle cx="160" cy="30" r="9"/><circle cx="260" cy="130" r="9"/><circle cx="160" cy="230" r="9"/><circle cx="60" cy="130" r="9"/><circle cx="222" cy="68" r="7"/><circle cx="98" cy="192" r="7"/></g><path class="core" d="M160 96l34 14v26c0 22-15 36-34 42-19-6-34-20-34-42v-26z"/></svg></div><ul class="stack" aria-label="What we manage">${services.slice(0, 8).map((s) => `<li><a href="/services/${s.slug}/">${esc(s.title)}</a></li>`).join('')}</ul>
 </div></section>
-<section class="vendors"><div class="wrap"><p>Platforms we design, deploy and support</p><div class="chips">${platforms.map((v) => `<span>${v}</span>`).join('')}</div></div></section>
+<section class="vendors"><div class="wrap"><p>Platforms we design, deploy and support: click a highlighted one to explore it</p><div class="chips">${platforms.map((v) => { const q = platformInfo.find((z) => z.chip === v); return q ? `<a href="/platforms/${q.slug}/">${v}</a>` : `<span>${v}</span>`; }).join('')}</div></div></section>
 <section class="sec"><div class="wrap"><h2>Our services</h2>${cards(services, (s) => `<article class="card rv">${icon(s.icon)}<h3><a href="/services/${s.slug}/">${esc(s.title)}</a></h3><p>${esc(s.summary)}</p></article>`)}</div></section>
 <section class="sec alt"><div class="wrap"><h2>Why organizations choose us</h2>${reasonList}</div></section>
 ${testimonials.length ? `<section class="sec"><div class="wrap"><h2>What clients say</h2>${cards(testimonials, (t) => `<blockquote class="card"><p>${esc(t.quote)}</p><footer>${esc(t.name)}, ${esc(t.role)}</footer></blockquote>`)}</div></section>` : ''}
@@ -67,7 +67,24 @@ for (const [si, s] of services.entries()) {
 }
 
 page('/products/', `Products | ${site.name}`, 'Net-Monit network monitoring, PC Admin Tools and the iFiNeX expense app from InfoXteK.',
-  `${head('Our products', 'Software we build and run ourselves.')}<section class="sec"><div class="wrap">${cards(products, (x) => `<article class="card rv" id="${x.slug}">${icon(x.icon)}<h2>${esc(x.title)}</h2><p><strong>${esc(x.tag)}</strong></p><p>${esc(x.summary)}</p><ul class="ticks">${x.points.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>${x.download ? `<a class="btn" href="${esc(x.download)}">Download</a>` : '<span class="btn ghost soon" aria-disabled="true">Download link coming soon</span>'}</article>`)}</div></section>${cta}`, [['Products', '/products/']]);
+  `${head('Our products', 'Software we build and run ourselves.')}<section class="sec"><div class="wrap">${cards(products, (x) => `<article class="card rv" id="${x.slug}">${icon(x.icon)}<h2>${x.page ? `<a href="/products/${x.slug}/">${esc(x.title)}</a>` : esc(x.title)}</h2><p><strong>${esc(x.tag)}</strong></p><p>${esc(x.summary)}</p><ul class="ticks">${x.points.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>${x.page ? `<a class="btn" href="/products/${x.slug}/">Explore</a> <a class="btn ghost" href="${esc(x.download)}">GitHub</a>` : '<span class="btn ghost soon" aria-disabled="true">Download link coming soon</span>'}</article>`)}</div></section>${cta}`, [['Products', '/products/']]);
+Object.assign(styleMap, { '/products/net-monit/': 'cyber', '/products/pc-admin-tools/': 'brutal', '/platforms/': 'flat' });
+for (const x of products.filter((q) => q.page)) {
+  const path = `/products/${x.slug}/`;
+  page(path, `${x.title} | ${site.name}`, x.summary.slice(0, 155), `<section class="band" data-h="${x.slug.length}"><div class="wrap">${icon(x.icon)}<h1>${esc(x.title)}</h1><p class="lead">${esc(x.tag)}</p></div></section>
+<section class="sec"><div class="wrap"><h2>How it works</h2>${customScene(custom[x.slug], x.title, pageEnv[path])}<p class="note">Illustrative simulation of a typical scenario. Not live data.</p></div></section>
+<section class="sec alt"><div class="wrap two"><div class="rv"><h2>Overview</h2><p>${esc(x.summary)}</p><h3>Key features</h3><ul class="ticks">${x.features.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></div><aside class="rv"><h2>Get it</h2><p><a class="btn" href="${esc(x.download)}">View on GitHub</a></p>${x.start ? `<h3>Quick start</h3><ul class="ticks">${x.start.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}<h3>Good to know</h3><ul class="ticks">${x.facts.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>${x.slug === 'net-monit' ? '<p><a class="btn ghost" href="/contact/#license">Request a license</a></p>' : ''}</aside></div></section>
+${x.editions ? `<section class="sec"><div class="wrap"><h2>Editions</h2>${cards(x.editions, ([n, d]) => `<article class="card rv"><h3>${esc(n)}</h3><p>${esc(d)}</p></article>`)}</div></section>` : ''}${cta}`, [['Products', '/products/'], [x.title, path]]);
+}
+page('/platforms/', `Platforms | ${site.name}`, 'Explore the security and cloud platforms InfoXteK designs, deploys and supports.',
+  `${head('Platforms we work with', 'Click a platform to see what it is, how it is secured and where AI is taking it.')}<section class="sec"><div class="wrap">${cards(platformInfo, (x) => `<article class="card rv"><h2><a href="/platforms/${x.slug}/">${esc(x.name)}</a></h2><p>${esc(x.tag)}</p></article>`)}<p class="note">More platform pages are being added. Product names are trademarks of their owners; listing a platform does not imply a partnership.</p></div></section>${cta}`, [['Platforms', '/platforms/']]);
+for (const x of platformInfo) {
+  const path = `/platforms/${x.slug}/`; styleMap[path] = x.style;
+  const rel = services.find((s) => s.slug === x.svc);
+  page(path, `${x.name} | ${site.name}`, `${x.name}: ${x.tag}. What it is, how it is secured and its AI direction.`, `<section class="band" data-h="${x.slug.length}"><div class="wrap"><h1>${esc(x.name)}</h1><p class="lead">${esc(x.tag)}</p></div></section>
+<section class="sec"><div class="wrap"><h2>What it does, in motion</h2>${customScene(custom[x.slug], x.name, pageEnv[path])}<p class="note">Illustrative simulation of a typical scenario. Not live data.</p></div></section>
+<section class="sec alt"><div class="wrap"><div class="grid"><article class="card rv"><h3>What it is</h3><p>${esc(x.what)}</p></article><article class="card rv"><h3>Security</h3><ul class="ticks">${x.security.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></article><article class="card rv"><h3>AI direction</h3><ul class="ticks">${x.ai.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></article></div>${rel ? `<p>Related service: <a href="/services/${rel.slug}/">${esc(rel.title)}</a></p>` : ''}<p class="note">Summary for orientation only: check the vendor's documentation for current features. Product names are trademarks of their owners; InfoXteK does not claim a vendor partnership.</p></div></section>${cta}`, [['Platforms', '/platforms/'], [x.name, path]]);
+}
 
 page('/industries/', `Industries | ${site.name}`, 'IT services for agriculture, banking and financial services, education, energy and utilities, and government.',
   `${head('Industries we serve', 'Every sector has its own risks and rules.')}<section class="sec"><div class="wrap">${cards(industries, (i) => `<article class="card"><h2>${esc(i.name)}</h2><p>${esc(i.summary)}</p></article>`)}</div></section>${cta}`, [['Industries', '/industries/']]);
@@ -88,7 +105,16 @@ page('/contact/', `Contact Us | ${site.name}`, 'Contact InfoXteK to discuss your
 <label for="message">Message</label><textarea id="message" name="message" rows="5" required maxlength="2000"></textarea><p class="err" id="message-e" hidden></p>
 <p class="hp" aria-hidden="true"><label>Leave empty <input name="website" tabindex="-1" autocomplete="off"></label></p>
 <button class="btn" type="submit">Send message</button><p id="status" role="status"></p></form>
-<aside><h2>Details</h2>${details.length ? `<ul class="list">${details.join('')}</ul>` : '<p class="note">Company contact details have not been added yet.</p>'}</aside></div></section>`, [['Contact Us', '/contact/']]);
+<aside><h2>Details</h2>${details.length ? `<ul class="list">${details.join('')}</ul>` : '<p class="note">Company contact details have not been added yet.</p>'}</aside></div></section>
+<section class="sec alt" id="license"><div class="wrap two"><div><h2>Request a Net-Monit license</h2><p>Net-Monit licenses are free and issued by us. In Net-Monit open the License page (or Settings, then License), copy your Device ID and Activation Code, and send them here. We reply by email with your key.</p><p class="note">Keys are tied to one installation. If you reinstall or move to a new folder you need a new key. Typical turnaround is 4 to 7 business days.</p></div>
+<form id="license-form" novalidate data-mailto="${esc(contact.email || '')}"${contact.formEndpoint ? ` data-endpoint="${esc(contact.formEndpoint)}"` : ''}>
+<label for="lname">Name</label><input id="lname" name="lname" autocomplete="name" required maxlength="120"><p class="err" id="lname-e" hidden></p>
+<label for="lemail">Email</label><input id="lemail" name="lemail" type="email" autocomplete="email" required maxlength="160"><p class="err" id="lemail-e" hidden></p>
+<label for="lcompany">Company (optional)</label><input id="lcompany" name="lcompany" autocomplete="organization" maxlength="160">
+<label for="ldevice">Device ID</label><input id="ldevice" name="ldevice" required maxlength="200" spellcheck="false"><p class="err" id="ldevice-e" hidden></p>
+<label for="lactivation">Activation Code</label><input id="lactivation" name="lactivation" required maxlength="200" spellcheck="false"><p class="err" id="lactivation-e" hidden></p>
+<p class="hp" aria-hidden="true"><label>Leave empty <input name="lwebsite" tabindex="-1" autocomplete="off"></label></p>
+<button class="btn" type="submit">Request license</button><p id="lstatus" role="status"></p></form></div></section>`, [['Contact Us', '/contact/']]);
 
 const envFor = (p) => envs[(p.path.match(/^\/services\/([^/]+)\/$/) || [])[1]] || pageEnv[p.path];
 const withArt = (p) => { const e = envFor(p); return e ? p.body.replace(/(<section class="band"[^>]*>)/, `$1<svg class="bgart c2" viewBox="0 0 640 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${e()}</svg>`) : p.body; };
