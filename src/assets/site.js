@@ -38,3 +38,4 @@
   const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.12 });
   els.forEach((el) => io.observe(el));
 })();
+if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.querySelectorAll('.scene svg').forEach((s) => s.pauseAnimations && s.pauseAnimations());
