@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync, mkdirSync, cpSync, rmSync, existsSync } from 'node:fs';
-import { scenes } from '../src/config/scenes.mjs';
+import { scenes, custom } from '../src/config/scenes.mjs';
+import { K } from '../src/config/kit.mjs';
 import { site, contact, nav, platforms, services, reasons, industries, bookings, resources, testimonials, tips, products } from '../src/config/site.mjs';
 
 const VERSION = JSON.parse(readFileSync('package.json', 'utf8')).version;
@@ -27,6 +28,7 @@ const styleMap = { '/': 'bento', '/why-choose-us/': 'minimal', '/industries/': '
   '/services/': 'fluent', '/products/': 'glass', '/services/cloud-solutions/': 'glass', '/services/cloud-desktop/': 'fluent', '/services/managed-it/': 'material', '/services/network-solutions/': 'bento', '/services/disaster-recovery/': 'skeuo',
   '/services/cyber-security/': 'cyber', '/services/support-consulting/': 'minimal', '/services/web-applications/': 'neumorphism', '/services/mobile-applications/': 'liquid', '/services/web-design-development/': 'maximal',
   '/services/seo/': 'flat', '/services/digital-marketing/': 'brutal', '/services/full-stack-apps/': 'oled', '/services/ecommerce/': 'clay', '/services/hosting-maintenance/': 'material' };
+const customScene = (c, title) => `<div class="scene rv"><svg viewBox="0 0 640 300" role="img" aria-label="${esc(title)} scenario animation">${c.d(K)}</svg><ul class="logs" aria-hidden="true">${c.l.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></div>`;
 const pages = [];
 const page = (path, title, description, body, crumbs = []) => pages.push({ path, title, description, body, crumbs });
 const head = (t, s = '', h = 0) => `<section class="band" data-h="${h}"><div class="wrap"><h1>${esc(t)}</h1>${s ? `<p class="lead">${esc(s)}</p>` : ''}</div></section>`;
@@ -54,7 +56,7 @@ page('/services/', `Our Services | ${site.name}`, 'Cloud, managed IT, network, d
 for (const [si, s] of services.entries()) {
   page(`/services/${s.slug}/`, `${s.title} | ${site.name}`, s.summary,
     `<section class="band" data-h="${si}"><div class="wrap">${icon(s.icon)}<h1>${esc(s.title)}</h1><p class="lead">${esc(s.summary)}</p></div></section>
-<section class="sec"><div class="wrap"><h2>See it in action</h2>${sceneSvg(scenes[s.slug], s.title)}<p class="note">Illustrative simulation of a typical scenario. Not live customer data.</p></div></section>
+<section class="sec"><div class="wrap"><h2>See it in action</h2>${custom[s.slug] ? customScene(custom[s.slug], s.title) : sceneSvg(scenes[s.slug], s.title)}<p class="note">Illustrative simulation of a typical scenario. Not live customer data.</p></div></section>
 <section class="sec"><div class="wrap two"><div class="rv"><h2>How we deliver it</h2><p>${esc(s.intro)}</p><ol class="steps">${s.steps.map((t) => `<li>${esc(t)}</li>`).join('')}</ol></div>
 <aside class="rv"><h2>Outcomes</h2><ul class="ticks">${s.outcomes.map((o) => `<li>${esc(o)}</li>`).join('')}</ul></aside></div></section>
 <section class="sec"><div class="wrap rv"><h2>What we do</h2><ul class="ticks cols">${s.caps.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></div></section>
