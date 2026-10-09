@@ -42,12 +42,14 @@ if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.querySelect
 (() => {
   const f = document.getElementById('license-form'); if (!f) return;
   const st = document.getElementById('lstatus');
-  const req = { lname: 'Enter your name.', lemail: 'Enter a valid email address.', ldevice: 'Enter your Device ID.', lactivation: 'Enter your Activation Code.' };
+  const free = /^(gmail|googlemail|yahoo|ymail|hotmail|outlook|live|msn|icloud|me|aol|proton|protonmail|gmx|mail|yandex|zoho|qq|163)\./i;
+  const msg = { lname: 'Enter your name.', lcompany: 'Enter your company name.', lemail: 'Enter your corporate email address.', ldevice: 'Enter your Device ID.', lactivation: 'Enter your Activation Code.' };
   f.addEventListener('submit', async (e) => {
     e.preventDefault(); let bad = null;
-    for (const k in req) {
-      const el = f.elements[k], er = document.getElementById(k + '-e'), v = el.value.trim();
-      const m = !v || (k === 'lemail' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) ? req[k] : '';
+    for (const k in msg) {
+      const el = f.elements[k], er = document.getElementById(k + '-e'), v = el.value.trim(); let m = '';
+      if (!v) m = msg[k];
+      else if (k === 'lemail') { if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) m = 'Enter a valid email address.'; else if (free.test(v.split('@')[1])) m = 'Please use your corporate email address, not a free webmail address.'; }
       er.hidden = !m; er.textContent = m; el.setAttribute('aria-invalid', String(!!m)); if (m && !bad) bad = el;
     }
     if (bad) { bad.focus(); st.textContent = ''; return; }
@@ -57,8 +59,9 @@ if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.querySelect
       st.textContent = 'Sending...';
       try { const r = await fetch(ep, { method: 'POST', headers: { Accept: 'application/json' }, body: new FormData(f) }); if (!r.ok) throw 0; f.reset(); st.textContent = 'Request received. We will email your license key.'; } catch { st.textContent = 'Sending failed. Please try again.'; }
     } else if (to) {
-      const body = `Net-Monit license request\n\nName: ${d.lname}\nEmail: ${d.lemail}\nCompany: ${d.lcompany || '-'}\nDevice ID: ${d.ldevice}\nActivation Code: ${d.lactivation}\n`;
-      location.href = 'mailto:' + to + '?subject=' + encodeURIComponent('Net-Monit License Request') + '&body=' + encodeURIComponent(body);
+      let cc = ''; try { cc = atob(f.dataset.cc || ''); } catch { cc = ''; }
+      const body = `Net-Monit license request\n\nName: ${d.lname}\nCompany: ${d.lcompany}\nCorporate email: ${d.lemail}\nNet-Monit version: ${d.lversion}\nOperating system: ${d.los}\nDevice ID: ${d.ldevice}\nActivation Code: ${d.lactivation}\n`;
+      location.href = 'mailto:' + to + '?' + (cc ? 'cc=' + encodeURIComponent(cc) + '&' : '') + 'subject=' + encodeURIComponent('Net-Monit License Request') + '&body=' + encodeURIComponent(body);
       st.textContent = 'Your email app should open with the request filled in. Press Send to submit it. If nothing opens, email ' + to + ' with the same details.';
     } else st.textContent = 'This form is not connected yet.';
   });

@@ -169,6 +169,10 @@ nav#nav.open{display:flex}.hero{padding:3rem 0}.stack li:nth-child(even){margin-
 .hint{position:absolute;right:1.25rem;bottom:.6rem;margin:0;font-size:.8rem;color:var(--muted);z-index:2}
 .chips a{border:1px solid var(--indigo);background:#fff;border-radius:999px;padding:.2rem .8rem;font-size:.85rem;color:var(--indigo);text-decoration:none;font-weight:600;transition:transform .2s,box-shadow .2s}.chips a:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(59,76,202,.25)}
 @media(max-width:820px){.hint{display:none}}
+/* v2.1 immersive themed headers */
+b.bx{color:#2b86d1;font-weight:inherit}.bgart{opacity:.6}
+:where(body[data-svc]) .band{background:linear-gradient(115deg,color-mix(in srgb,var(--indigo) 16%,#fff),color-mix(in srgb,var(--teal) 16%,#fff));padding:4.2rem 0 3.2rem}
+body[data-svc] .band .wrap{text-shadow:0 1px 0 rgba(255,255,255,.6)}
 body[data-svc="cloud-solutions"]{--indigo:#1e6fd9;--indigo-d:#1e6fd9;--teal:#00a6b8}
 body[data-svc="cloud-desktop"]{--indigo:#0f6cbd;--indigo-d:#0f6cbd;--teal:#2b88d8}
 body[data-svc="managed-it"]{--indigo:#3949ab;--indigo-d:#3949ab;--teal:#1f9d8f}

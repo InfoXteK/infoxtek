@@ -106,11 +106,13 @@ page('/contact/', `Contact Us | ${site.name}`, 'Contact InfoXteK to discuss your
 <p class="hp" aria-hidden="true"><label>Leave empty <input name="website" tabindex="-1" autocomplete="off"></label></p>
 <button class="btn" type="submit">Send message</button><p id="status" role="status"></p></form>
 <aside><h2>Details</h2>${details.length ? `<ul class="list">${details.join('')}</ul>` : '<p class="note">Company contact details have not been added yet.</p>'}</aside></div></section>
-<section class="sec alt" id="license"><div class="wrap two"><div><h2>Request a Net-Monit license</h2><p>Net-Monit licenses are free and issued by us. In Net-Monit open the License page (or Settings, then License), copy your Device ID and Activation Code, and send them here. We reply by email with your key.</p><p class="note">Keys are tied to one installation. If you reinstall or move to a new folder you need a new key. Typical turnaround is 4 to 7 business days.</p></div>
-<form id="license-form" novalidate data-mailto="${esc(contact.email || '')}"${contact.formEndpoint ? ` data-endpoint="${esc(contact.formEndpoint)}"` : ''}>
+<section class="sec alt" id="license"><div class="wrap two"><div><h2>Request a Net-Monit license</h2><p>Net-Monit licenses are free and issued by us. In Net-Monit open the License page (or Settings, then License), copy your Device ID and Activation Code, and send them here. Please use your corporate email address (free webmail addresses are not accepted). We reply by email with your key.</p><p class="note">Keys are tied to one installation. If you reinstall or move to a new folder you need a new key. Typical turnaround is 4 to 7 business days.</p></div>
+<form id="license-form" novalidate data-mailto="${esc(contact.email || '')}" data-cc="${Buffer.from((contact.licenseCc || []).join(',')).toString('base64')}"${contact.formEndpoint ? ` data-endpoint="${esc(contact.formEndpoint)}"` : ''}>
 <label for="lname">Name</label><input id="lname" name="lname" autocomplete="name" required maxlength="120"><p class="err" id="lname-e" hidden></p>
-<label for="lemail">Email</label><input id="lemail" name="lemail" type="email" autocomplete="email" required maxlength="160"><p class="err" id="lemail-e" hidden></p>
-<label for="lcompany">Company (optional)</label><input id="lcompany" name="lcompany" autocomplete="organization" maxlength="160">
+<label for="lemail">Corporate email</label><input id="lemail" name="lemail" type="email" autocomplete="email" required maxlength="160"><p class="err" id="lemail-e" hidden></p>
+<label for="lcompany">Company</label><input id="lcompany" name="lcompany" autocomplete="organization" required maxlength="160"><p class="err" id="lcompany-e" hidden></p>
+<label for="lversion">Net-Monit version</label><select id="lversion" name="lversion"><option>V11.0 (current)</option><option>Upgrading from V10.9 or older (new V11.0 key needed)</option></select>
+<label for="los">Operating system</label><select id="los" name="los"><option>Windows</option><option>Linux</option></select>
 <label for="ldevice">Device ID</label><input id="ldevice" name="ldevice" required maxlength="200" spellcheck="false"><p class="err" id="ldevice-e" hidden></p>
 <label for="lactivation">Activation Code</label><input id="lactivation" name="lactivation" required maxlength="200" spellcheck="false"><p class="err" id="lactivation-e" hidden></p>
 <p class="hp" aria-hidden="true"><label>Leave empty <input name="lwebsite" tabindex="-1" autocomplete="off"></label></p>
@@ -118,6 +120,7 @@ page('/contact/', `Contact Us | ${site.name}`, 'Contact InfoXteK to discuss your
 
 const envFor = (p) => envs[(p.path.match(/^\/services\/([^/]+)\/$/) || [])[1]] || pageEnv[p.path];
 const withArt = (p) => { const e = envFor(p); return e ? p.body.replace(/(<section class="band"[^>]*>)/, `$1<svg class="bgart c2" viewBox="0 0 640 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${e()}</svg>`) : p.body; };
+const brandize = (html) => { let skip = 0; return html.split(/(<[^>]+>)/).map((s) => { if (s[0] === '<') { if (/^<(script|style|title|svg)\b/i.test(s)) skip++; else if (/^<\/(script|style|title|svg)>/i.test(s)) skip--; return s; } return skip > 0 ? s : s.replace(/InfoXteK/g, 'Info<b class="bx">X</b>te<b class="bx">K</b>'); }).join(''); };
 const layout = (p) => {
   const crumbs = [['Home', '/'], ...p.crumbs];
   const jsonld = [
@@ -148,7 +151,7 @@ mkdirSync(`${OUT}/assets`, { recursive: true });
 for (const p of pages) {
   const dir = p.path === '/' ? OUT : `${OUT}${p.path}`;
   mkdirSync(dir, { recursive: true });
-  writeFileSync(`${dir}/index.html`, layout(p));
+  writeFileSync(`${dir}/index.html`, brandize(layout(p)));
 }
 writeFileSync(`${OUT}/404.html`, layout({ path: '/404/', noindex: true, title: `Page not found | ${site.name}`, description: 'Page not found.', crumbs: [], body: `${head('Page not found', 'That page does not exist or has moved.')}<section class="sec"><div class="wrap"><a class="btn" href="/">Back to home</a></div></section>` }));
 cpSync('src/assets', `${OUT}/assets`, { recursive: true });
