@@ -12,7 +12,7 @@ export const site = {
 export const contact = {
   email: 'infoxtekcorp@gmail.com',        // VERIFY: real company email
   phone: '+971545414237',        // VERIFY: real company phone
-  address: 'International City, Dubai.',       // VERIFY: real company address
+  address: 'International City, Dubai.',      // VERIFY: real company address
   formEndpoint: null, // Optional https:// URL of a form provider you approve. null = form is not connected.
   social: [],         // e.g. [{ label: 'LinkedIn', href: 'https://...' }]
 };

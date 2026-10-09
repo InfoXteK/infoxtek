@@ -23,6 +23,10 @@ const sceneSvg = (sc, title) => {
   const pk = sc.f.map(([r, c], i) => `<circle r="5" fill="${colr[c]}"><animateMotion dur="${(1.5 * (r.length - 1) + 0.4).toFixed(1)}s" begin="${(i * 0.6).toFixed(1)}s" repeatCount="indefinite" path="M${r.map((j) => `${n[j][1]},${n[j][2]}`).join(' L')}"/></circle>`).join('');
   return `<div class="scene rv"><svg viewBox="0 0 640 300" role="img" aria-label="${esc(title)} scenario animation"><g class="lk">${lines}</g>${boxes}${pk}</svg><ul class="logs" aria-hidden="true">${sc.l.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></div>`;
 };
+const styleMap = { '/': 'bento', '/why-choose-us/': 'minimal', '/industries/': 'flat', '/tools-tips/': 'clay', '/book-online/': 'material', '/contact/': 'neumorphism',
+  '/services/': 'fluent', '/services/cloud-solutions/': 'glass', '/services/cloud-desktop/': 'fluent', '/services/managed-it/': 'material', '/services/network-solutions/': 'bento', '/services/disaster-recovery/': 'skeuo',
+  '/services/cyber-security/': 'cyber', '/services/support-consulting/': 'minimal', '/services/web-applications/': 'neumorphism', '/services/mobile-applications/': 'liquid', '/services/web-design-development/': 'maximal',
+  '/services/seo/': 'flat', '/services/digital-marketing/': 'brutal', '/services/full-stack-apps/': 'oled', '/services/ecommerce/': 'clay', '/services/hosting-maintenance/': 'material' };
 const pages = [];
 const page = (path, title, description, body, crumbs = []) => pages.push({ path, title, description, body, crumbs });
 const head = (t, s = '', h = 0) => `<section class="band" data-h="${h}"><div class="wrap"><h1>${esc(t)}</h1>${s ? `<p class="lead">${esc(s)}</p>` : ''}</div></section>`;
@@ -94,8 +98,8 @@ const layout = (p) => {
 <meta property="og:type" content="website"><meta property="og:site_name" content="${esc(site.name)}"><meta property="og:title" content="${esc(p.title)}"><meta property="og:description" content="${esc(p.description)}"><meta property="og:url" content="${url(p.path)}"><meta name="twitter:card" content="summary">
 <meta name="theme-color" content="#3b4cca"><link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png"><link rel="icon" href="/favicon.png" sizes="128x128" type="image/png"><link rel="apple-touch-icon" href="/favicon.png"><link rel="stylesheet" href="/assets/site.css?v=${VERSION}">
 <script type="application/ld+json">${ld(jsonld)}</script></head>
-<body><a class="skip" href="#main">Skip to content</a>
-<header class="top"><div class="wrap bar"><a class="logo" href="/" aria-label="${esc(site.name)} home"><img src="/assets/logo.png" width="34" height="44" alt=""><span>Info<b>Xt</b>eK</span></a>
+<body data-style="${styleMap[p.path] || 'flat'}"><a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="wrap bar"><a class="logo" href="/" aria-label="${esc(site.name)} home"><img src="/assets/logo.png" width="34" height="44" alt=""><span>Info<b>X</b>te<b>K</b></span></a>
 <button class="menu" aria-expanded="false" aria-controls="nav">Menu</button>
 <nav id="nav" aria-label="Main">${nav.map((n) => `<a href="${n.path}"${cur(n.path)}>${esc(n.label)}</a>`).join('')}<a class="btn small" href="/book-online/"${cur('/book-online/')}>Book Online</a></nav></div></header>
 ${p.crumbs.length ? `<nav class="crumbs wrap" aria-label="Breadcrumb">${crumbs.map((c, i) => (i < crumbs.length - 1 ? `<a href="${c[1]}">${esc(c[0])}</a>` : `<span aria-current="page">${esc(c[0])}</span>`)).join(' / ')}</nav>` : ''}
