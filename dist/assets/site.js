@@ -76,3 +76,32 @@ document.querySelectorAll('.floaters span').forEach((el) => {
   el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
   el.addEventListener('keydown', (e) => { const d = { ArrowLeft: [-14, 0], ArrowRight: [14, 0], ArrowUp: [0, -14], ArrowDown: [0, 14] }[e.key]; if (!d) return; e.preventDefault(); el.style.left = el.offsetLeft + d[0] + 'px'; el.style.top = el.offsetTop + d[1] + 'px'; });
 });
+const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+document.querySelectorAll('.scene').forEach((sc) => {
+  const svg = sc.querySelector('svg.main'), deep = sc.querySelector('.deep'); if (!svg || !deep) return;
+  const logs = [...sc.querySelectorAll('.logs li')].map((l) => l.textContent), T = (sc.dataset.t || '').split(',').map(Number);
+  sc.classList.add('ix');
+  const ctl = document.createElement('div'); ctl.className = 'ctl';
+  const cap = document.createElement('p'); cap.className = 'cap'; cap.setAttribute('aria-live', 'polite'); cap.textContent = 'Click a step to freeze the scene at that moment, or move your pointer over it to tilt it in 3D.';
+  const play = document.createElement('button'); play.type = 'button'; play.textContent = 'Pause'; let paused = false;
+  const setP = (p) => { paused = p; play.textContent = p ? 'Play' : 'Pause'; try { p ? svg.pauseAnimations() : svg.unpauseAnimations(); } catch {} };
+  play.onclick = () => { setP(!paused); if (!paused) cap.textContent = 'Playing.'; };
+  ctl.append(play);
+  logs.forEach((t, i) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = 'Step ' + (i + 1); b.onclick = () => { try { svg.setCurrentTime((T[i] || 0.12 + i * 0.25) * 12); } catch {} setP(true); cap.textContent = 'Step ' + (i + 1) + ': ' + t; }; ctl.append(b); });
+  sc.append(ctl, cap);
+  if (calm) { setP(true); return; }
+  sc.addEventListener('pointermove', (e) => { if (e.pointerType === 'touch') return; const r = sc.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5; deep.style.setProperty('--ty', x * 14 + 'deg'); deep.style.setProperty('--tx', -y * 12 + 'deg'); });
+  sc.addEventListener('pointerleave', () => { deep.style.setProperty('--ty', '0deg'); deep.style.setProperty('--tx', '0deg'); });
+});
+if (!calm) {
+  document.querySelectorAll('.card').forEach((c) => { c.addEventListener('pointermove', (e) => { if (e.pointerType === 'touch') return; const r = c.getBoundingClientRect(); c.style.setProperty('--ry', ((e.clientX - r.left) / r.width - 0.5) * 12 + 'deg'); c.style.setProperty('--rx', -((e.clientY - r.top) / r.height - 0.5) * 10 + 'deg'); }); c.addEventListener('pointerleave', () => { c.style.setProperty('--rx', '0deg'); c.style.setProperty('--ry', '0deg'); }); });
+  document.querySelectorAll('.band').forEach((b) => b.addEventListener('pointermove', (e) => { const r = b.getBoundingClientRect(); b.style.setProperty('--mx', (e.clientX - r.left) / r.width - 0.5); b.style.setProperty('--my', (e.clientY - r.top) / r.height - 0.5); }));
+}
+(() => {
+  const st = document.getElementById('stage'); if (!st) return;
+  let on = false, moved = 0, sx = 0, sy = 0, rz = -32, rx = 0;
+  const mv = (e) => { if (!on) return; const dx = e.clientX - sx, dy = e.clientY - sy; sx = e.clientX; sy = e.clientY; moved += Math.abs(dx) + Math.abs(dy); rz += dx * 0.5; rx = Math.max(-25, Math.min(25, rx - dy * 0.3)); st.style.setProperty('--rz', rz + 'deg'); st.style.setProperty('--rx', rx + 'deg'); };
+  const up = () => { on = false; st.classList.remove('drag'); removeEventListener('pointermove', mv); removeEventListener('pointerup', up); };
+  st.addEventListener('pointerdown', (e) => { on = true; moved = 0; sx = e.clientX; sy = e.clientY; st.classList.add('drag'); addEventListener('pointermove', mv); addEventListener('pointerup', up); });
+  st.addEventListener('click', (e) => { if (moved > 6) { e.preventDefault(); e.stopPropagation(); } }, true);
+})();

@@ -20,7 +20,7 @@ export const scenes = {
 
 // Bespoke scenarios: each explains its own technical flow on a shared 12s loop.
 export const custom = {
-  'disaster-recovery': { l: ['Normal: cluster and DR heartbeat healthy, data replicating', 'Disaster: heartbeat missed, primary declared down', 'HA director promotes DR node and redirects users', 'Primary repaired: failback and replication resume'],
+  'disaster-recovery': { t: [0.15, 0.4, 0.65, 0.92], l: ['Normal: cluster and DR heartbeat healthy, data replicating', 'Disaster: heartbeat missed, primary declared down', 'HA director promotes DR node and redirects users', 'Primary repaired: failback and replication resume'],
     d: (K) => [K.zone(10, 104, 290, 170, 'Primary data centre'), K.zone(350, 104, 280, 170, 'DR site'), K.box(270, 4, 100, 28, 'Users'), K.box(245, 50, 150, 30, 'HA / GSLB director'), K.line(320, 32, 320, 50), K.line(280, 80, 160, 130), K.line(360, 80, 490, 130),
       K.box(30, 130, 110, 36, 'Node A (active)'), K.box(160, 130, 110, 36, 'Node B (HA)'), K.cyl(110, 205, 90, 54, 'SAN'), K.box(370, 130, 110, 36, 'DR node'), K.cyl(500, 205, 90, 54, 'Replica'),
       K.line(200, 232, 500, 232), K.txt(350, 222, 'replication', { c: 'm' }), K.pkt([[200, 232], [500, 232]], '#0e9aa7', 0.0, 0.14), K.pkt([[200, 232], [500, 232]], '#0e9aa7', 0.08, 0.14), K.pkt([[200, 232], [500, 232]], '#0e9aa7', 0.16, 0.14),
@@ -30,7 +30,7 @@ export const custom = {
       K.pkt([[280, 80], [160, 130]], '#3b4cca', 0.0, 0.12), K.pkt([[280, 80], [160, 130]], '#3b4cca', 0.14, 0.12), K.pkt([[280, 80], [160, 130]], '#3b4cca', 0.86, 0.12),
       K.pkt([[360, 80], [480, 130]], '#3b4cca', 0.52, 0.13), K.pkt([[360, 80], [480, 130]], '#3b4cca', 0.67, 0.13),
       K.txt(320, 292, 'Heartbeat OK, replicas in sync', { c: 'g', show: [[0, 0.31]] }), K.txt(320, 292, 'Heartbeat lost, failover triggered', { c: 'r', show: [[0.33, 0.5]] }), K.txt(320, 292, 'DR promoted, users redirected', { c: 'g', show: [[0.5, 0.84]] }), K.txt(320, 292, 'Failback complete', { c: 'g', show: [[0.85, 1]] })].join('') },
-  'cyber-security': { l: ['Phishing mail quarantined at the email gateway', 'Exploit attempt dropped by the firewall', 'Ransomware stopped and host isolated by EDR/XDR', 'DLP blocks the exfiltration; SOC investigates the alerts'],
+  'cyber-security': { t: [0.12, 0.33, 0.55, 0.8], l: ['Phishing mail quarantined at the email gateway', 'Exploit attempt dropped by the firewall', 'Ransomware stopped and host isolated by EDR/XDR', 'DLP blocks the exfiltration; SOC investigates the alerts'],
     d: (K) => { const xs = [130, 232, 334, 436], nm = ['Email security', 'Firewall', 'EDR / XDR', 'DLP'], at = ['phishing mail', 'exploit', 'ransomware', 'data theft']; const o = [K.box(8, 126, 84, 44, 'Attacker', { k: 'r' }), K.cyl(548, 116, 74, 62, 'Data'), K.box(290, 232, 130, 34, 'SIEM / SOC')];
       xs.forEach((x, i) => { const a = i * 0.21; o.push(K.box(x, 126, 88, 44, nm[i], { k: 's' }), K.line(92, 148, x, 148), K.pkt([[92, 148], [x, 148]], '#d64545', a + 0.01, 0.13), K.ring(x + 44, 148, '#d64545', a + 0.14, a + 0.21), K.txt(x + 44, 118, 'BLOCKED', { c: 'r', show: [[a + 0.14, a + 0.24]] }), K.txt(50, 118, at[i], { c: 'r', show: [[a, a + 0.2]] }), K.pkt([[x + 44, 170], [355, 232]], '#16a34a', a + 0.15, 0.1)); });
       o.push(K.txt(320, 70, 'Defence in depth: each layer stops a different stage of the attack', { c: 'm' }), K.txt(320, 290, 'Contained, incident closed', { c: 'g', show: [[0.86, 1]] })); return o.join(''); } },

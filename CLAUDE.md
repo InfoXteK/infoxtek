@@ -1,6 +1,6 @@
 # InfoXtek: Project Memory
 - Project: InfoXtek corporate site rebuild (source: https://infoxtekcorp.wixsite.com/infoxtek). Target: https://infoXtek.com on GitHub Pages via Actions.
-- Version: v1.9.0. Dev port: 3009 (verified free in build env; auto-increments, skips 80/443/3306/5432/8080).
+- Version: v2.2.0. Dev port: 3012 (verified free in build env; auto-increments, skips 80/443/3306/5432/8080).
 - Stack: zero-dependency Node static generator (`scripts/build.mjs`), content in `src/config/site.mjs`. Astro migration is a later option (see docs).
 - Design: light enterprise theme, indigo/teal, system fonts. No dark/black-primary theme.
 - Never publish placeholder contact data. Unknown values stay `null` in config.
