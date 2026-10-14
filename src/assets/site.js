@@ -105,7 +105,68 @@ if (!calm) {
   st.addEventListener('pointerdown', (e) => { on = true; moved = 0; sx = e.clientX; sy = e.clientY; st.classList.add('drag'); addEventListener('pointermove', mv); addEventListener('pointerup', up); });
   st.addEventListener('click', (e) => { if (moved > 6) { e.preventDefault(); e.stopPropagation(); } }, true);
 })();
+/*G3*/
 document.querySelectorAll('.ring3d').forEach((root) => {
+  try {
+    const groups = [...root.querySelectorAll('.ring')].map((r) => [...r.querySelectorAll('.c3')].map((c) => ({ t: c.dataset.t, d: c.dataset.d, h: c.getAttribute('href') })));
+    const tabs = [...root.querySelectorAll('[role=tab]')], sel = root.querySelector('.sel'), stageEl = root.querySelector('.stage');
+    const cv = document.createElement('canvas'), ctx = cv.getContext('2d'); if (!ctx || !groups.length || !sel || !stageEl) return;
+    const COL = ['#22d3ee', '#a78bfa', '#f472b6', '#fbbf24'], calm = matchMedia('(prefers-reduced-motion: reduce)').matches, PI2 = Math.PI * 2;
+    const box = document.createElement('div'); box.className = 'gstage'; cv.tabIndex = 0; cv.setAttribute('role', 'application'); cv.setAttribute('aria-label', 'Interactive 3D map. Drag to orbit, click a node to select it, arrow keys move between nodes, Enter opens.');
+    box.append(cv); root.insertBefore(box, stageEl);
+    const tip = document.createElement('p'); tip.className = 'tip gtip'; tip.textContent = 'Drag to orbit. Click a glowing node to select it, click it again to open. Arrow keys move between nodes, Enter opens.'; sel.after(tip);
+    const hh = sel.querySelector('h3'), pp = sel.querySelector('p'), bb = sel.querySelector('.btn');
+    root.dataset.g3 = '1'; root.classList.add('ongal');
+    let g = 0, selI = 0, W = 0, H = 0, yaw = 0.6, pitch = 0.2, vy = 0, vp = 0, drag = null, hover = -1, tr = 1, fly = null, t0 = 0, on = true, P = [], pos = [], prev = [], nodes = groups[0];
+    const clamp = (v) => Math.max(-0.7, Math.min(0.7, v)), md = (a) => ((a % PI2) + PI2) % PI2;
+    const fib = (n, R) => Array.from({ length: n }, (_, i) => { const y = n === 1 ? 0 : 1 - (2 * i) / (n - 1), r = Math.sqrt(Math.max(0, 1 - y * y)), a = i * 2.399963; return [Math.cos(a) * r * R, y * R * 0.8, Math.sin(a) * r * R]; });
+    const stars = Array.from({ length: 150 }, () => [(Math.random() - 0.5) * 900, (Math.random() - 0.5) * 700, (Math.random() - 0.5) * 800]);
+    const rs = () => { const r = box.getBoundingClientRect(), d = window.devicePixelRatio || 1; W = r.width; H = r.height; cv.width = Math.round(W * d); cv.height = Math.round(H * d); ctx.setTransform(d, 0, 0, d, 0, 0); };
+    const proj = (p) => { const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch); const x = p[0] * cy + p[2] * sy, z1 = -p[0] * sy + p[2] * cy, y = p[1] * cp - z1 * sp, z = p[1] * sp + z1 * cp, f = 700 / (700 - z); return { x: W / 2 + x * f, y: H / 2 + y * f, z, f }; };
+    const choose = (i, doFly) => { selI = i; const n = nodes[i]; hh.textContent = n.t; pp.textContent = n.d; bb.hidden = !n.h; if (n.h) { bb.href = n.h; bb.textContent = 'Open ' + n.t; } if (doFly && pos[i]) { const [x, y, z] = pos[i], R = Math.hypot(x, z) || 1; fly = { yaw: -Math.atan2(x, z), pitch: clamp(Math.atan2(y, R)) }; vy = vp = 0; } };
+    const setGroup = (k) => { g = k; nodes = groups[k]; prev = pos.length ? pos.map((q) => q.slice()) : []; pos = fib(nodes.length, 200); tr = 0; tabs.forEach((t, i) => t.setAttribute('aria-selected', String(i === k))); choose(0, true); };
+    const hit = (mx, my) => { let b = -1, bd = 1e9; P.forEach((p, i) => { const d = Math.hypot(p.x - mx, p.y - my); if (d < Math.max(26, 18 * p.f + 8) && d < bd) { bd = d; b = i; } }); return b; };
+    const xy = (e) => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+    const open = (i) => { if (nodes[i] && nodes[i].h) location.href = nodes[i].h; };
+    cv.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, y: e.clientY, m: 0 }; fly = null; try { cv.setPointerCapture(e.pointerId); } catch {} });
+    cv.addEventListener('pointermove', (e) => { const [mx, my] = xy(e); if (drag) { const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.m += Math.abs(dx) + Math.abs(dy); drag.x = e.clientX; drag.y = e.clientY; yaw += dx * 0.007; pitch = clamp(pitch + dy * 0.005); vy = dx * 0.0009; vp = dy * 0.0006; return; } hover = hit(mx, my); cv.style.cursor = hover >= 0 ? 'pointer' : ''; });
+    cv.addEventListener('pointerup', (e) => { if (drag && drag.m < 6) { const [mx, my] = xy(e), h = hit(mx, my); if (h >= 0) { if (h === selI) open(h); else choose(h, true); } } drag = null; });
+    cv.addEventListener('pointerleave', () => { hover = -1; });
+    cv.addEventListener('keydown', (e) => { const n = nodes.length; if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); choose((selI + (e.key === 'ArrowRight' ? 1 : n - 1)) % n, true); } else if (e.key === 'Enter') { e.preventDefault(); open(selI); } });
+    tabs.forEach((t, i) => t.addEventListener('click', () => setGroup(i)));
+    if ('IntersectionObserver' in window) new IntersectionObserver((es) => { on = es[0].isIntersecting; }).observe(box);
+    addEventListener('resize', rs);
+    const loop = (ts) => {
+      requestAnimationFrame(loop); if (!on || !W) return; const dt = Math.min(0.05, (ts - t0) / 1000 || 0.016); t0 = ts;
+      if (!drag) { yaw += vy; pitch = clamp(pitch + vp); vy *= 0.94; vp *= 0.94; if (!calm && !fly && Math.abs(vy) < 0.0006) yaw += 0.0022; }
+      if (fly) { const dy = md(fly.yaw - yaw + Math.PI) - Math.PI; yaw += dy * 0.1; pitch += (fly.pitch - pitch) * 0.1; if (Math.abs(dy) < 0.008 && Math.abs(fly.pitch - pitch) < 0.008) fly = null; }
+      if (tr < 1) tr = Math.min(1, tr + dt * 1.5);
+      const e = 1 - Math.pow(1 - tr, 3), col = COL[g % COL.length]; ctx.clearRect(0, 0, W, H);
+      stars.forEach((s) => { const q = proj(s); if (q.f > 3) return; ctx.globalAlpha = Math.max(0.08, Math.min(0.7, 0.45 * q.f)); ctx.fillStyle = '#cfe0ff'; ctx.fillRect(q.x, q.y, 1.7 * q.f, 1.7 * q.f); });
+      P = nodes.map((_, i) => { const a = prev[i] || [0, 0, 0], b = pos[i]; return proj([a[0] + (b[0] - a[0]) * e, a[1] + (b[1] - a[1]) * e, a[2] + (b[2] - a[2]) * e]); });
+      const hub = proj([0, 0, 0]); ctx.strokeStyle = col; ctx.lineWidth = 1.2;
+      P.forEach((p, i) => { const q = P[(i + 1) % P.length], depth = (p.z + q.z + 520) / 1040; if (q !== p) { ctx.globalAlpha = 0.12 + 0.3 * depth; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); } ctx.globalAlpha = 0.22; ctx.beginPath(); ctx.moveTo(hub.x, hub.y); ctx.lineTo(p.x, p.y); ctx.stroke(); const k = (ts / 2200 + i * 0.173) % 1; ctx.globalAlpha = 0.9; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(hub.x + (p.x - hub.x) * k, hub.y + (p.y - hub.y) * k, 2.2 * p.f, 0, PI2); ctx.fill(); });
+      const hg = ctx.createRadialGradient(hub.x, hub.y, 0, hub.x, hub.y, 70 * hub.f); hg.addColorStop(0, col + 'aa'); hg.addColorStop(1, col + '00'); ctx.globalAlpha = 0.9 + 0.1 * Math.sin(ts / 500); ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(hub.x, hub.y, 70 * hub.f, 0, PI2); ctx.fill();
+      ctx.globalAlpha = 1; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(hub.x, hub.y, 6 * hub.f, 0, PI2); ctx.fill();
+      P.map((_, i) => i).sort((a, b) => P[a].z - P[b].z).forEach((i) => {
+        const p = P[i], n = nodes[i], isS = i === selI, isH = i === hover, r = (isH || isS ? 20 : 16) * p.f, depth = Math.max(0.3, Math.min(1, (p.z + 260) / 460));
+        const gr = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 3.2); gr.addColorStop(0, col + (isS ? 'cc' : '77')); gr.addColorStop(1, col + '00');
+        ctx.globalAlpha = depth; ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(p.x, p.y, r * 3.2, 0, PI2); ctx.fill();
+        ctx.fillStyle = '#0b1230'; ctx.strokeStyle = col; ctx.lineWidth = isS ? 3 : 2; ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, PI2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.font = '700 ' + Math.round(r * 0.95) + 'px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(n.t[0], p.x, p.y + 1);
+        if (isS) { const k = (ts / 1000) % 1; ctx.globalAlpha = depth * (1 - k); ctx.beginPath(); ctx.arc(p.x, p.y, r * (1.25 + k * 1.3), 0, PI2); ctx.stroke(); }
+        if (p.z > -90 || isS || isH) { ctx.globalAlpha = isS || isH ? 1 : depth; ctx.font = (isS || isH ? '700 ' : '600 ') + Math.round(Math.max(11, 12 * p.f)) + 'px system-ui,sans-serif'; const w = ctx.measureText(n.t).width + 14, ly = p.y + r + 15; ctx.fillStyle = 'rgba(8,14,40,.78)'; ctx.fillRect(p.x - w / 2, ly - 10, w, 20); ctx.fillStyle = '#fff'; ctx.fillText(n.t, p.x, ly); }
+      });
+      ctx.globalAlpha = 1; ctx.strokeStyle = 'rgba(140,190,255,.55)'; ctx.lineWidth = 2;
+      [[14, 14, 1, 1], [W - 14, 14, -1, 1], [14, H - 14, 1, -1], [W - 14, H - 14, -1, -1]].forEach(([x, y, a, b]) => { ctx.beginPath(); ctx.moveTo(x, y + 22 * b); ctx.lineTo(x, y); ctx.lineTo(x + 22 * a, y); ctx.stroke(); });
+      ctx.fillStyle = 'rgba(190,215,255,.9)'; ctx.font = '12px ui-monospace,Menlo,Consolas,monospace'; ctx.textAlign = 'left'; ctx.fillText(((tabs[g] && tabs[g].textContent) || '').toUpperCase() + '  //  ' + nodes.length + ' NODES  //  SELECTED ' + (selI + 1), 28, 32);
+    };
+    rs(); setGroup(0); requestAnimationFrame(loop);
+  } catch (err) { root.classList.remove('ongal'); delete root.dataset.g3; root.querySelectorAll('.gstage,.gtip').forEach((x) => x.remove()); }
+});
+/*G3END*/
+document.querySelectorAll('.ring3d').forEach((root) => {
+  if (root.dataset.g3) return;
   const rings = [...root.querySelectorAll('.ring')], tabs = [...root.querySelectorAll('[role=tab]')], stage = root.querySelector('.stage'), sel = root.querySelector('.sel');
   const [hh, pp, bb] = [sel.querySelector('h3'), sel.querySelector('p'), sel.querySelector('.btn')];
   root.classList.add('on3d'); let act = 0, drag = null, moved = 0;

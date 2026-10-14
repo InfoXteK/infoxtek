@@ -50,7 +50,7 @@ page('/', `${site.name} | ${site.tagline}`, site.description, `
 
 </div></section>
 <section class="vendors"><div class="wrap"><p>Platforms we design, deploy and support: click a highlighted one to explore it</p><div class="chips">${platforms.map((v) => { const q = platformInfo.find((z) => z.chip === v); return q ? `<a href="/platforms/${q.slug}/">${v}</a>` : `<span>${v}</span>`; }).join('')}</div></div></section>
-<section class="sec"><div class="wrap"><h2>Choose your service</h2>${svcRing('pick')})}</div></section>
+<section class="sec"><div class="wrap"><h2>Choose your service</h2>${svcRing('pick')}</div></section>
 <section class="sec alt"><div class="wrap"><h2>Why organizations choose us</h2>${reasonList}</div></section>
 ${testimonials.length ? `<section class="sec"><div class="wrap"><h2>What clients say</h2>${cards(testimonials, (t) => `<blockquote class="card"><p>${esc(t.quote)}</p><footer>${esc(t.name)}, ${esc(t.role)}</footer></blockquote>`)}</div></section>` : ''}
 ${cta}`);
@@ -82,7 +82,7 @@ for (const x of products.filter((q) => q.page)) {
 ${x.editions ? `<section class="sec"><div class="wrap"><h2>Editions</h2>${cards(x.editions, ([n, d]) => `<article class="card rv"><h3>${esc(n)}</h3><p>${esc(d)}</p></article>`)}</div></section>` : ''}${cta}`, [['Products', '/products/'], [x.title, path]]);
 }
 page('/platforms/', `Platforms | ${site.name}`, 'Explore the security and cloud platforms InfoXteK designs, deploys and supports.',
-  `${head('Platforms we work with', 'Click a platform to see what it is, how it is secured and where AI is taking it.')}<section class="sec"><div class="wrap">${ring3d('plat', [{ name: 'Platforms', items: platformInfo.map((x) => ({ t: x.name, d: x.tag, h: `/platforms/${x.slug}/`, i: 'shield' })) }])})}<p class="note">More platform pages are being added. Product names are trademarks of their owners; listing a platform does not imply a partnership.</p></div></section>${cta}`, [['Platforms', '/platforms/']]);
+  `${head('Platforms we work with', 'Click a platform to see what it is, how it is secured and where AI is taking it.')}<section class="sec"><div class="wrap">${ring3d('plat', [{ name: 'Platforms', items: platformInfo.map((x) => ({ t: x.name, d: x.tag, h: `/platforms/${x.slug}/`, i: 'shield' })) }])}<p class="note">More platform pages are being added. Product names are trademarks of their owners; listing a platform does not imply a partnership.</p></div></section>${cta}`, [['Platforms', '/platforms/']]);
 for (const x of platformInfo) {
   const path = `/platforms/${x.slug}/`; styleMap[path] = x.style;
   const rel = services.find((s) => s.slug === x.svc);
@@ -92,7 +92,7 @@ for (const x of platformInfo) {
 }
 
 page('/industries/', `Industries | ${site.name}`, 'IT services for agriculture, banking and financial services, education, energy and utilities, and government.',
-  `${head('Industries we serve', 'Every sector has its own risks and rules.')}<section class="sec"><div class="wrap">${ring3d('ind', [{ name: 'Industries', items: industries.map((i) => ({ t: i.name, d: i.summary, i: 'shield' })) }])})}</div></section>${cta}`, [['Industries', '/industries/']]);
+  `${head('Industries we serve', 'Every sector has its own risks and rules.')}<section class="sec"><div class="wrap">${ring3d('ind', [{ name: 'Industries', items: industries.map((i) => ({ t: i.name, d: i.summary, i: 'shield' })) }])}</div></section>${cta}`, [['Industries', '/industries/']]);
 
 page('/tools-tips/', `Tools & Tips | ${site.name}`, 'Practical cyber security, backup, AI and cloud tips from InfoXteK.',
   `${head('Tools and tips', 'Practical advice on security, recovery, AI and cloud.')}<section class="sec"><div class="wrap">${ring3d('tips', tips.map((g) => ({ name: g.g, items: g.i.map((x) => ({ t: x.t, d: x.d, i: 'shield' })) })))}${resources.length ? `<h2>Downloads</h2><ul class="list">${resources.map((r) => `<li><a href="${esc(r.href)}">${esc(r.title)}</a><p>${esc(r.text)}</p></li>`).join('')}</ul>` : ''}</div></section>${cta}`, [['Tools & Tips', '/tools-tips/']]);
