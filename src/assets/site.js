@@ -82,7 +82,7 @@ document.querySelectorAll('.scene').forEach((sc) => {
   const logs = [...sc.querySelectorAll('.logs li')].map((l) => l.textContent), T = (sc.dataset.t || '').split(',').map(Number);
   sc.classList.add('ix');
   const ctl = document.createElement('div'); ctl.className = 'ctl';
-  const cap = document.createElement('p'); cap.className = 'cap'; cap.setAttribute('aria-live', 'polite'); cap.textContent = 'Click a step to freeze the scene at that moment, or move your pointer over it to tilt it in 3D.';
+  const cap = document.createElement('p'); cap.className = 'cap'; cap.setAttribute('aria-live', 'polite'); cap.textContent = 'Click a step (or press 1 to 4) to freeze the scene at that moment, press P to pause or play, and move your pointer over it to tilt it in 3D.';
   const play = document.createElement('button'); play.type = 'button'; play.textContent = 'Pause'; let paused = false;
   const setP = (p) => { paused = p; play.textContent = p ? 'Play' : 'Pause'; try { p ? svg.pauseAnimations() : svg.unpauseAnimations(); } catch {} };
   play.onclick = () => { setP(!paused); if (!paused) cap.textContent = 'Playing.'; };
@@ -105,3 +105,23 @@ if (!calm) {
   st.addEventListener('pointerdown', (e) => { on = true; moved = 0; sx = e.clientX; sy = e.clientY; st.classList.add('drag'); addEventListener('pointermove', mv); addEventListener('pointerup', up); });
   st.addEventListener('click', (e) => { if (moved > 6) { e.preventDefault(); e.stopPropagation(); } }, true);
 })();
+document.querySelectorAll('.ring3d').forEach((root) => {
+  const rings = [...root.querySelectorAll('.ring')], tabs = [...root.querySelectorAll('[role=tab]')], stage = root.querySelector('.stage'), sel = root.querySelector('.sel');
+  const [hh, pp, bb] = [sel.querySelector('h3'), sel.querySelector('p'), sel.querySelector('.btn')];
+  root.classList.add('on3d'); let act = 0, drag = null, moved = 0;
+  const mod = (a, n) => ((a % n) + n) % n;
+  const lay = (r) => { const cs = [...r.querySelectorAll('.c3')], n = cs.length; r._cs = cs; r._n = n; r._step = 360 / n; const w = cs[0].offsetWidth || 210; r._R = n > 2 ? Math.round(w / 2 / Math.tan(Math.PI / n)) + 36 : 0; cs.forEach((c, i) => { c.style.transform = `rotateY(${i * r._step}deg) translateZ(${r._R}px)`; }); if (r._cur === undefined) r._cur = 0; };
+  const show = (r, cur) => { r._cur = cur; const f = mod(cur, r._n); r.style.transform = `translateZ(${-r._R}px) rotateY(${-cur * r._step}deg)`; r._cs.forEach((c, i) => { const d = Math.min(mod(i - f, r._n), mod(f - i, r._n)); c.classList.toggle('front', d === 0); c.style.opacity = d === 0 ? 1 : d === 1 ? 0.8 : 0.4; c.tabIndex = d === 0 ? 0 : -1; if (d === 0) { hh.textContent = c.dataset.t; pp.textContent = c.dataset.d; const h = c.getAttribute('href'); bb.hidden = !h; if (h) { bb.href = h; bb.textContent = 'Open ' + c.dataset.t; } } }); };
+  const go = (r, i) => { let d = mod(i - mod(r._cur, r._n), r._n); if (d > r._n / 2) d -= r._n; show(r, r._cur + d); };
+  const pick = (g) => { act = g; rings.forEach((r, i) => r.classList.toggle('on', i === g)); tabs.forEach((t, i) => t.setAttribute('aria-selected', String(i === g))); lay(rings[g]); show(rings[g], rings[g]._cur); };
+  tabs.forEach((t, i) => t.addEventListener('click', () => pick(i)));
+  root.querySelector('.prev').addEventListener('click', () => show(rings[act], rings[act]._cur - 1));
+  root.querySelector('.next').addEventListener('click', () => show(rings[act], rings[act]._cur + 1));
+  root.addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft') { e.preventDefault(); show(rings[act], rings[act]._cur - 1); } if (e.key === 'ArrowRight') { e.preventDefault(); show(rings[act], rings[act]._cur + 1); } });
+  rings.forEach((r) => r.querySelectorAll('.c3').forEach((c, i) => c.addEventListener('click', (e) => { if (moved > 6 || !c.classList.contains('front') || !c.getAttribute('href')) { e.preventDefault(); if (moved <= 6) go(r, i); } })));
+  stage.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, off: 0 }; moved = 0; stage.classList.add('drag'); });
+  addEventListener('pointermove', (e) => { if (!drag) return; const r = rings[act]; drag.off = (e.clientX - drag.x) * 0.3; moved = Math.max(moved, Math.abs(e.clientX - drag.x)); r.style.transition = 'none'; r.style.transform = `translateZ(${-r._R}px) rotateY(${-r._cur * r._step + drag.off}deg)`; });
+  addEventListener('pointerup', () => { if (!drag) return; const r = rings[act]; r.style.transition = ''; const off = drag.off; drag = null; stage.classList.remove('drag'); show(r, r._cur - Math.round(off / r._step)); });
+  pick(0);
+});
+addEventListener('keydown', (e) => { if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return; const ctl = document.querySelector('.scene .ctl'); if (!ctl) return; const n = +e.key; if (n >= 1 && n <= 4 && ctl.children[n]) ctl.children[n].click(); if (e.key === 'p' || e.key === 'P') ctl.children[0].click(); });

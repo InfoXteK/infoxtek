@@ -1,6 +1,6 @@
 Beginner? Follow `docs/SETUP_GUIDE_NAMECHEAP.md` instead of the short steps below.
 
-# InfoXtek website (v2.2.0)
+# InfoXtek website (v1.0.0)
 
 ## Edit the content
 Open `src/config/site.mjs`. Change text there. Put real email, phone and address into the `contact` block (they are `null` until you add them).
@@ -13,7 +13,7 @@ Open `src/config/site.mjs`. Change text there. Put real email, phone and address
 ## Put it online with GitHub Pages and infoXtek.com
 1. Create a free account at github.com. Click New repository, name it `infoxtek`, leave it empty.
 2. In this folder run:
-   `git init`, `git add .`, `git commit -m "InfoXtek V2.2.0"`, `git branch -M main`,
+   `git init`, `git add .`, `git commit -m "InfoXtek v1.0.0"`, `git branch -M main`,
    `git remote add origin https://github.com/YOUR-USERNAME/infoxtek.git`, `git push -u origin main`.
 3. On GitHub: Settings, Pages, Source: choose **GitHub Actions**. Wait for the "Deploy to GitHub Pages" run (Actions tab) to turn green.
 4. Settings, Pages, Custom domain: type `infoXtek.com`, Save. The `CNAME` file in `public/` is included as a backup.

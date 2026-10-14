@@ -192,3 +192,19 @@ body[data-svc] .band .wrap{text-shadow:0 1px 0 rgba(255,255,255,.6)}
 .hero .floaters{z-index:3}
 @media(max-width:820px){.stage3d{height:330px}.slab{width:215px;height:130px;margin:-65px 0 0 -107px}}
 @media(prefers-reduced-motion:reduce){.spin{animation:none}.deep,.bgart,.slab{transition:none}}
+/* v2.3 3D selector rings (fallback = plain grid without JS) */
+.hero-grid{grid-template-columns:1fr}.hero .lead{max-width:62ch}
+.ring3d{margin:.5rem 0 1rem}.tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.9rem}
+.tabs button{font:600 .9rem system-ui,sans-serif;border:2px solid var(--indigo);background:#fff;color:var(--indigo);border-radius:999px;padding:.4rem 1.1rem;cursor:pointer}.tabs button[aria-selected=true]{background:var(--indigo);color:#fff}
+.ring3d .stage{position:relative}.ring3d .rings .ring{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin-bottom:1rem}
+.c3{display:flex;flex-direction:column;gap:.3rem;padding:1.1rem;border-radius:16px;border:1px solid var(--line);background:linear-gradient(160deg,#fff,var(--mist));color:var(--ink);text-decoration:none;box-shadow:0 10px 24px rgba(20,33,61,.12)}.c3 b{font-size:1.05rem}.c3 span{color:var(--muted);font-size:.9rem}
+.ring3d .nav,.ring3d .sel{display:none}.ring3d .tip{display:none}
+.on3d .stage{height:340px;perspective:1100px;overflow:hidden;cursor:grab;touch-action:pan-y;border-radius:18px;background:radial-gradient(ellipse at 50% 85%,color-mix(in srgb,var(--indigo) 18%,transparent),transparent 65%),linear-gradient(180deg,var(--mist),#fff);user-select:none}.on3d .stage.drag{cursor:grabbing}
+.on3d .rings{position:absolute;inset:0;transform-style:preserve-3d}.on3d .rings .ring{display:none;position:absolute;left:50%;top:50%;width:0;height:0;margin:0;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.2,.8,.2,1)}.on3d .rings .ring.on{display:block}
+.on3d .c3{position:absolute;width:210px;height:240px;left:-105px;top:-120px;backface-visibility:hidden;transition:opacity .4s,box-shadow .3s}
+.on3d .c3.front{box-shadow:0 0 0 3px var(--indigo),0 26px 44px color-mix(in srgb,var(--indigo) 40%,transparent)}.on3d .c3 .ico{width:42px;height:42px}
+.on3d .nav{display:grid;place-items:center;position:absolute;top:50%;margin-top:-22px;width:44px;height:44px;border-radius:50%;border:2px solid var(--indigo);background:#fff;color:var(--indigo);font-size:1.6rem;cursor:pointer;z-index:2}.on3d .nav.prev{left:10px}.on3d .nav.next{right:10px}.on3d .nav:hover{background:var(--indigo);color:#fff}
+.on3d .sel{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;margin-top:1rem;padding:1rem 1.3rem;border:1px solid var(--line);border-radius:14px;background:#fff}.on3d .sel h3{margin:0 0 .2rem}.on3d .sel p{margin:0;color:var(--muted);max-width:70ch}
+.on3d .tip{display:block;text-align:center;color:var(--muted);font-size:.85rem;margin:.6rem 0 0}
+@media(max-width:820px){.on3d .stage{height:300px}.on3d .c3{width:176px;height:220px;left:-88px;top:-110px}}
+@media(prefers-reduced-motion:reduce){.on3d .rings .ring,.on3d .c3{transition:none}}
