@@ -68,13 +68,15 @@ if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.querySelect
 })();
 document.querySelectorAll('.floaters span').forEach((el) => {
   const hero = el.closest('.hero'); if (!hero) return;
-  el.tabIndex = 0; el.setAttribute('role', 'button'); el.setAttribute('aria-label', el.textContent + ' skill chip: drag, or use the arrow keys');
-  let on = false, sx, sy, ox, oy;
-  el.addEventListener('pointerdown', (e) => { on = true; el.setPointerCapture(e.pointerId); el.classList.add('drag'); ox = el.offsetLeft; oy = el.offsetTop; sx = e.clientX; sy = e.clientY; e.preventDefault(); });
-  el.addEventListener('pointermove', (e) => { if (!on) return; el.style.left = Math.max(0, Math.min(hero.clientWidth - el.offsetWidth, ox + e.clientX - sx)) + 'px'; el.style.top = Math.max(0, Math.min(hero.clientHeight - el.offsetHeight, oy + e.clientY - sy)) + 'px'; });
-  const end = () => { on = false; el.classList.remove('drag'); };
+  el.tabIndex = 0; el.setAttribute('role', 'button'); el.setAttribute('aria-label', el.textContent + ' skill chip: drag or fling it, or use the arrow keys');
+  let on = false, sx, sy, ox, oy, lx, ly, vx = 0, vy = 0, raf = 0;
+  const place = (x, y) => { el.style.left = Math.max(0, Math.min(hero.clientWidth - el.offsetWidth, x)) + 'px'; el.style.top = Math.max(0, Math.min(hero.clientHeight - el.offsetHeight, y)) + 'px'; };
+  const fling = () => { if (Math.abs(vx) + Math.abs(vy) < 0.4) return; const mx = hero.clientWidth - el.offsetWidth, my = hero.clientHeight - el.offsetHeight; let x = el.offsetLeft + vx, y = el.offsetTop + vy; if (x < 0 || x > mx) { vx = -vx * 0.7; x = Math.max(0, Math.min(mx, x)); } if (y < 0 || y > my) { vy = -vy * 0.7; y = Math.max(0, Math.min(my, y)); } el.style.left = x + 'px'; el.style.top = y + 'px'; vx *= 0.965; vy *= 0.965; raf = requestAnimationFrame(fling); };
+  el.addEventListener('pointerdown', (e) => { cancelAnimationFrame(raf); on = true; el.setPointerCapture(e.pointerId); el.classList.add('drag'); ox = el.offsetLeft; oy = el.offsetTop; sx = lx = e.clientX; sy = ly = e.clientY; vx = vy = 0; e.preventDefault(); });
+  el.addEventListener('pointermove', (e) => { if (!on) return; place(ox + e.clientX - sx, oy + e.clientY - sy); vx = (e.clientX - lx) * 0.9 + vx * 0.1; vy = (e.clientY - ly) * 0.9 + vy * 0.1; lx = e.clientX; ly = e.clientY; });
+  const end = () => { if (!on) return; on = false; el.classList.remove('drag'); raf = requestAnimationFrame(fling); };
   el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
-  el.addEventListener('keydown', (e) => { const d = { ArrowLeft: [-14, 0], ArrowRight: [14, 0], ArrowUp: [0, -14], ArrowDown: [0, 14] }[e.key]; if (!d) return; e.preventDefault(); el.style.left = el.offsetLeft + d[0] + 'px'; el.style.top = el.offsetTop + d[1] + 'px'; });
+  el.addEventListener('keydown', (e) => { const d = { ArrowLeft: [-14, 0], ArrowRight: [14, 0], ArrowUp: [0, -14], ArrowDown: [0, 14] }[e.key]; if (!d) return; e.preventDefault(); place(el.offsetLeft + d[0], el.offsetTop + d[1]); });
 });
 const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
 document.querySelectorAll('.scene').forEach((sc) => {
@@ -186,3 +188,48 @@ document.querySelectorAll('.ring3d').forEach((root) => {
   pick(0);
 });
 addEventListener('keydown', (e) => { if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return; const ctl = document.querySelector('.scene .ctl'); if (!ctl) return; const n = +e.key; if (n >= 1 && n <= 4 && ctl.children[n]) ctl.children[n].click(); if (e.key === 'p' || e.key === 'P') ctl.children[0].click(); });
+/*FX*/
+(() => { try {
+  const SEL = '.btn,button,.card,nav#nav a,.chips a,.logo,.foot a,.tabs button,.ctl button';
+  const st = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+  let fxon = st.get('fx') !== 'off' && !calm; const html = document.documentElement;
+  if (!fxon) html.classList.add('nofx');
+  const cv = document.createElement('canvas'); cv.className = 'fxc'; cv.setAttribute('aria-hidden', 'true'); document.body.append(cv); const c = cv.getContext('2d');
+  let W = 0, H = 0, parts = [], rings = [], run = false;
+  const rs = () => { const d = window.devicePixelRatio || 1; W = innerWidth; H = innerHeight; cv.width = W * d; cv.height = H * d; c.setTransform(d, 0, 0, d, 0, 0); }; rs(); addEventListener('resize', rs);
+  const cs = (v, f) => (getComputedStyle(document.body).getPropertyValue(v).trim() || f);
+  const tick = () => { c.clearRect(0, 0, W, H); parts = parts.filter((p) => p.l > 0); parts.forEach((p) => { p.x += p.vx; p.y += p.vy; p.vy += 0.12; p.vx *= 0.98; p.l -= p.d; c.globalAlpha = Math.max(0, p.l); c.fillStyle = p.c; c.beginPath(); c.arc(p.x, p.y, p.r * p.l + 0.5, 0, 6.283); c.fill(); }); rings = rings.filter((r) => r.l > 0); rings.forEach((r) => { r.r += 4; r.l -= 0.045; c.globalAlpha = Math.max(0, r.l); c.strokeStyle = r.c; c.lineWidth = 2; c.beginPath(); c.arc(r.x, r.y, r.r, 0, 6.283); c.stroke(); }); if (parts.length || rings.length) requestAnimationFrame(tick); else { run = false; c.clearRect(0, 0, W, H); } };
+  const go = () => { if (!run) { run = true; requestAnimationFrame(tick); } };
+  const burst = (x, y, big) => { const a = cs('--indigo', '#3b4cca'), b = cs('--teal', '#0e9aa7'), n = big ? 26 : 14; for (let i = 0; i < n; i++) { const an = Math.random() * 6.283, s = 2 + Math.random() * (big ? 7 : 5); parts.push({ x, y, vx: Math.cos(an) * s, vy: Math.sin(an) * s, l: 1, d: 0.022, c: i % 2 ? a : b, r: 2 + Math.random() * 3 }); } rings.push({ x, y, r: 6, l: 1, c: a }); go(); };
+  let lastT = 0, cur = null;
+  const reset = (t) => { if (!t) return; t.style.transition = ''; t.style.transform = ''; t.style.filter = ''; };
+  const xp = { v: +st.get('xp') || 0 }; const hud = document.createElement('div'); hud.className = 'hud'; hud.setAttribute('aria-hidden', 'true'); const mkEl = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt) e.textContent = txt; return e; }; const lvb = mkEl('b', '', 'LV '); lvb.append(mkEl('span', 'lv', '1')); const bar = mkEl('i'); bar.append(mkEl('u')); hud.append(lvb, bar, mkEl('span', 'xt'));
+  const toast = document.createElement('div'); toast.className = 'toast'; toast.setAttribute('role', 'status'); const fb = document.createElement('button'); fb.type = 'button'; fb.className = 'fxbtn'; fb.setAttribute('aria-label', 'Toggle special effects');
+  document.body.append(hud, toast, fb);
+  const draw = () => { const lv = Math.floor(xp.v / 100) + 1; hud.querySelector('.lv').textContent = lv; hud.querySelector('u').style.width = xp.v % 100 + '%'; hud.querySelector('.xt').textContent = xp.v + ' XP'; fb.textContent = fxon ? 'FX on' : 'FX off'; fb.setAttribute('aria-pressed', String(fxon)); hud.hidden = !fxon; };
+  let tt = 0; const say = (m) => { toast.textContent = m; toast.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => toast.classList.remove('on'), 2600); };
+  const add = (n, msg) => { if (!fxon) return; const l0 = Math.floor(xp.v / 100); xp.v += n; st.set('xp', xp.v); draw(); if (Math.floor(xp.v / 100) > l0) say('Level up! You reached level ' + (Math.floor(xp.v / 100) + 1)); else if (msg) say(msg); };
+  let vis = []; try { vis = JSON.parse(st.get('vis') || '[]'); } catch {}
+  draw(); if (!vis.includes(location.pathname)) { vis.push(location.pathname); st.set('vis', JSON.stringify(vis)); add(10, '+10 XP: new area discovered' + (vis.length === 5 ? '. Achievement: Explorer (5 areas)' : vis.length === 12 ? '. Achievement: Cartographer (12 areas)' : '')); }
+  fb.addEventListener('click', () => { fxon = !fxon; st.set('fx', fxon ? 'on' : 'off'); html.classList.toggle('nofx', !fxon); draw(); if (!fxon) say('Special effects off'); });
+  document.addEventListener('pointerdown', (e) => { if (!fxon) return; const t = e.target.closest ? e.target.closest(SEL) : null; burst(e.clientX, e.clientY, !!t); if (t) { add(1); t.style.transition = 'transform .08s'; t.style.transform = 'perspective(700px) translateZ(-8px) scale(.95)'; t.style.filter = 'none'; } });
+  document.addEventListener('pointerup', () => { if (cur) { cur.style.transition = ''; cur.style.transform = ''; } });
+  document.addEventListener('pointermove', (e) => {
+    if (!fxon || e.pointerType === 'touch') return;
+    const tg = e.target.closest ? e.target : null, t = tg && tg.closest(SEL);
+    if (!/INPUT|TEXTAREA|SELECT/.test((tg || {}).tagName || '') && e.timeStamp - lastT > 38 && !(e.buttons)) { lastT = e.timeStamp; parts.push({ x: e.clientX, y: e.clientY, vx: (Math.random() - 0.5) * 0.8, vy: (Math.random() - 0.5) * 0.8, l: 0.8, d: 0.04, c: cs('--teal', '#0e9aa7'), r: 2.4 }); go(); }
+    if (t !== cur) { reset(cur); cur = t; }
+    if (!t || t.classList.contains('dragging') || (t.classList.contains('rv') && !t.classList.contains('in') && html.classList.contains('js')) || e.buttons) return;
+    const r = t.getBoundingClientRect(), px = (e.clientX - r.left) / r.width - 0.5, py = (e.clientY - r.top) / r.height - 0.5, k = r.width > 420 ? 3 : r.width > 220 ? 8 : 14;
+    t.style.transition = 'transform .1s ease-out'; t.style.transform = 'perspective(700px) rotateX(' + (-py * k).toFixed(2) + 'deg) rotateY(' + (px * k).toFixed(2) + 'deg) translateZ(14px)'; t.style.filter = 'drop-shadow(' + (-px * 14).toFixed(1) + 'px ' + (-py * 14 + 10).toFixed(1) + 'px 14px rgba(20,33,61,.28))';
+  });
+  document.addEventListener('pointerleave', () => { reset(cur); cur = null; });
+  // rubber-band drag on cards
+  let dg = null, moved = 0;
+  document.addEventListener('pointerdown', (e) => { if (!fxon || e.pointerType === 'touch' || e.button) return; const t = e.target.closest ? e.target.closest('.card') : null; if (!t || e.target.closest('input,textarea,select')) return; dg = { t, x: e.clientX, y: e.clientY }; moved = 0; });
+  addEventListener('pointermove', (e) => { if (!dg) return; const dx = e.clientX - dg.x, dy = e.clientY - dg.y; moved = Math.max(moved, Math.abs(dx) + Math.abs(dy)); if (moved < 6) return; dg.t.classList.add('dragging'); dg.t.style.transition = 'none'; dg.t.style.filter = 'drop-shadow(0 22px 22px rgba(20,33,61,.3))'; dg.t.style.transform = 'perspective(700px) translate3d(' + dx * 0.6 + 'px,' + dy * 0.6 + 'px,50px) rotateZ(' + dx * 0.02 + 'deg) rotateX(' + -dy * 0.05 + 'deg) rotateY(' + dx * 0.05 + 'deg)'; });
+  addEventListener('pointerup', () => { if (!dg) return; const t = dg.t; dg = null; if (moved >= 6) { burst(t.getBoundingClientRect().left + t.offsetWidth / 2, t.getBoundingClientRect().top + t.offsetHeight / 2, true); t.style.transition = 'transform .6s cubic-bezier(.34,1.56,.64,1),filter .4s'; t.style.transform = ''; t.style.filter = ''; setTimeout(() => t.classList.remove('dragging'), 620); } });
+  document.addEventListener('click', (e) => { if (moved >= 6) { e.preventDefault(); e.stopPropagation(); moved = 0; return; } const a = e.target.closest ? e.target.closest('a[href]') : null; if (!a || !fxon || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || a.target || a.hasAttribute('download')) return; const h = a.getAttribute('href'); if (/^(mailto:|tel:|#)/.test(h)) return; const u = new URL(a.href, location.href); if (u.origin !== location.origin || (u.pathname === location.pathname && u.hash)) return; e.preventDefault(); html.classList.add('leaving'); setTimeout(() => { location.href = a.href; }, 230); }, true);
+  addEventListener('pageshow', (e) => { if (e.persisted) html.classList.remove('leaving'); });
+} catch (err) { /* effects are optional */ } })();
+/*FXEND*/
