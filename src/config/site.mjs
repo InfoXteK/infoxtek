@@ -209,7 +209,7 @@ export const products = [
     features: ['Same 36 operations and categories across all three editions', 'Sensitive operations (reboot, network interruption, long tasks) need explicit confirmation', 'Test Connection before running; choose the authentication transport', 'Timestamped log for every session', 'Targets need only WinRM enabled (Enable-PSRemoting -Force)'],
     editions: [['Python GUI v2.1', 'Native Tkinter desktop app. Needs Python 3.9+ and pywinrm; double-click install_and_run.bat.'], ['Web-Service v2.1', 'Flask service on port 3030 for a whole subnet. Installs as a real Windows Service or Linux systemd unit. Use a trusted subnet or put it behind HTTPS.'], ['PowerShell GUI v2.7', 'WinForms tool with zero installs, Windows 7 SP1 or later. Run-AdminTool.bat requests administrator rights.']],
     facts: ['Targets must be Windows with WinRM enabled', 'Web edition sends credentials over plain HTTP by default: restrict to a trusted network or add TLS'] },
-  { slug: 'ifinex', title: 'iFiNeX', tag: 'Public mobile and web app', icon: 'phone', download: null,
+  { slug: 'ifinex', title: 'iFiNeX', tag: 'Public mobile and web app', icon: 'phone', download: 'https://github.com/InfoXteK/iFiNeX-Mobile/releases', howto: 'On the GitHub page, open Releases (right-hand side of the repository) and download the latest file for your phone.',
     summary: 'An expense tracker, card payment tracker and squad splitter in one app, for mobile and web.',
     points: ['Expense tracker', 'Card payment tracker', 'Squad splitter for shared costs (formerly Squad Split)'] },
 ];
