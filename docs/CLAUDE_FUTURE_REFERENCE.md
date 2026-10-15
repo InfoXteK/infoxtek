@@ -1,4 +1,4 @@
-# InfoXteK: Complete Claude Reference (v2.5.1, port 3016)
+# InfoXteK: Complete Claude Reference (v2.6.0, port 3017)
 Living record from the start of the project. Update on every change. Repository and docs are the source of truth.
 
 ## 1. Identity
@@ -113,3 +113,12 @@ Read CLAUDE.md and this file; ask owner for logo original, phone/address, form p
 - Remediation done: removed the only innerHTML (HUD now built with createElement); audit grep on site.js shows none of innerHTML/eval/new Function/document.write.
 - Only external text found in dist: http://localhost in Net-Monit quick-start text (not a resource). Product links to github.com/InfoXteK are the only outbound links.
 - Verified: build, check.mjs, JS syntax, Node smoke tests with stubbed DOM for the galaxy and FX blocks (no exceptions). NOT verified: real rendering, feel/performance of the effects, mobile behaviour, whether tilt on large `.card`s feels right.
+
+## 20. v2.6.0 notes (security hardening, port 3017)
+- Trigger: owner re-sent master prompt V2 + memory + reference with the full command list (/security-review, /exfil-check, /Repo-audit, /Supply-chain, /Deobfuscate, /Vul-scan, /Threat-model, /Remediate, /Compliance) and the v2.5.1 ZIP. Commands were executed as an audit of the ZIP; no feature changes.
+- Verified in sandbox: build (31 pages + 404), `npm run check` 0 problems, dev server on 3017 returns 200, path traversal returns 404, negative test (injected onclick) correctly fails check.
+- Code changes: galaxy `open()` validates same-site path; serve.mjs path-prefix fix; workflow timeout-minutes; check.mjs security assertions (list in docs/SECURITY_REVIEW.md).
+- New docs: docs/SECURITY_REVIEW.md, docs/THREAT_MODEL.md.
+- Master prompt V2 asks for a WebGL 3D hub; the site already has a canvas 3D galaxy (v2.4.0) + CSS 3D and no Three.js. Not changed here; adding a WebGL library would add a dependency and needs an explicit decision.
+- NOT done: npm audit (no dependencies), live site/DNS/HTTPS verification, Lighthouse, axe, real-browser visual tests, SHA-pinning of Actions.
+- Next session: read CLAUDE.md and this file, then continue from open items.

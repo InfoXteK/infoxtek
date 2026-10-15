@@ -129,7 +129,7 @@ document.querySelectorAll('.ring3d').forEach((root) => {
     const setGroup = (k) => { g = k; nodes = groups[k]; prev = pos.length ? pos.map((q) => q.slice()) : []; pos = fib(nodes.length, 200); tr = 0; tabs.forEach((t, i) => t.setAttribute('aria-selected', String(i === k))); choose(0, true); };
     const hit = (mx, my) => { let b = -1, bd = 1e9; P.forEach((p, i) => { const d = Math.hypot(p.x - mx, p.y - my); if (d < Math.max(26, 18 * p.f + 8) && d < bd) { bd = d; b = i; } }); return b; };
     const xy = (e) => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
-    const open = (i) => { if (nodes[i] && nodes[i].h) location.href = nodes[i].h; };
+    const open = (i) => { const h = nodes[i] && nodes[i].h; if (typeof h === 'string' && /^\/(?!\/)/.test(h)) location.href = h; };
     cv.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, y: e.clientY, m: 0 }; fly = null; try { cv.setPointerCapture(e.pointerId); } catch {} });
     cv.addEventListener('pointermove', (e) => { const [mx, my] = xy(e); if (drag) { const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.m += Math.abs(dx) + Math.abs(dy); drag.x = e.clientX; drag.y = e.clientY; yaw += dx * 0.007; pitch = clamp(pitch + dy * 0.005); vy = dx * 0.0009; vp = dy * 0.0006; return; } hover = hit(mx, my); cv.style.cursor = hover >= 0 ? 'pointer' : ''; });
     cv.addEventListener('pointerup', (e) => { if (drag && drag.m < 6) { const [mx, my] = xy(e), h = hit(mx, my); if (h >= 0) { if (h === selI) open(h); else choose(h, true); } } drag = null; });
