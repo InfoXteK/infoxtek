@@ -1,4 +1,4 @@
-# InfoXteK: Complete Claude Reference (v2.6.0, port 3017)
+# InfoXteK: Complete Claude Reference (v2.7.0, port 3018)
 Living record from the start of the project. Update on every change. Repository and docs are the source of truth.
 
 ## 1. Identity
@@ -122,3 +122,14 @@ Read CLAUDE.md and this file; ask owner for logo original, phone/address, form p
 - Master prompt V2 asks for a WebGL 3D hub; the site already has a canvas 3D galaxy (v2.4.0) + CSS 3D and no Three.js. Not changed here; adding a WebGL library would add a dependency and needs an explicit decision.
 - NOT done: npm audit (no dependencies), live site/DNS/HTTPS verification, Lighthouse, axe, real-browser visual tests, SHA-pinning of Actions.
 - Next session: read CLAUDE.md and this file, then continue from open items.
+
+## 21. v2.7.0 notes (detail panels + realistic 3D, port 3018)
+- Owner feedback: on Why Choose Us, Industries and Tools & Tips the galaxy "Open" button did nothing (nodes had no page to open) and the 3D looked too simple; wants selecting an item to show everything about it, with more realistic 3D/XD.
+- Content: `src/config/details.mjs` (reasonDetails, industryDetails, tipDetails). Shape `{intro, points:[[title,text]], example, links:[[label,href]]}`. Examples are labelled "Illustrative"; no invented clients, figures or guarantees. Every reason (5), industry (5) and tip (16) has an entry.
+- Build: `dtls()` in scripts/build.mjs renders one `<article class="dtl" id="d-<ring>-<group>-<index>">` per item inside the `.ring3d` container. Nodes get `data-det`; href is the `#d-...` anchor, so without JS all panels are visible and anchors work.
+- Runtime (site.js /*G3*/ block): with the galaxy active all panels start hidden. Click a selected node, press Enter, or press the "Show full details" button to open its panel (3D flip-in animation, staggered cards). Panel buttons: Previous, Next (wrap within the group, sync the map selection), Back to 3D map. Deep links `#d-ind-0-2` open the panel on load; hashchange supported. Opening updates the URL hash with replaceState.
+- Renderer: sphere shading with specular highlight, perspective floor grid, 2 orbit rings, per-node ground shadows and selection beam, core glow with travelling pulses, nebula and star parallax with twinkle, node bobbing, selection punch zoom, hover parallax. DPR capped at 2, paused off-screen (IntersectionObserver), bob and rotation disabled for reduced motion.
+- Bug found by browser test and fixed: `style="--n:.."` attributes were blocked by CSP (style-src 'self'). Replaced with nth-child CSS; check.mjs now fails on any inline `style=` attribute.
+- Tested (headless Chromium via Playwright in the sandbox): why-choose-us, industries, tools-tips: button shows "Show full details", click opens exactly one panel, Next moves to the next item, Back hides panels; Enter on canvas opens panel; hash deep link opens correct panel; 0 console errors; no horizontal overflow at 390px width before/after opening; `npm run check` 0 problems.
+- NOT tested: real touch devices, Safari/Firefox, screen readers, Lighthouse, performance on low-end phones, live deployment.
+- Not changed: services, platforms and products ring items still open their own pages (they have real URLs). Say if you want the same detail panel there too.

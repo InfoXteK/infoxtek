@@ -24,3 +24,7 @@ Scope: repo as uploaded (infoxtek-web-v2_5_1.zip), reviewed by static inspection
 - Form provider not chosen. Before setting `formEndpoint`, review the provider's privacy terms and use HTTPS only.
 - Clickjacking protection not possible via meta CSP on GitHub Pages.
 - Not performed: live-site check, Lighthouse/axe accessibility run, real-browser visual test, DNS/HTTPS verification, GitHub Dependabot/Actions settings review.
+
+## v2.7.0 addendum
+- check.mjs now also fails on inline `style=` attributes (CSP `style-src 'self'` blocks them; a first draft of the detail panels used one and produced console errors, caught by browser test).
+- New content file src/config/details.mjs is static text, rendered with HTML escaping in the build. No new hosts, dependencies, storage or network calls. URL hash is read to open a panel: the value is only matched against existing element ids, never inserted into the page.

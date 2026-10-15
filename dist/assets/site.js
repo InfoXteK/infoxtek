@@ -110,61 +110,93 @@ if (!calm) {
 /*G3*/
 document.querySelectorAll('.ring3d').forEach((root) => {
   try {
-    const groups = [...root.querySelectorAll('.ring')].map((r) => [...r.querySelectorAll('.c3')].map((c) => ({ t: c.dataset.t, d: c.dataset.d, h: c.getAttribute('href') })));
+    const groups = [...root.querySelectorAll('.ring')].map((r) => [...r.querySelectorAll('.c3')].map((c) => ({ t: c.dataset.t, d: c.dataset.d, det: c.dataset.det || '', h: c.dataset.det ? '' : c.getAttribute('href') })));
     const tabs = [...root.querySelectorAll('[role=tab]')], sel = root.querySelector('.sel'), stageEl = root.querySelector('.stage');
     const cv = document.createElement('canvas'), ctx = cv.getContext('2d'); if (!ctx || !groups.length || !sel || !stageEl) return;
-    const COL = ['#22d3ee', '#a78bfa', '#f472b6', '#fbbf24'], calm = matchMedia('(prefers-reduced-motion: reduce)').matches, PI2 = Math.PI * 2;
-    const box = document.createElement('div'); box.className = 'gstage'; cv.tabIndex = 0; cv.setAttribute('role', 'application'); cv.setAttribute('aria-label', 'Interactive 3D map. Drag to orbit, click a node to select it, arrow keys move between nodes, Enter opens.');
+    const COL = [[34, 211, 238], [167, 139, 250], [244, 114, 182], [251, 191, 36]], calm = matchMedia('(prefers-reduced-motion: reduce)').matches, PI2 = Math.PI * 2;
+    const rgba = (c, a) => 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')', mix = (c, k) => [Math.round(c[0] + (255 - c[0]) * k), Math.round(c[1] + (255 - c[1]) * k), Math.round(c[2] + (255 - c[2]) * k)], dark = (c, k) => [Math.round(c[0] * k), Math.round(c[1] * k), Math.round(c[2] * k)];
+    const box = document.createElement('div'); box.className = 'gstage'; cv.tabIndex = 0; cv.setAttribute('role', 'application'); cv.setAttribute('aria-label', 'Interactive 3D map. Drag to orbit, click a node to select it, click it again or press Enter to open the full details. Arrow keys move between nodes.');
     box.append(cv); root.insertBefore(box, stageEl);
-    const tip = document.createElement('p'); tip.className = 'tip gtip'; tip.textContent = 'Drag to orbit. Click a glowing node to select it, click it again to open. Arrow keys move between nodes, Enter opens.'; sel.after(tip);
+    const tip = document.createElement('p'); tip.className = 'tip gtip'; tip.textContent = 'Drag to orbit. Click a glowing sphere to select it, click it again (or press Open) to see everything about it. Arrow keys move between nodes, Enter opens.'; sel.after(tip);
     const hh = sel.querySelector('h3'), pp = sel.querySelector('p'), bb = sel.querySelector('.btn');
-    root.dataset.g3 = '1'; root.classList.add('ongal');
-    let g = 0, selI = 0, W = 0, H = 0, yaw = 0.6, pitch = 0.2, vy = 0, vp = 0, drag = null, hover = -1, tr = 1, fly = null, t0 = 0, on = true, P = [], pos = [], prev = [], nodes = groups[0];
-    const clamp = (v) => Math.max(-0.7, Math.min(0.7, v)), md = (a) => ((a % PI2) + PI2) % PI2;
-    const fib = (n, R) => Array.from({ length: n }, (_, i) => { const y = n === 1 ? 0 : 1 - (2 * i) / (n - 1), r = Math.sqrt(Math.max(0, 1 - y * y)), a = i * 2.399963; return [Math.cos(a) * r * R, y * R * 0.8, Math.sin(a) * r * R]; });
-    const stars = Array.from({ length: 150 }, () => [(Math.random() - 0.5) * 900, (Math.random() - 0.5) * 700, (Math.random() - 0.5) * 800]);
-    const rs = () => { const r = box.getBoundingClientRect(), d = window.devicePixelRatio || 1; W = r.width; H = r.height; cv.width = Math.round(W * d); cv.height = Math.round(H * d); ctx.setTransform(d, 0, 0, d, 0, 0); };
-    const proj = (p) => { const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch); const x = p[0] * cy + p[2] * sy, z1 = -p[0] * sy + p[2] * cy, y = p[1] * cp - z1 * sp, z = p[1] * sp + z1 * cp, f = 700 / (700 - z); return { x: W / 2 + x * f, y: H / 2 + y * f, z, f }; };
-    const choose = (i, doFly) => { selI = i; const n = nodes[i]; hh.textContent = n.t; pp.textContent = n.d; bb.hidden = !n.h; if (n.h) { bb.href = n.h; bb.textContent = 'Open ' + n.t; } if (doFly && pos[i]) { const [x, y, z] = pos[i], R = Math.hypot(x, z) || 1; fly = { yaw: -Math.atan2(x, z), pitch: clamp(Math.atan2(y, R)) }; vy = vp = 0; } };
-    const setGroup = (k) => { g = k; nodes = groups[k]; prev = pos.length ? pos.map((q) => q.slice()) : []; pos = fib(nodes.length, 200); tr = 0; tabs.forEach((t, i) => t.setAttribute('aria-selected', String(i === k))); choose(0, true); };
-    const hit = (mx, my) => { let b = -1, bd = 1e9; P.forEach((p, i) => { const d = Math.hypot(p.x - mx, p.y - my); if (d < Math.max(26, 18 * p.f + 8) && d < bd) { bd = d; b = i; } }); return b; };
+    const dtls = root.querySelector('.dtls'), arts = dtls ? [...dtls.querySelectorAll('.dtl')] : [];
+    root.dataset.g3 = '1'; root.classList.add('ongal'); arts.forEach((a) => { a.hidden = true; });
+    const FL = 215, R0 = 200;
+    let g = 0, selI = 0, W = 0, H = 0, yaw = 0.6, pitch = 0.22, vy = 0, vp = 0, drag = null, hover = -1, tr = 1, fly = null, t0 = 0, on = true, P = [], pos = [], prev = [], nodes = groups[0], punch = 0, px = 0, py = 0, cur = '';
+    const clamp = (v) => Math.max(-0.75, Math.min(0.75, v)), md = (a) => ((a % PI2) + PI2) % PI2;
+    const fib = (n, R) => Array.from({ length: n }, (_, i) => { const y = n === 1 ? 0 : 1 - (2 * i) / (n - 1), r = Math.sqrt(Math.max(0, 1 - y * y)), a = i * 2.399963; return [Math.cos(a) * r * R, y * R * 0.72, Math.sin(a) * r * R]; });
+    const stars = Array.from({ length: 170 }, () => [(Math.random() - 0.5) * 1100, (Math.random() - 0.5) * 800, (Math.random() - 0.5) * 1000, Math.random() * 6.28]);
+    const rs = () => { const r = box.getBoundingClientRect(), d = Math.min(2, window.devicePixelRatio || 1); W = r.width; H = r.height; cv.width = Math.round(W * d); cv.height = Math.round(H * d); ctx.setTransform(d, 0, 0, d, 0, 0); };
+    const proj = (p) => { const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch); const x = p[0] * cy + p[2] * sy, z1 = -p[0] * sy + p[2] * cy, y = p[1] * cp - z1 * sp, z = p[1] * sp + z1 * cp, f = (700 / (700 - z)) * (1 + 0.1 * punch) * Math.min(1.1, Math.max(0.62, W / 760)); return { x: W / 2 + x * f, y: H / 2 + 10 + y * f, z, f }; };
+    const setBtn = (n) => { bb.hidden = !(n.h || n.det); if (n.det) { bb.href = '#' + n.det; bb.textContent = 'Show full details'; } else if (n.h) { bb.href = n.h; bb.textContent = 'Open ' + n.t; } };
+    const choose = (i, doFly) => { selI = i; const n = nodes[i]; hh.textContent = n.t; pp.textContent = n.d; setBtn(n); punch = 1; if (doFly && pos[i]) { const [x, y, z] = pos[i], R = Math.hypot(x, z) || 1; fly = { yaw: -Math.atan2(x, z), pitch: clamp(Math.atan2(y, R) * 0.8 + 0.12) }; vy = vp = 0; } };
+    const hideDet = () => { arts.forEach((a) => { a.hidden = true; a.classList.remove('enter'); }); root.classList.remove('hasdet'); cur = ''; };
+    const showDet = (id, quiet) => {
+      const a = arts.find((x) => x.id === id); if (!a) return;
+      arts.forEach((x) => { x.hidden = x !== a; x.classList.remove('enter'); }); void a.offsetWidth; a.classList.add('enter'); root.classList.add('hasdet'); cur = id;
+      if (!quiet) { try { history.replaceState(null, '', '#' + id); } catch {} a.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' }); const h = a.querySelector('h3'); if (h) h.focus({ preventScroll: true }); }
+    };
+    const setGroup = (k) => { g = k; nodes = groups[k]; prev = pos.length ? pos.map((q) => q.slice()) : []; pos = fib(nodes.length, R0); tr = 0; tabs.forEach((t, i) => t.setAttribute('aria-selected', String(i === k))); hideDet(); choose(0, true); };
+    const hit = (mx, my) => { let b = -1, bd = 1e9; P.forEach((p, i) => { const d = Math.hypot(p.x - mx, p.y - my); if (d < Math.max(28, 24 * p.f + 8) && d < bd) { bd = d; b = i; } }); return b; };
     const xy = (e) => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
-    const open = (i) => { const h = nodes[i] && nodes[i].h; if (typeof h === 'string' && /^\/(?!\/)/.test(h)) location.href = h; };
+    const open = (i) => { const n = nodes[i]; if (!n) return; if (n.det) showDet(n.det); else if (typeof n.h === 'string' && /^\/(?!\/)/.test(n.h)) location.href = n.h; };
+    bb.addEventListener('click', (e) => { const n = nodes[selI]; if (n && n.det) { e.preventDefault(); showDet(n.det); } });
+    if (dtls) dtls.addEventListener('click', (e) => {
+      const b = e.target.closest ? e.target.closest('button[data-a]') : null; if (!b) return; const a = b.closest('.dtl'), gi = +a.dataset.g, xi = +a.dataset.i, act = b.dataset.a;
+      if (act === 'map') { hideDet(); try { history.replaceState(null, '', location.pathname); } catch {} box.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'center' }); cv.focus({ preventScroll: true }); return; }
+      if (gi !== g) setGroup(gi); const n = groups[gi].length, ni = (xi + (act === 'next' ? 1 : n - 1)) % n; choose(ni, true); showDet(nodes[ni].det);
+    });
+    const fromHash = () => { const id = decodeURIComponent((location.hash || '').slice(1)); const a = id && arts.find((x) => x.id === id); if (!a) return; const gi = +a.dataset.g, xi = +a.dataset.i; if (gi !== g) setGroup(gi); choose(xi, true); showDet(id, true); setTimeout(() => a.scrollIntoView({ block: 'start' }), 60); };
     cv.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, y: e.clientY, m: 0 }; fly = null; try { cv.setPointerCapture(e.pointerId); } catch {} });
-    cv.addEventListener('pointermove', (e) => { const [mx, my] = xy(e); if (drag) { const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.m += Math.abs(dx) + Math.abs(dy); drag.x = e.clientX; drag.y = e.clientY; yaw += dx * 0.007; pitch = clamp(pitch + dy * 0.005); vy = dx * 0.0009; vp = dy * 0.0006; return; } hover = hit(mx, my); cv.style.cursor = hover >= 0 ? 'pointer' : ''; });
+    cv.addEventListener('pointermove', (e) => { const [mx, my] = xy(e); px = (mx / W - 0.5); py = (my / H - 0.5); if (drag) { const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.m += Math.abs(dx) + Math.abs(dy); drag.x = e.clientX; drag.y = e.clientY; yaw += dx * 0.007; pitch = clamp(pitch + dy * 0.005); vy = dx * 0.0009; vp = dy * 0.0006; return; } hover = hit(mx, my); cv.style.cursor = hover >= 0 ? 'pointer' : ''; });
     cv.addEventListener('pointerup', (e) => { if (drag && drag.m < 6) { const [mx, my] = xy(e), h = hit(mx, my); if (h >= 0) { if (h === selI) open(h); else choose(h, true); } } drag = null; });
-    cv.addEventListener('pointerleave', () => { hover = -1; });
+    cv.addEventListener('pointerleave', () => { hover = -1; px = py = 0; });
     cv.addEventListener('keydown', (e) => { const n = nodes.length; if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); choose((selI + (e.key === 'ArrowRight' ? 1 : n - 1)) % n, true); } else if (e.key === 'Enter') { e.preventDefault(); open(selI); } });
     tabs.forEach((t, i) => t.addEventListener('click', () => setGroup(i)));
     if ('IntersectionObserver' in window) new IntersectionObserver((es) => { on = es[0].isIntersecting; }).observe(box);
-    addEventListener('resize', rs);
+    addEventListener('resize', rs); addEventListener('hashchange', fromHash);
+    const flr = R0 * 0.92;
     const loop = (ts) => {
-      requestAnimationFrame(loop); if (!on || !W) return; const dt = Math.min(0.05, (ts - t0) / 1000 || 0.016); t0 = ts;
-      if (!drag) { yaw += vy; pitch = clamp(pitch + vp); vy *= 0.94; vp *= 0.94; if (!calm && !fly && Math.abs(vy) < 0.0006) yaw += 0.0022; }
+      requestAnimationFrame(loop); if (!on || !W) return; const dt = Math.min(0.05, (ts - t0) / 1000 || 0.016); t0 = ts, T = ts / 1000;
+      if (!drag) { yaw += vy; pitch = clamp(pitch + vp); vy *= 0.94; vp *= 0.94; if (!calm && !fly && Math.abs(vy) < 0.0006) yaw += 0.0018; }
       if (fly) { const dy = md(fly.yaw - yaw + Math.PI) - Math.PI; yaw += dy * 0.1; pitch += (fly.pitch - pitch) * 0.1; if (Math.abs(dy) < 0.008 && Math.abs(fly.pitch - pitch) < 0.008) fly = null; }
-      if (tr < 1) tr = Math.min(1, tr + dt * 1.5);
-      const e = 1 - Math.pow(1 - tr, 3), col = COL[g % COL.length]; ctx.clearRect(0, 0, W, H);
-      stars.forEach((s) => { const q = proj(s); if (q.f > 3) return; ctx.globalAlpha = Math.max(0.08, Math.min(0.7, 0.45 * q.f)); ctx.fillStyle = '#cfe0ff'; ctx.fillRect(q.x, q.y, 1.7 * q.f, 1.7 * q.f); });
-      P = nodes.map((_, i) => { const a = prev[i] || [0, 0, 0], b = pos[i]; return proj([a[0] + (b[0] - a[0]) * e, a[1] + (b[1] - a[1]) * e, a[2] + (b[2] - a[2]) * e]); });
-      const hub = proj([0, 0, 0]); ctx.strokeStyle = col; ctx.lineWidth = 1.2;
-      P.forEach((p, i) => { const q = P[(i + 1) % P.length], depth = (p.z + q.z + 520) / 1040; if (q !== p) { ctx.globalAlpha = 0.12 + 0.3 * depth; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); } ctx.globalAlpha = 0.22; ctx.beginPath(); ctx.moveTo(hub.x, hub.y); ctx.lineTo(p.x, p.y); ctx.stroke(); const k = (ts / 2200 + i * 0.173) % 1; ctx.globalAlpha = 0.9; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(hub.x + (p.x - hub.x) * k, hub.y + (p.y - hub.y) * k, 2.2 * p.f, 0, PI2); ctx.fill(); });
-      const hg = ctx.createRadialGradient(hub.x, hub.y, 0, hub.x, hub.y, 70 * hub.f); hg.addColorStop(0, col + 'aa'); hg.addColorStop(1, col + '00'); ctx.globalAlpha = 0.9 + 0.1 * Math.sin(ts / 500); ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(hub.x, hub.y, 70 * hub.f, 0, PI2); ctx.fill();
-      ctx.globalAlpha = 1; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(hub.x, hub.y, 6 * hub.f, 0, PI2); ctx.fill();
-      P.map((_, i) => i).sort((a, b) => P[a].z - P[b].z).forEach((i) => {
-        const p = P[i], n = nodes[i], isS = i === selI, isH = i === hover, r = (isH || isS ? 20 : 16) * p.f, depth = Math.max(0.3, Math.min(1, (p.z + 260) / 460));
-        const gr = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 3.2); gr.addColorStop(0, col + (isS ? 'cc' : '77')); gr.addColorStop(1, col + '00');
-        ctx.globalAlpha = depth; ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(p.x, p.y, r * 3.2, 0, PI2); ctx.fill();
-        ctx.fillStyle = '#0b1230'; ctx.strokeStyle = col; ctx.lineWidth = isS ? 3 : 2; ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, PI2); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#fff'; ctx.font = '700 ' + Math.round(r * 0.95) + 'px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(n.t[0], p.x, p.y + 1);
-        if (isS) { const k = (ts / 1000) % 1; ctx.globalAlpha = depth * (1 - k); ctx.beginPath(); ctx.arc(p.x, p.y, r * (1.25 + k * 1.3), 0, PI2); ctx.stroke(); }
-        if (p.z > -90 || isS || isH) { ctx.globalAlpha = isS || isH ? 1 : depth; ctx.font = (isS || isH ? '700 ' : '600 ') + Math.round(Math.max(11, 12 * p.f)) + 'px system-ui,sans-serif'; const w = ctx.measureText(n.t).width + 14, ly = p.y + r + 15; ctx.fillStyle = 'rgba(8,14,40,.78)'; ctx.fillRect(p.x - w / 2, ly - 10, w, 20); ctx.fillStyle = '#fff'; ctx.fillText(n.t, p.x, ly); }
+      if (tr < 1) tr = Math.min(1, tr + dt * 1.5); punch = Math.max(0, punch - dt * 1.8);
+      const e = 1 - Math.pow(1 - tr, 3), C = COL[g % COL.length]; ctx.clearRect(0, 0, W, H);
+      // nebula parallax
+      [[0.3, 0.35, 0.5, C, 0.16], [0.75, 0.7, 0.45, [99, 102, 241], 0.18]].forEach(([nx, ny, nr, nc, na]) => { const cx = W * nx - Math.sin(yaw) * 60 - px * 24, cy = H * ny - pitch * 40 - py * 18, rr = Math.max(W, H) * nr, gr = ctx.createRadialGradient(cx, cy, 0, cx, cy, rr); gr.addColorStop(0, rgba(nc, na)); gr.addColorStop(1, rgba(nc, 0)); ctx.globalAlpha = 1; ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H); });
+      // stars (twinkle, depth sized)
+      stars.forEach((s) => { const q = proj(s); if (q.f > 3 || q.f < 0.25) return; ctx.globalAlpha = Math.max(0.06, Math.min(0.85, 0.5 * q.f * (0.7 + 0.3 * Math.sin(T * 1.6 + s[3])))); ctx.fillStyle = '#cfe0ff'; const z = 1.6 * q.f; ctx.fillRect(q.x, q.y, z, z); });
+      // perspective floor grid
+      ctx.lineWidth = 1; for (let k = -5; k <= 5; k++) { const v = k * 70; [[[v, flr, -350], [v, flr, 350]], [[-350, flr, v], [350, flr, v]]].forEach(([a, b]) => { const A = proj(a), B = proj(b); ctx.globalAlpha = Math.max(0.03, 0.2 - Math.abs(k) * 0.03); ctx.strokeStyle = rgba(C, 1); ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke(); }); }
+      // orbit rings in 3D
+      [[0, 1], [0.5, 0.0]].forEach(([tilt, solid], ri) => { ctx.strokeStyle = rgba(C, 1); ctx.lineWidth = ri ? 1 : 1.4; let lp = null; for (let k = 0; k <= 72; k++) { const a = (k / 72) * PI2 + (ri ? T * 0.1 : 0), x = Math.cos(a) * R0 * (ri ? 1.12 : 1), z = Math.sin(a) * R0 * (ri ? 1.12 : 1), y = ri ? Math.sin(a) * R0 * 0.35 : 0, q = proj([x, y, z]); if (lp) { ctx.globalAlpha = 0.08 + 0.22 * ((q.z + 260) / 520); ctx.beginPath(); ctx.moveTo(lp.x, lp.y); ctx.lineTo(q.x, q.y); ctx.stroke(); } lp = q; } });
+      P = nodes.map((_, i) => { const a = prev[i] || [0, 0, 0], b = pos[i], bob = calm ? 0 : Math.sin(T * 1.3 + i * 1.7) * 7; return proj([a[0] + (b[0] - a[0]) * e, a[1] + (b[1] - a[1]) * e + bob, a[2] + (b[2] - a[2]) * e]); });
+      const hub = proj([0, 0, 0]);
+      // energy links from core with travelling pulses
+      P.forEach((p, i) => { const depth = Math.max(0.1, Math.min(1, (p.z + 280) / 520)); ctx.globalAlpha = 0.1 + 0.4 * depth * (i === selI ? 1.6 : 1); const lg = ctx.createLinearGradient(hub.x, hub.y, p.x, p.y); lg.addColorStop(0, rgba(mix(C, 0.5), 0.9)); lg.addColorStop(1, rgba(C, 0.25)); ctx.strokeStyle = lg; ctx.lineWidth = i === selI ? 2 : 1.1; ctx.beginPath(); ctx.moveTo(hub.x, hub.y); ctx.lineTo(p.x, p.y); ctx.stroke(); if (!calm) { const k = (T * 0.45 + i * 0.23) % 1; ctx.globalAlpha = 0.9 * depth; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(hub.x + (p.x - hub.x) * k, hub.y + (p.y - hub.y) * k, 2 * p.f, 0, PI2); ctx.fill(); } const q = P[(i + 1) % P.length]; if (q !== p) { ctx.globalAlpha = 0.1 + 0.18 * depth; ctx.strokeStyle = rgba(C, 1); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); } });
+      // core
+      const pulse = 1 + 0.12 * Math.sin(T * 2.2), hg = ctx.createRadialGradient(hub.x, hub.y, 0, hub.x, hub.y, 90 * hub.f * pulse); hg.addColorStop(0, rgba(mix(C, 0.6), 0.95)); hg.addColorStop(0.25, rgba(C, 0.45)); hg.addColorStop(1, rgba(C, 0)); ctx.globalAlpha = 1; ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(hub.x, hub.y, 90 * hub.f * pulse, 0, PI2); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(hub.x, hub.y, 6 * hub.f, 0, PI2); ctx.fill();
+      // nodes: shadows first, then shaded spheres back to front
+      const order = P.map((_, i) => i).sort((a, b) => P[a].z - P[b].z);
+      order.forEach((i) => { const p = P[i], bw = pos[i], a = prev[i] || [0, 0, 0], X = a[0] + (bw[0] - a[0]) * e, Z = a[2] + (bw[2] - a[2]) * e, s = proj([X, flr, Z]), h = Math.max(0, (s.y - p.y) / 260); ctx.globalAlpha = Math.max(0.05, 0.38 - h * 0.25); const sg = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, 26 * p.f); sg.addColorStop(0, 'rgba(0,0,0,.75)'); sg.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = sg; ctx.save(); ctx.translate(s.x, s.y); ctx.scale(1, 0.36); ctx.translate(-s.x, -s.y); ctx.beginPath(); ctx.arc(s.x, s.y, 26 * p.f, 0, PI2); ctx.fill(); ctx.restore(); if (i === selI) { ctx.globalAlpha = 0.35; const bg = ctx.createLinearGradient(p.x, p.y, s.x, s.y); bg.addColorStop(0, rgba(C, 0.7)); bg.addColorStop(1, rgba(C, 0)); ctx.strokeStyle = bg; ctx.lineWidth = 3 * p.f; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(s.x, s.y); ctx.stroke(); } });
+      order.forEach((i) => {
+        const p = P[i], n = nodes[i], isS = i === selI, isH = i === hover, r = (isH || isS ? 23 : 19) * p.f * (isS ? 1 + 0.05 * Math.sin(T * 3) : 1), depth = Math.max(0.35, Math.min(1, (p.z + 300) / 500));
+        const aura = ctx.createRadialGradient(p.x, p.y, r * 0.8, p.x, p.y, r * 3.4); aura.addColorStop(0, rgba(C, isS ? 0.7 : 0.38)); aura.addColorStop(1, rgba(C, 0)); ctx.globalAlpha = depth; ctx.fillStyle = aura; ctx.beginPath(); ctx.arc(p.x, p.y, r * 3.4, 0, PI2); ctx.fill();
+        const sp = ctx.createRadialGradient(p.x - r * 0.4, p.y - r * 0.45, r * 0.05, p.x, p.y, r); sp.addColorStop(0, rgba(mix(C, 0.8), 1)); sp.addColorStop(0.35, rgba(C, 1)); sp.addColorStop(1, rgba(dark(C, 0.32), 1)); ctx.fillStyle = sp; ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, PI2); ctx.fill();
+        ctx.lineWidth = isS ? 2.5 : 1.4; ctx.strokeStyle = rgba(mix(C, 0.55), isS ? 1 : 0.7); ctx.stroke();
+        ctx.globalAlpha = depth * 0.75; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.ellipse(p.x - r * 0.35, p.y - r * 0.42, r * 0.22, r * 0.12, -0.6, 0, PI2); ctx.fill();
+        ctx.globalAlpha = depth; ctx.fillStyle = '#071029'; ctx.font = '800 ' + Math.round(r * 0.95) + 'px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(n.t[0], p.x, p.y + 1);
+        if (isS) { const k = (T * 0.9) % 1; ctx.globalAlpha = depth * (1 - k); ctx.strokeStyle = rgba(mix(C, 0.4), 1); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(p.x, p.y, r * (1.2 + k * 1.4), 0, PI2); ctx.stroke(); }
+        if (p.z > -110 || isS || isH) { ctx.globalAlpha = isS || isH ? 1 : depth; ctx.font = (isS || isH ? '700 ' : '600 ') + Math.round(Math.max(11, 12.5 * p.f)) + 'px system-ui,sans-serif'; const w = ctx.measureText(n.t).width + 16, ly = p.y + r + 17; ctx.fillStyle = 'rgba(6,12,36,.82)'; ctx.fillRect(p.x - w / 2, ly - 11, w, 22); ctx.strokeStyle = rgba(C, isS ? 0.9 : 0.35); ctx.lineWidth = 1; ctx.strokeRect(p.x - w / 2, ly - 11, w, 22); ctx.fillStyle = '#fff'; ctx.fillText(n.t, p.x, ly + 1); }
       });
       ctx.globalAlpha = 1; ctx.strokeStyle = 'rgba(140,190,255,.55)'; ctx.lineWidth = 2;
       [[14, 14, 1, 1], [W - 14, 14, -1, 1], [14, H - 14, 1, -1], [W - 14, H - 14, -1, -1]].forEach(([x, y, a, b]) => { ctx.beginPath(); ctx.moveTo(x, y + 22 * b); ctx.lineTo(x, y); ctx.lineTo(x + 22 * a, y); ctx.stroke(); });
       ctx.fillStyle = 'rgba(190,215,255,.9)'; ctx.font = '12px ui-monospace,Menlo,Consolas,monospace'; ctx.textAlign = 'left'; ctx.fillText(((tabs[g] && tabs[g].textContent) || '').toUpperCase() + '  //  ' + nodes.length + ' NODES  //  SELECTED ' + (selI + 1), 28, 32);
     };
-    rs(); setGroup(0); requestAnimationFrame(loop);
-  } catch (err) { root.classList.remove('ongal'); delete root.dataset.g3; root.querySelectorAll('.gstage,.gtip').forEach((x) => x.remove()); }
+    let T = 0;
+    rs(); setGroup(0); fromHash(); requestAnimationFrame(loop);
+  } catch (err) { root.classList.remove('ongal'); delete root.dataset.g3; root.querySelectorAll('.gstage,.gtip').forEach((x) => x.remove()); root.querySelectorAll('.dtl').forEach((a) => { a.hidden = false; }); }
 });
 /*G3END*/
 document.querySelectorAll('.ring3d').forEach((root) => {

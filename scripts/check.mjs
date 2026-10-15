@@ -24,6 +24,7 @@ for (const f of html) {
   const s = readFileSync(f, 'utf8');
   if (!s.includes('Content-Security-Policy')) fail(`${f} missing CSP`);
   if (!s.includes('name="referrer"')) fail(`${f} missing referrer policy`);
+  if (/\sstyle\s*=\s*["']/i.test(s)) fail(`${f} has inline style attribute (blocked by CSP)`);
   if (/\son[a-z]+\s*=\s*["']/i.test(s)) fail(`${f} has inline event handler`);
   if (/<script(?![^>]*\bsrc=)[^>]*>(?!\s*<\/script>)/i.test(s.replace(/<script[^>]*type="application\/ld\+json"[^>]*>[\s\S]*?<\/script>/gi, ''))) fail(`${f} has inline script`);
   for (const m of s.matchAll(/<a [^>]*target="_blank"[^>]*>/g)) if (!/rel="[^"]*noopener/.test(m[0])) fail(`${f} target=_blank without noopener`);
