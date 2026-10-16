@@ -196,8 +196,25 @@ export const tips = [
 ];
 
 // Products. download: path under public/downloads or an https://github.com/InfoXteK/ URL. page:true builds /products/<slug>/.
+// ---------------------------------------------------------------------------
+// NET-MONIT VERSIONS: edit ONLY this list when a new version is released.
+// Newest first. Exactly one entry should have status 'latest'; the rest use 'previous'.
+// This one list drives: the version selector on /products/net-monit/, the version table
+// on /products/, and the "Net-Monit version" drop-down in the Contact page license form.
+// Fields: id (lowercase, unique, used in links like /contact/?v=v11.2#license),
+//         label (shown to visitors), status, repo (GitHub URL), note (one or two plain sentences).
+// ---------------------------------------------------------------------------
+export const netMonitVersions = [
+  { id: 'v11.2', label: 'V11.2', status: 'latest', repo: 'https://github.com/InfoXteK/Net-Monit-V11_2',
+    note: 'Production-grade, self-hosted network monitoring platform. Monitors ping latency, packet loss, CPU, memory, disk and bandwidth across your infrastructure; web application uptime and SSL expiry; WAN speed tests; network scanner device discovery; email and SMS alerts with configurable thresholds and escalations.' },
+  { id: 'v11.0', label: 'V11.0', status: 'previous', repo: 'https://github.com/InfoXteK/Net-monit-V11.0',
+    note: 'Earlier release of the same platform: Flask and SQLite, multi-level L1/L2/L3 escalation by email, SMS and voice call, free vendor-issued license with a 30-day trial.' },
+];
+// Extra choice at the bottom of the license-form drop-down for versions not listed above.
+export const netMonitOlderOption = 'Older than V11.0 (V10.9 or earlier, new key needed)';
+
 export const products = [
-  { slug: 'net-monit', page: true, title: 'Net-Monit V11.0', tag: 'Network and infrastructure monitoring', icon: 'network', download: 'https://github.com/InfoXteK/Net-monit-V11.0',
+  { slug: 'net-monit', page: true, title: 'Net-Monit', tag: 'Network and infrastructure monitoring', icon: 'network', download: (netMonitVersions.find((v) => v.status === 'latest') || netMonitVersions[0]).repo, // automatic: follows the 'latest' entry above
     summary: 'A production-grade, self-hosted network monitoring platform. Monitor ping latency, packet loss, CPU, memory, disk and bandwidth; track web application uptime and SSL expiry; run WAN speed tests; discover devices with a network scanner; and receive alerts with configurable thresholds, multi-level escalation and a full Acknowledge/Resolve workflow.',
     points: ['Runs on your own server (Windows or Linux), no cloud needed', 'Multi-level escalation (L1, L2, L3) by email, SMS and voice call', 'Free vendor-issued license, 30-day trial'],
     features: ['Ping, SNMP, SSH, PowerShell and HTTP/HTTPS checks, plus disk usage and service/task status', 'Web application uptime and SSL expiry monitoring', 'Built-in WAN speed test with a live gauge and rate-limit handling', 'TCP and UDP port scanning and device discovery', 'Per-device escalation levels, thresholds and notification timing', 'Acknowledge and Resolve alert workflow with a full audit log', 'Multi-user with Admin and Viewer roles, per-user dashboards', 'AES-encrypted credential storage, backup and restore of device configuration'],

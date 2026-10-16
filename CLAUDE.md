@@ -1,6 +1,6 @@
 # InfoXtek: Project Memory
 - Project: InfoXtek corporate site rebuild (source: https://infoxtekcorp.wixsite.com/infoxtek). Target: https://infoXtek.com on GitHub Pages via Actions.
-- Version: v2.7.0. Dev port: 3018 (verified free in build env; auto-increments, skips 80/443/3306/5432/8080).
+- Version: v2.8.0. Dev port: 3019 (verified free in build env; auto-increments, skips 80/443/3306/5432/8080).
 - Stack: zero-dependency Node static generator (`scripts/build.mjs`), content in `src/config/site.mjs`. Astro migration is a later option (see docs).
 - Design: light enterprise theme, indigo/teal, system fonts. No dark/black-primary theme.
 - Never publish placeholder contact data. Unknown values stay `null` in config.
@@ -11,3 +11,4 @@
 
 - v2.6.0 (port 3017): security review done by static inspection only (docs/SECURITY_REVIEW.md, docs/THREAT_MODEL.md); `npm run check` now enforces security assertions. Open: pin Actions to SHAs, choose form provider, live/DNS/a11y/Lighthouse tests not run.
 - v2.7.0 (port 3018): Why Choose Us, Industries and Tools & Tips items now open full in-page detail panels (content in src/config/details.mjs; panels are real HTML, visible without JS). Galaxy renderer rebuilt: shaded spheres, floor grid, orbit rings, shadows, pulses. Inline `style=` attributes are banned (CSP blocks them); `npm run check` enforces it.
+- v2.8.0 (port 3019): Net-Monit multi-version control. Single list `netMonitVersions` in src/config/site.mjs drives the product-page selector, the /products/ versions table, the Products card link and the Contact license-form version drop-down. How-to: docs/UPDATING_PRODUCT_VERSIONS.md.

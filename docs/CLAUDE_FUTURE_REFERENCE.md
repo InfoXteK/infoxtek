@@ -1,4 +1,4 @@
-# InfoXteK: Complete Claude Reference (v2.7.0, port 3018)
+# InfoXteK: Complete Claude Reference (v2.8.0, port 3019)
 Living record from the start of the project. Update on every change. Repository and docs are the source of truth.
 
 ## 1. Identity
@@ -133,3 +133,13 @@ Read CLAUDE.md and this file; ask owner for logo original, phone/address, form p
 - Tested (headless Chromium via Playwright in the sandbox): why-choose-us, industries, tools-tips: button shows "Show full details", click opens exactly one panel, Next moves to the next item, Back hides panels; Enter on canvas opens panel; hash deep link opens correct panel; 0 console errors; no horizontal overflow at 390px width before/after opening; `npm run check` 0 problems.
 - NOT tested: real touch devices, Safari/Firefox, screen readers, Lighthouse, performance on low-end phones, live deployment.
 - Not changed: services, platforms and products ring items still open their own pages (they have real URLs). Say if you want the same detail panel there too.
+
+## 22. v2.8.0 notes (Net-Monit versions, port 3019)
+- Owner request: several Net-Monit versions/repos exist; wants a version control in the Products area, a version drop-down in the Contact license request, and a guide for adding future versions.
+- Data: `netMonitVersions` (newest first; id, label, status latest|previous, repo, note) and `netMonitOlderOption` in src/config/site.mjs. Known: V11.2 -> https://github.com/InfoXteK/Net-Monit-V11_2 (description supplied by owner); V11.0 -> https://github.com/InfoXteK/Net-monit-V11.0. Assumption: V11.2 is the latest because of its higher number; flip `status` if wrong. Owner mentioned "multiple versions" but supplied only these two links; add others per docs/UPDATING_PRODUCT_VERSIONS.md.
+- Product title is now plain "Net-Monit" (was "Net-Monit V11.0"); the products entry `download` follows the latest repo automatically.
+- Build helpers in scripts/build.mjs: `vOpt`, `verPanels` (selector + per-version panels, all visible without JS), `verTable` (/products/ table). License select options come from the same list; option `data-v` = id.
+- JS (/*VER*/ block in site.js): selector shows one panel; `/contact/?v=<id>` preselects the matching option, unknown values ignored (matched against existing options only).
+- The license key's validity across versions is NOT stated anywhere on the site because it is unknown; the requester's chosen version goes in the email body.
+- Tested (headless Chromium, sandbox): default panel V11.2, switching to V11.0 changes link, license link preselects V11.0, bad `?v=` ignored, versions table 2 rows, 0 console errors. Also simulated adding V11.3 in config: selector, drop-down and product page all updated; reverted. check.mjs 0 problems.
+- NOT tested: real mailto delivery, mobile layout of the table, other browsers.

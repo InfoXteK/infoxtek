@@ -265,3 +265,12 @@ addEventListener('keydown', (e) => { if (/INPUT|TEXTAREA|SELECT/.test(e.target.t
   addEventListener('pageshow', (e) => { if (e.persisted) html.classList.remove('leaving'); });
 } catch (err) { /* effects are optional */ } })();
 /*FXEND*/
+
+/*VER*/
+(() => {
+  const sel = document.getElementById('vsel'), panels = [...document.querySelectorAll('.vpanel')];
+  if (sel && panels.length) { const show = () => panels.forEach((p) => { p.hidden = p.dataset.v !== sel.value; }); sel.addEventListener('change', show); show(); }
+  const ls = document.getElementById('lversion');
+  if (ls) { const v = new URLSearchParams(location.search).get('v'); if (v) { const o = [...ls.options].find((x) => x.dataset.v === v.toLowerCase()); if (o) ls.value = o.value; } }
+})();
+/*VEREND*/
