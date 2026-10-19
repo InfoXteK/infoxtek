@@ -1,4 +1,4 @@
-# InfoXteK: Complete Claude Reference (v2.8.0, port 3019)
+# InfoXteK: Complete Claude Reference (v2.9.0, port 3020)
 Living record from the start of the project. Update on every change. Repository and docs are the source of truth.
 
 ## 1. Identity
@@ -143,3 +143,15 @@ Read CLAUDE.md and this file; ask owner for logo original, phone/address, form p
 - The license key's validity across versions is NOT stated anywhere on the site because it is unknown; the requester's chosen version goes in the email body.
 - Tested (headless Chromium, sandbox): default panel V11.2, switching to V11.0 changes link, license link preselects V11.0, bad `?v=` ignored, versions table 2 rows, 0 console errors. Also simulated adding V11.3 in config: selector, drop-down and product page all updated; reverted. check.mjs 0 problems.
 - NOT tested: real mailto delivery, mobile layout of the table, other browsers.
+
+## 23. v2.9.0 notes (one-click stacks, 3D flow, favicon, port 3020)
+- Owner feedback: choosing a service (e.g. Disaster Recovery) in the 3D map was hard and needed two clicks; wants one click to show everything below the map with graphics and a live animation; wants more realistic 3D/XD; Google shows no logo; asks for logical professional 3D flow explanations everywhere; no vulnerabilities / IDOR.
+- One-click: any ring item with `panel` (services, products, platforms) or `det` (reasons, industries, tips) opens its panel on a single click of the sphere, a chip button under the map, Enter, or the sel-card button. Items without a panel keep select-then-open. Panel scrolls into view only if off-screen. Prev/Next/Back buttons and `#d-...` deep links work for all.
+- Hit testing: radius >= 34 px, label area clickable, front nodes preferred; auto-rotation pauses while the pointer is over the map. Chips guarantee selection by keyboard/touch.
+- Panels: `svcPanel`, `prodPanel`, `platPanel` in scripts/build.mjs; copy in src/config/svcdetails.mjs (`svcExtra`: why/without/special per service; `prodExtra` for products). Scenes (animated SVG, step buttons) are reused inline on /services/ and /products/ and /platforms/; the home page uses text-only panels (no scenes) to stay light. /services/ is about 180 KB of HTML (static, compressible).
+- 3D flow: `.flow` (steps) and `.dtl-grid` (needs/risks/help, do/then/check) render as numbered, perspective-tilted cards joined by arrows with a travelling signal animation; reduced-motion disables it.
+- Renderer: glass spheres with rim light and caustic, depth-of-field blur on far nodes (where ctx.filter exists and width > 520), light shafts, dust motes, gyro rings at the core, floor light pools and ripple, selected-node satellites, pointer parallax.
+- Bugs found and fixed: duplicate SVG ids (`dots`, `land`) via scopeIds(); panel scenes stayed transparent because of the reveal-on-scroll class (CSS override); inline `style` previously fixed in v2.7.0.
+- Favicon/logo: tools/make-icons.py generates public/favicon.ico, favicon-48/96/144/192/512.png, apple-touch-icon.png, logo-512.png (logo on white rounded tile); head links, site.webmanifest, og:image and Organization.logo added. What Google shows cannot be verified from here; steps in docs/GOOGLE_LOGO_FAVICON.md.
+- Tested (headless Chromium, sandbox): /services/ chip click opens Disaster Recovery in one click with scene (clock advancing), 8 sections, 4-step flow; canvas single click opens a panel; /products/, /platforms/ and home open panels (home without scene); mobile 390px no overflow; earlier regression tests (why/industries/tools panels, version selector, license preselect) pass; 0 console errors; check.mjs 0 problems.
+- NOT tested: touch devices, Safari/Firefox, screen readers, Lighthouse/performance on low-end phones, live site, Google's actual display of the logo.

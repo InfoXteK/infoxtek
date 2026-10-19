@@ -28,3 +28,10 @@ Scope: repo as uploaded (infoxtek-web-v2_5_1.zip), reviewed by static inspection
 ## v2.7.0 addendum
 - check.mjs now also fails on inline `style=` attributes (CSP `style-src 'self'` blocks them; a first draft of the detail panels used one and produced console errors, caught by browser test).
 - New content file src/config/details.mjs is static text, rendered with HTML escaping in the build. No new hosts, dependencies, storage or network calls. URL hash is read to open a panel: the value is only matched against existing element ids, never inserted into the page.
+
+## v2.9.0 addendum (re-audit)
+- Re-checked after the changes: build + `npm run check` 0 problems. Check now also fails on duplicate HTML ids.
+- IDOR (insecure direct object reference): NOT APPLICABLE by design. The site is static files on GitHub Pages: no server code, no database, no accounts, no per-user objects and no object IDs in requests. Everything on it is public content. The only user-controlled inputs are `#d-...` (detail panel) and `?v=` (Net-Monit version); both are only compared against ids/options that already exist on the page and are never inserted into the page or sent anywhere.
+- New code paths (one-click panels, chips, renderer) use no new hosts, storage, network calls or dangerous sinks (banned-sink check passes). Chips are built with createElement/textContent.
+- Panel content comes from build-time config and is HTML-escaped; hrefs in panel buttons are now escaped too.
+- Still open: Actions not SHA-pinned, form provider not chosen, clickjacking not enforceable via meta CSP on GitHub Pages. "No vulnerabilities" cannot be promised for any site; what was tested is listed here and in the reference file.

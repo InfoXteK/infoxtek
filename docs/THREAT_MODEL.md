@@ -12,3 +12,4 @@ Trust boundaries: visitor browser; GitHub Pages (static host); Namecheap DNS; Gi
 | Subdomain/DNS takeover | dangling DNS | no wildcard DNS, only A + www CNAME | Owner must keep records tidy |
 | Clickjacking | iframe embedding | not enforceable on Pages | Accepted |
 | Spam/abuse of license form | bots | honeypot, corporate-email rule | No server-side rate limit |
+| IDOR / broken access control | guessing ids or URLs | no backend, no private data, no per-user objects; URL hash/query only matched to existing ids | N/A for a static public site |
