@@ -117,21 +117,24 @@ document.querySelectorAll('.ring3d').forEach((root) => {
     const rgba = (c, a) => 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')', mix = (c, k) => [Math.round(c[0] + (255 - c[0]) * k), Math.round(c[1] + (255 - c[1]) * k), Math.round(c[2] + (255 - c[2]) * k)], dark = (c, k) => [Math.round(c[0] * k), Math.round(c[1] * k), Math.round(c[2] * k)];
     const box = document.createElement('div'); box.className = 'gstage'; cv.tabIndex = 0; cv.setAttribute('role', 'application'); cv.setAttribute('aria-label', 'Interactive 3D map. Drag to orbit, click a node to select it, click it again or press Enter to open the full details. Arrow keys move between nodes.');
     box.append(cv); root.insertBefore(box, stageEl);
+    let GLR = null, glc = null, raf = 0, awake = 0;
+    const failGL = () => { try { if (GLR) GLR.dispose(); } catch {} GLR = null; if (glc) glc.remove(); glc = null; cv.classList.remove('g3hud'); root.dataset.gl = '2d'; try { rs(); } catch {} };
+    if (window.IXGL && IXGL.galaxy && IXGL.supported()) { try { glc = document.createElement('canvas'); glc.className = 'g3gl'; glc.setAttribute('aria-hidden', 'true'); box.insertBefore(glc, cv); GLR = IXGL.galaxy(glc, { onFail: failGL }); cv.classList.add('g3hud'); root.dataset.gl = 'webgl2'; } catch { GLR = null; if (glc) glc.remove(); glc = null; root.dataset.gl = '2d'; } } else root.dataset.gl = '2d';
     const tip = document.createElement('p'); tip.className = 'tip gtip'; tip.textContent = 'Drag to orbit. One click on a sphere (or a button below the map) opens its full details underneath. Arrow keys move between nodes, Enter opens.'; sel.after(tip);
     const chips = document.createElement('div'); chips.className = 'gchips'; chips.setAttribute('role', 'group'); chips.setAttribute('aria-label', 'Quick select: choose an item'); box.after(chips);
     const hh = sel.querySelector('h3'), pp = sel.querySelector('p'), bb = sel.querySelector('.btn');
     const dtls = root.querySelector('.dtls'), arts = dtls ? [...dtls.querySelectorAll('.dtl')] : [];
     root.dataset.g3 = '1'; root.classList.add('ongal'); arts.forEach((a) => { a.hidden = true; });
     const FL = 215, R0 = 200;
-    let lw = [], over = false, spx = 0, spy = 0, g = 0, selI = 0, W = 0, H = 0, yaw = 0.6, pitch = 0.22, vy = 0, vp = 0, drag = null, hover = -1, tr = 1, fly = null, t0 = 0, on = true, P = [], pos = [], prev = [], nodes = groups[0], punch = 0, px = 0, py = 0, cur = '';
-    const clamp = (v) => Math.max(-0.75, Math.min(0.75, v)), md = (a) => ((a % PI2) + PI2) % PI2;
+    let lw = [], over = false, spx = 0, spy = 0, g = 0, selI = 0, W = 0, H = 0, yaw = 0.6, pitch = GLR ? 0.3 : 0.22, vy = 0, vp = 0, drag = null, hover = -1, tr = 1, fly = null, t0 = 0, on = true, P = [], pos = [], prev = [], nodes = groups[0], punch = 0, px = 0, py = 0, cur = '';
+    const clamp = (v) => (GLR ? Math.max(0.05, Math.min(0.8, v)) : Math.max(-0.75, Math.min(0.75, v))), md = (a) => ((a % PI2) + PI2) % PI2;
     const fib = (n, R) => Array.from({ length: n }, (_, i) => { const y = n === 1 ? 0 : 1 - (2 * i) / (n - 1), r = Math.sqrt(Math.max(0, 1 - y * y)), a = i * 2.399963; return [Math.cos(a) * r * R, y * R * 0.72, Math.sin(a) * r * R]; });
     const motes = Array.from({ length: 46 }, () => [(Math.random() - 0.5) * 520, (Math.random() - 0.5) * 760, (Math.random() - 0.5) * 520, Math.random() * 6.28, Math.random()]);
     const stars = Array.from({ length: 170 }, () => [(Math.random() - 0.5) * 1100, (Math.random() - 0.5) * 800, (Math.random() - 0.5) * 1000, Math.random() * 6.28]);
-    const rs = () => { const r = box.getBoundingClientRect(), d = Math.min(2, window.devicePixelRatio || 1); W = r.width; H = r.height; cv.width = Math.round(W * d); cv.height = Math.round(H * d); ctx.setTransform(d, 0, 0, d, 0, 0); };
-    const proj = (p) => { const Y = yaw + spx * 0.16, Q = pitch + spy * 0.1, cy = Math.cos(Y), sy = Math.sin(Y), cp = Math.cos(Q), sp = Math.sin(Q); const x = p[0] * cy + p[2] * sy, z1 = -p[0] * sy + p[2] * cy, y = p[1] * cp - z1 * sp, z = p[1] * sp + z1 * cp, f = (700 / (700 - z)) * (1 + 0.1 * punch) * Math.min(1.1, Math.max(0.62, W / 760)); return { x: W / 2 + x * f, y: H / 2 + 10 + y * f, z, f }; };
+    const rs = () => { const r = box.getBoundingClientRect(), d = Math.min(2, window.devicePixelRatio || 1); W = r.width; H = r.height; cv.width = Math.round(W * d); cv.height = Math.round(H * d); ctx.setTransform(d, 0, 0, d, 0, 0); if (GLR) GLR.resize(W, H); wake(); };
+    const proj = (p) => { if (GLR) return GLR.project(p); const Y = yaw + spx * 0.16, Q = pitch + spy * 0.1, cy = Math.cos(Y), sy = Math.sin(Y), cp = Math.cos(Q), sp = Math.sin(Q); const x = p[0] * cy + p[2] * sy, z1 = -p[0] * sy + p[2] * cy, y = p[1] * cp - z1 * sp, z = p[1] * sp + z1 * cp, f = (700 / (700 - z)) * (1 + 0.1 * punch) * Math.min(1.1, Math.max(0.62, W / 760)); return { x: W / 2 + x * f, y: H / 2 + 10 + y * f, z, f }; };
     const setBtn = (n) => { bb.hidden = !(n.h || n.det); if (n.det) { bb.href = '#' + n.det; bb.textContent = 'Show full details'; } else if (n.h) { bb.href = n.h; bb.textContent = 'Open ' + n.t; } };
-    const choose = (i, doFly) => { selI = i; const n = nodes[i]; hh.textContent = n.t; pp.textContent = n.d; setBtn(n); punch = 1; markChips(); if (doFly && pos[i]) { const [x, y, z] = pos[i], R = Math.hypot(x, z) || 1; fly = { yaw: -Math.atan2(x, z), pitch: clamp(Math.atan2(y, R) * 0.8 + 0.12) }; vy = vp = 0; } };
+    const choose = (i, doFly) => { selI = i; const n = nodes[i]; hh.textContent = n.t; pp.textContent = n.d; setBtn(n); punch = 1; markChips(); if (doFly && pos[i]) { const [x, y, z] = pos[i], R = Math.hypot(x, z) || 1; fly = { yaw: -Math.atan2(x, z), pitch: clamp(GLR ? 0.3 - Math.atan2(y, R) * 0.35 : Math.atan2(y, R) * 0.8 + 0.12) }; vy = vp = 0; } if (GLR && pos[i]) GLR.burst(pos[i]); wake(); };
     const buildChips = () => { chips.replaceChildren(...nodes.map((n, i) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = n.t; b.addEventListener('click', () => { choose(i, true); if (n.det) showDet(n.det); }); return b; })); };
     const markChips = () => [...chips.children].forEach((b, i) => b.setAttribute('aria-pressed', String(i === selI)));
     const hideDet = () => { arts.forEach((a) => { a.hidden = true; a.classList.remove('enter'); }); root.classList.remove('hasdet'); cur = ''; };
@@ -153,22 +156,56 @@ document.querySelectorAll('.ring3d').forEach((root) => {
       if (gi !== g) setGroup(gi); const n = groups[gi].length, ni = (xi + (act === 'next' ? 1 : n - 1)) % n; choose(ni, true); showDet(nodes[ni].det);
     });
     const fromHash = () => { const id = decodeURIComponent((location.hash || '').slice(1)); const a = id && arts.find((x) => x.id === id); if (!a) return; const gi = +a.dataset.g, xi = +a.dataset.i; if (gi !== g) setGroup(gi); choose(xi, true); showDet(id, true); setTimeout(() => a.scrollIntoView({ block: 'start' }), 60); };
-    cv.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, y: e.clientY, m: 0 }; fly = null; try { cv.setPointerCapture(e.pointerId); } catch {} });
-    cv.addEventListener('pointermove', (e) => { const [mx, my] = xy(e); px = (mx / W - 0.5); py = (my / H - 0.5); if (drag) { const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.m += Math.abs(dx) + Math.abs(dy); drag.x = e.clientX; drag.y = e.clientY; yaw += dx * 0.007; pitch = clamp(pitch + dy * 0.005); vy = dx * 0.0009; vp = dy * 0.0006; return; } hover = hit(mx, my); cv.style.cursor = hover >= 0 ? 'pointer' : ''; });
-    cv.addEventListener('pointerup', (e) => { if (drag && drag.m < 6) { const [mx, my] = xy(e), h = hit(mx, my); if (h >= 0) { const same = h === selI, n = nodes[h]; if (!same) choose(h, true); if (n.det) showDet(n.det); else if (same) open(h); } } drag = null; });
+    cv.addEventListener('pointerdown', (e) => { wake(); drag = { x: e.clientX, y: e.clientY, m: 0 }; fly = null; try { cv.setPointerCapture(e.pointerId); } catch {} });
+    cv.addEventListener('pointermove', (e) => { const [mx, my] = xy(e); px = (mx / W - 0.5); py = (my / H - 0.5); if (drag) { const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.m += Math.abs(dx) + Math.abs(dy); drag.x = e.clientX; drag.y = e.clientY; yaw += dx * 0.007; pitch = clamp(pitch + dy * 0.005); vy = dx * 0.0009; vp = dy * 0.0006; return; } hover = hit(mx, my); cv.style.cursor = hover >= 0 ? 'pointer' : ''; wake(); });
+    cv.addEventListener('pointerup', (e) => { if (drag && drag.m < 6) { const [mx, my] = xy(e), h = hit(mx, my); if (h >= 0) { const same = h === selI, n = nodes[h]; if (!same) choose(h, true); if (!calm && navigator.vibrate && matchMedia('(pointer: coarse)').matches) { try { navigator.vibrate(8); } catch {} } if (n.det) showDet(n.det); else if (same) open(h); } } drag = null; });
     cv.addEventListener('pointerenter', () => { over = true; });
     cv.addEventListener('pointerleave', () => { hover = -1; px = py = 0; over = false; });
-    cv.addEventListener('keydown', (e) => { const n = nodes.length; if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); choose((selI + (e.key === 'ArrowRight' ? 1 : n - 1)) % n, true); } else if (e.key === 'Enter') { e.preventDefault(); open(selI); } });
+    cv.addEventListener('keydown', (e) => { wake(); const n = nodes.length; if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); choose((selI + (e.key === 'ArrowRight' ? 1 : n - 1)) % n, true); } else if (e.key === 'Enter') { e.preventDefault(); open(selI); } });
     tabs.forEach((t, i) => t.addEventListener('click', () => setGroup(i)));
-    if ('IntersectionObserver' in window) new IntersectionObserver((es) => { on = es[0].isIntersecting; }).observe(box);
-    addEventListener('resize', rs); addEventListener('hashchange', fromHash);
+    if ('IntersectionObserver' in window) new IntersectionObserver((es) => { on = es[0].isIntersecting; if (on) wake(); }).observe(box);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) wake(); });
+    if ('ResizeObserver' in window) new ResizeObserver(() => rs()).observe(box); else addEventListener('resize', rs);
+    addEventListener('hashchange', fromHash);
     const flr = R0 * 0.92;
+    const kick = () => { if (!raf) raf = requestAnimationFrame(loop); };
+    const wake = (ms) => { awake = performance.now() + (ms || 1500); kick(); };
+    const hud = (C) => {
+      ctx.clearRect(0, 0, W, H); lw = [];
+      const order = P.map((_, i) => i).sort((a, b) => P[a].z - P[b].z);
+      order.forEach((i) => {
+        const p = P[i], n = nodes[i], r = (i === hover || i === selI ? 23 : 19) * p.f, depth = Math.max(0.35, Math.min(1, (p.z + 300) / 500));
+        ctx.globalAlpha = depth; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '800 ' + Math.round(r * 0.95) + 'px system-ui,sans-serif'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(2,12,40,.55)'; ctx.strokeText(n.t[0], p.x, p.y + 1); ctx.fillStyle = '#fff'; ctx.fillText(n.t[0], p.x, p.y + 1);
+      });
+      // labels: selected and hovered first, then nearest first; a label that would overlap one already placed is skipped
+      const taken = [], lab = P.map((_, i) => i).sort((a, b) => ((b === selI) - (a === selI)) || ((b === hover) - (a === hover)) || (P[b].z - P[a].z));
+      lab.forEach((i) => {
+        const p = P[i], n = nodes[i], isS = i === selI, isH = i === hover, r = (isH || isS ? 23 : 19) * p.f, depth = Math.max(0.35, Math.min(1, (p.z + 300) / 500));
+        if (!(p.z > -110 || isS || isH)) { lw[i] = 0; return; }
+        ctx.font = (isS || isH ? '700 ' : '600 ') + Math.round(Math.max(11, 12.5 * p.f)) + 'px system-ui,sans-serif'; const w = ctx.measureText(n.t).width + 16, ly = p.y + r + 17, rc = [p.x - w / 2 - 3, ly - 14, w + 6, 28];
+        if (!isS && !isH && taken.some((t) => rc[0] < t[0] + t[2] && rc[0] + rc[2] > t[0] && rc[1] < t[1] + t[3] && rc[1] + rc[3] > t[1])) { lw[i] = 0; return; }
+        taken.push(rc); lw[i] = w; ctx.globalAlpha = isS || isH ? 1 : depth; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'rgba(6,12,36,.84)'; ctx.fillRect(p.x - w / 2, ly - 11, w, 22); ctx.strokeStyle = rgba(C, isS ? 0.9 : 0.35); ctx.lineWidth = 1; ctx.strokeRect(p.x - w / 2, ly - 11, w, 22); ctx.fillStyle = '#fff'; ctx.fillText(n.t, p.x, ly + 1);
+      });
+      ctx.globalAlpha = 1; ctx.strokeStyle = 'rgba(140,190,255,.55)'; ctx.lineWidth = 2;
+      [[14, 14, 1, 1], [W - 14, 14, -1, 1], [14, H - 14, 1, -1], [W - 14, H - 14, -1, -1]].forEach(([x, y, a, b]) => { ctx.beginPath(); ctx.moveTo(x, y + 22 * b); ctx.lineTo(x, y); ctx.lineTo(x + 22 * a, y); ctx.stroke(); });
+      ctx.fillStyle = 'rgba(190,215,255,.9)'; ctx.font = '12px ui-monospace,Menlo,Consolas,monospace'; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; ctx.fillText(((tabs[g] && tabs[g].textContent) || '').toUpperCase() + '  //  ' + nodes.length + ' NODES  //  SELECTED ' + (selI + 1), 28, 32);
+      const gi = GLR.info(); if (gi.frames < 12 || gi.frames % 10 === 0) { root.dataset.fps = gi.fps; root.dataset.q = gi.q; root.dataset.frames = gi.frames; root.dataset.dc = gi.dc; root.dataset.err = gi.err; }
+      if (W > 520) { ctx.fillStyle = 'rgba(150,185,235,.72)'; ctx.textAlign = 'right'; ctx.fillText('WEBGL2  //  ' + gi.fps + ' FPS  //  Q' + gi.q, W - 28, 32); }
+    };
+    const glFrame = (dt, e, C) => {
+      GLR.cam(yaw + spx * 0.16, pitch + spy * 0.1, punch);
+      const wn = nodes.map((_, i) => { const a = prev[i] || [0, 0, 0], b = pos[i], bob = calm ? 0 : Math.sin(T * 1.3 + i * 1.7) * 7; return [a[0] + (b[0] - a[0]) * e, a[1] + (b[1] - a[1]) * e + bob, a[2] + (b[2] - a[2]) * e]; });
+      P = wn.map((q) => GLR.project(q));
+      try { GLR.draw({ T: calm ? 2 : T, dt, nodes: wn, sel: selI, hover, col: C, tr: e, yaw, pitch, px: spx, py: spy }); } catch (err) { failGL(); return; }
+      hud(C);
+    };
     const loop = (ts) => {
-      requestAnimationFrame(loop); if (!on || !W) return; const dt = Math.min(0.05, (ts - t0) / 1000 || 0.016); t0 = ts, T = ts / 1000;
+      raf = 0; if (!on || document.hidden || !W) return; if (!calm || ts < awake) kick(); const dt = Math.min(0.05, (ts - t0) / 1000 || 0.016); t0 = ts, T = ts / 1000;
       if (!drag) { yaw += vy; pitch = clamp(pitch + vp); vy *= 0.94; vp *= 0.94; if (!calm && !fly && !over && Math.abs(vy) < 0.0006) yaw += 0.0018; }
       if (fly) { const dy = md(fly.yaw - yaw + Math.PI) - Math.PI; yaw += dy * 0.1; pitch += (fly.pitch - pitch) * 0.1; if (Math.abs(dy) < 0.008 && Math.abs(fly.pitch - pitch) < 0.008) fly = null; }
       spx += (px - spx) * 0.08; spy += (py - spy) * 0.08; if (tr < 1) tr = Math.min(1, tr + dt * 1.5); punch = Math.max(0, punch - dt * 1.8);
-      const e = 1 - Math.pow(1 - tr, 3), C = COL[g % COL.length]; ctx.clearRect(0, 0, W, H);
+      const e = 1 - Math.pow(1 - tr, 3), C = COL[g % COL.length]; if (GLR) { glFrame(dt, e, C); return; } ctx.clearRect(0, 0, W, H);
       // nebula parallax
       [[0.3, 0.35, 0.5, C, 0.16], [0.75, 0.7, 0.45, [99, 102, 241], 0.18]].forEach(([nx, ny, nr, nc, na]) => { const cx = W * nx - Math.sin(yaw) * 60 - px * 24, cy = H * ny - pitch * 40 - py * 18, rr = Math.max(W, H) * nr, gr = ctx.createRadialGradient(cx, cy, 0, cx, cy, rr); gr.addColorStop(0, rgba(nc, na)); gr.addColorStop(1, rgba(nc, 0)); ctx.globalAlpha = 1; ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H); });
       // volumetric light shafts
@@ -211,8 +248,8 @@ document.querySelectorAll('.ring3d').forEach((root) => {
       ctx.fillStyle = 'rgba(190,215,255,.9)'; ctx.font = '12px ui-monospace,Menlo,Consolas,monospace'; ctx.textAlign = 'left'; ctx.fillText(((tabs[g] && tabs[g].textContent) || '').toUpperCase() + '  //  ' + nodes.length + ' NODES  //  SELECTED ' + (selI + 1), 28, 32);
     };
     let T = 0;
-    rs(); setGroup(0); fromHash(); requestAnimationFrame(loop);
-  } catch (err) { root.classList.remove('ongal'); delete root.dataset.g3; root.querySelectorAll('.gstage,.gtip').forEach((x) => x.remove()); root.querySelectorAll('.dtl').forEach((a) => { a.hidden = false; }); }
+    rs(); setGroup(0); fromHash(); wake();
+  } catch (err) { try { if (typeof GLR !== 'undefined' && GLR) GLR.dispose(); } catch {} root.classList.remove('ongal'); delete root.dataset.g3; root.querySelectorAll('.gstage,.gtip').forEach((x) => x.remove()); root.querySelectorAll('.dtl').forEach((a) => { a.hidden = false; }); }
 });
 /*G3END*/
 document.querySelectorAll('.ring3d').forEach((root) => {
@@ -290,3 +327,60 @@ addEventListener('keydown', (e) => { if (/INPUT|TEXTAREA|SELECT/.test(e.target.t
   if (ls) { const v = new URLSearchParams(location.search).get('v'); if (v) { const o = [...ls.options].find((x) => x.dataset.v === v.toLowerCase()); if (o) ls.value = o.value; } }
 })();
 /*VEREND*/
+
+/*F3 v3.0.0: 3D flow stage controller. Progressive enhancement over the .f3list step cards: needs WebGL2, otherwise the cards stay as they are. */
+(() => {
+  const els = [...document.querySelectorAll('.flow3d')];
+  if (!els.length || !window.IXGL || !IXGL.flowHost || !IXGL.supported()) return;
+  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let host = null;
+  const mk = (tag, cls, txt) => { const n = document.createElement(tag); if (cls) n.className = cls; if (txt) n.textContent = txt; return n; };
+  const btn = (label, cls, aria) => { const b = mk('button', cls, label); b.type = 'button'; if (aria) b.setAttribute('aria-label', aria); return b; };
+  const sync = (st, step, playing) => {
+    st.chips.forEach((c, i) => c.setAttribute('aria-pressed', String(i === step + 1)));
+    const s = st.data.s[step];
+    st.capB.textContent = s ? 'Step ' + (step + 1) + ' of ' + st.data.s.length + ': ' + s[0] + '.' : 'Overview.';
+    st.capT.textContent = s ? s[1] : 'All ' + st.data.s.length + ' steps of this flow. Pick a step, or press play to walk through it.';
+    if (st.list) [...st.list.children].forEach((li, i) => li.classList.toggle('on', i === step));
+    st.play.textContent = playing ? 'Pause' : 'Play'; st.play.setAttribute('aria-pressed', String(!!playing));
+  };
+  const setup = (el) => {
+    if (el._f3) return el._f3;
+    let data; try { data = JSON.parse(el.dataset.f); } catch { return null; }
+    if (!data || !Array.isArray(data.n) || !Array.isArray(data.s) || !data.s.length) return null;
+    const title = el.dataset.ttl || data.t || 'flow', wrap = mk('div', 'f3'), stage = mk('div', 'f3stage'), bar = mk('div', 'f3bar'), cap = mk('p', 'f3cap'), capB = mk('b'), capT = mk('span');
+    stage.tabIndex = 0; stage.setAttribute('role', 'group'); stage.setAttribute('aria-label', 'Interactive 3D diagram: ' + title + '. Use the left and right arrow keys to change step. The steps are also written out as text.');
+    cap.setAttribute('aria-live', 'polite'); cap.append(capB, document.createTextNode(' '), capT);
+    const prev = btn('\u2039', 'f3b', 'Previous step'), next = btn('\u203A', 'f3b', 'Next step'), play = btn('Play', 'f3b f3play'), reset = btn('Reset view', 'f3b f3reset'), all = btn('All', 'f3c', 'Show the whole flow'), chips = mk('span', 'f3chips');
+    play.setAttribute('aria-pressed', 'false'); if (calm) play.hidden = true;
+    chips.append(all); data.s.forEach((s, i) => chips.append(btn(String(i + 1), 'f3c', 'Step ' + (i + 1) + ': ' + s[0])));
+    bar.append(prev, chips, next, play, reset); wrap.append(stage, bar, cap);
+    const list = el.querySelector('.f3list'); el.insertBefore(wrap, el.firstChild); if (list) list.classList.add('live');
+    const st = { wrap, stage, data, ctl: null, chips: [...chips.children], list, capB, capT, play, timer: 0, touched: false };
+    const go = (i) => { st.touched = true; if (st.ctl) st.ctl.goto(i, true); };
+    st.chips.forEach((c, i) => c.addEventListener('click', () => go(i - 1)));
+    prev.addEventListener('click', () => { st.touched = true; if (st.ctl) st.ctl.prev(true); });
+    next.addEventListener('click', () => { st.touched = true; if (st.ctl) st.ctl.next(true); });
+    play.addEventListener('click', () => { st.touched = true; if (st.ctl) st.ctl.play(!st.ctl.playing); });
+    reset.addEventListener('click', () => { if (st.ctl) st.ctl.resetView(); });
+    if (list) [...list.children].forEach((li, i) => li.addEventListener('click', () => go(i)));
+    stage.addEventListener('keydown', (e) => { const c = st.ctl; if (!c) return; if (e.key === 'ArrowRight') { st.touched = true; c.next(true); e.preventDefault(); } else if (e.key === 'ArrowLeft') { st.touched = true; c.prev(true); e.preventDefault(); } else if (e.key === ' ' || e.key === 'Enter') { st.touched = true; c.play(!c.playing); e.preventDefault(); } else if (e.key === 'Home') { go(-1); e.preventDefault(); } });
+    stage.addEventListener('pointerdown', () => { st.touched = true; if (st.ctl && st.ctl.playing) st.ctl.play(false); });
+    el._f3 = st; el.classList.add('f3on'); sync(st, -1, false); return st;
+  };
+  const hide = (el) => { const st = el._f3; if (!st) return; clearInterval(st.timer); if (st.ctl) { st.ctl.destroy(); st.ctl = null; } };
+  const fail = (el) => { const st = el._f3; hide(el); if (st) { st.wrap.remove(); if (st.list) st.list.classList.remove('live'); } el._f3 = null; el._dead = true; el.classList.remove('f3on'); el.dataset.gl = 'off'; };
+  const show = (el) => {
+    const st = setup(el); if (!st) { el._dead = true; return; }
+    if (st.ctl) return;
+    try { if (!host) host = IXGL.flowHost(); st.ctl = host.attach(st.stage, st.data, {}); } catch { fail(el); return; }
+    st.ctl.onStep = (i, p) => sync(st, i, p);
+    sync(st, -1, false); st.ctl.play(!calm && !st.touched);
+    el.dataset.gl = 'webgl2'; clearInterval(st.timer);
+    st.timer = setInterval(() => { if (!host) return; const i = host.info(); el.dataset.frames = i.frames; el.dataset.fps = i.fps; el.dataset.q = i.q; el.dataset.err = i.err; }, 1000);
+  };
+  // Build every stage skeleton now so the page layout is final (no jump when a stage mounts); only the WebGL mount is lazy.
+  els.forEach((el) => { if (!setup(el)) el._dead = true; });
+  const io = new IntersectionObserver((es) => es.forEach((e) => { const el = e.target; if (el._dead) return; if (e.isIntersecting) show(el); else hide(el); }), { rootMargin: '320px', threshold: 0 });
+  els.forEach((el) => { if (!el._dead) io.observe(el); });
+})();

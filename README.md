@@ -1,6 +1,6 @@
 Beginner? Follow `docs/SETUP_GUIDE_NAMECHEAP.md` instead of the short steps below.
 
-# InfoXtek website (v1.0.0)
+# InfoXtek website (v3.0.0)
 
 ## Edit the content
 Open `src/config/site.mjs`. Change text there. Put real email, phone and address into the `contact` block (they are `null` until you add them).
@@ -8,7 +8,10 @@ Open `src/config/site.mjs`. Change text there. Put real email, phone and address
 ## Preview on your computer (optional, developers only)
 1. Install Node.js 20 or newer from nodejs.org.
 2. Open a terminal in this folder.
-3. Run `npm run dev`. Open the address it prints (starts at http://127.0.0.1:3000).
+3. Run `npm run dev`. Open the address it prints (starts at http://127.0.0.1:3000). To use this release's port, set `PORT=3021` first (Windows cmd: `set PORT=3021`, then `npm run dev`); if a port is busy the server tries the next one.
+
+## 3D map and 3D flows (v3.0.0)
+The service map and the step-by-step flow diagrams use WebGL2. Browsers without it automatically get the 2D map and the numbered step cards. Edit the flows in `src/config/flows3d.mjs` (the build stops with a clear message if something is wrong). Details, tuning and testing: `docs/3D_ENGINE.md`.
 
 ## Put it online with GitHub Pages and infoXtek.com
 1. Create a free account at github.com. Click New repository, name it `infoxtek`, leave it empty.

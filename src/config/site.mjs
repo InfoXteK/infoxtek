@@ -205,11 +205,9 @@ export const tips = [
 //         label (shown to visitors), status, repo (GitHub URL), note (one or two plain sentences).
 // ---------------------------------------------------------------------------
 export const netMonitVersions = [
-  {id: 'v11.3', label: 'V11.3', status: 'latest', repo: 'https://github.com/InfoXteK/Net-Monit',
+  { id: 'v11.2', label: 'V11.2', status: 'latest', repo: 'https://github.com/InfoXteK/Net-Monit-V11_2',
     note: 'Production-grade, self-hosted network monitoring platform. Monitors ping latency, packet loss, CPU, memory, disk and bandwidth across your infrastructure; web application uptime and SSL expiry; WAN speed tests; network scanner device discovery; email and SMS alerts with configurable thresholds and escalations.' },
-  { id: 'v11.2', label: 'V11.2', status: 'previous', repo: 'https://github.com/InfoXteK/Net-Monit-V11_2',
-    note: 'Earlier release of the same platform: Flask and SQLite, multi-level L1/L2/L3 escalation by email, SMS and voice call, free vendor-issued license with a 30-day trial.' },
-  { id: 'v11.0', label: 'V11.0', status: 'Earlier', repo: 'https://github.com/InfoXteK/Net-monit-V11.0',
+  { id: 'v11.0', label: 'V11.0', status: 'previous', repo: 'https://github.com/InfoXteK/Net-monit-V11.0',
     note: 'Earlier release of the same platform: Flask and SQLite, multi-level L1/L2/L3 escalation by email, SMS and voice call, free vendor-issued license with a 30-day trial.' },
 ];
 // Extra choice at the bottom of the license-form drop-down for versions not listed above.

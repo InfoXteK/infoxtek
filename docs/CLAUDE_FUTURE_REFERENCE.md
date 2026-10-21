@@ -1,4 +1,4 @@
-# InfoXteK: Complete Claude Reference (v2.9.0, port 3020)
+# InfoXteK: Complete Claude Reference (v3.0.0, port 3021)
 Living record from the start of the project. Update on every change. Repository and docs are the source of truth.
 
 ## 1. Identity
@@ -19,6 +19,7 @@ Living record from the start of the project. Update on every change. Repository 
 9. v1.6.0 per-page design styles; logo X and K blue (earlier Xt was a mistake).
 10. v2.5.1 owner asked for 3D, interactive, gaming-style effects on ALL pages and clickable areas, and sent the iFiNeX mobile repo (https://github.com/InfoXteK/iFiNeX-Mobile/releases, download via the Releases option on the right of the repo page). Added a site-wide game layer (site.js between /*FX*/ and /*FXEND*/): click/tap spark bursts + shock ring, cursor glow trail, 3D tilt with moving drop-shadow and press-in depth on every button, card, nav link, chip, tab and step button, rubber-band drag (cards can be picked up and snap back with a spring), page-leave/enter 3D transitions, chip fling physics on the Home hero (throw a skill chip, it bounces off the edges), form field focus lift, an XP/level HUD with toast achievements (progress stored only in the visitor's browser localStorage, never sent anywhere) and an FX on/off button. iFiNeX card now shows a Download from GitHub Releases button with instructions.
 11. v2.4.0 owner feedback on v2.3.0: a stray `)}` printed under the ring on Home, Industries and Platforms (my build edit left part of a template expression; fixed) and the CSS 3D ring still did not feel like a proper 3D/gaming experience. The ring is now only a fallback: every `.ring3d` becomes a canvas 3D 'service galaxy' (hand-written perspective projection, no library): glowing orbs on a sphere around a core hub, data pulses along links, star field, drag to orbit with inertia, auto-orbit, hover highlight, click to select and fly the camera to the node, click again or Enter to open, arrow keys, tabs morph nodes between groups, HUD corner brackets and readout, detail panel + Open button below. Same data as the ring, so it appears on Home, Services, Industries, Why Choose Us, Tools & Tips, Products and Platforms.
+- v3.0.0 (latest): see section 24. WebGL2 3D engine, logical 3D flow for every service/product/platform/reason/industry/tip.
 11. v2.3.0 owner feedback on v2.2.0 (screenshots): connector lines ran straight through boxes and struck out text, and the home 3D stack hid labels and made services impossible to choose. Fixes: all connector lines are now drawn behind boxes in every custom scene (`layered`), cyber scene redesigned so each attack arrives by its own vector over the top and is stopped by its own layer (no line crosses other layers); home 3D stack removed and replaced by a 3D selector ring (`ring3d`): tabs (IT & Security / Digital & Software), drag, arrows, left/right keys, click a card to bring it front, click the front card to open, detail panel shows title/summary/Open button. Same ring on /services/, /industries/, /why-choose-us/, /tools-tips/ (4 tip groups), /products/ (Products + Platforms), /platforms/. Without JS the rings fall back to plain card grids. Scene hotkeys: 1-4 steps, P play/pause.
 11. v2.2.0 owner asked for a 3D-based, interactive site with logical graphical explanations (3D and XD): home hero is now a draggable 3D layer stack (CSS 3D: Backup & DR, Network, Cloud, Cyber Security, AI, Apps & Web; hover explodes the stack, click opens the service); every scenario panel has real depth (backdrop layer behind, scene in front, tilts toward the pointer) and a Play/Pause + Step 1-4 control that freezes the SVG animation at that step (setCurrentTime) with the step text; cards tilt in 3D on hover; page header art has pointer parallax. All plain CSS 3D + SVG + JS (no WebGL/three.js).
 11. v2.1.0 owner shared 4 stock images (AI chip on circuit board, cyber padlock HUD over a night city, Disaster Recovery dotted world map + cloud sync, gears with icons) as IDEAS ONLY (not used or copied): new original backdrops circuit (AI), HUD padlocks + hex matrix (Cyber), dotted world map with links + cloud sync (DR), rotating gears + heartbeat (Managed IT); service headers now tinted with each service accent and taller. License form now requires corporate email (free webmail domains rejected client-side), company, Net-Monit version, OS, Device ID, Activation Code; mailto copies (CC) abuabdullah.be@outlook.com and jamilsyed77@gmail.com (config contact.licenseCc, base64 in HTML to deter scrapers). Brand name in page text now renders Info[X]te[K] with blue X and K everywhere (build-time `brandize`).
@@ -32,11 +33,11 @@ Living record from the start of the project. Update on every change. Repository 
 - No analytics/telemetry/tracking; CSP allows only self (+ form endpoint origin if set); no remote fonts/scripts; all config text HTML-escaped.
 - Unknown company data stays null; never invent contact data. Vendors are text only, no logos or partnership claims (trademark footnote). AWS, Alibaba, CrowdStrike, Proofpoint, FortiDLP kept at owner request though not in resume: verify.
 - Contact form is not connected (no backend); set `contact.formEndpoint` to an approved https provider.
-- Never claim tests/audits/deploys/DNS happened unless run. Browser rendering has never been visually verified by Claude.
+- Never claim tests/audits/deploys/DNS happened unless run. Browser rendering was checked by looking at screenshots from headless Chromium with software WebGL (v3.0.0 session); it has never been verified on a real GPU, a real phone, Safari or Firefox.
 - Every code change bumps version and port and updates this file and CLAUDE.md.
 
 ## 4. Structure
-package.json | scripts/build.mjs (templates, styleMap, scenes renderer), serve.mjs, check.mjs | src/config/site.mjs (all content: site, contact, nav, platforms, services, reasons, industries, bookings, resources, testimonials, tips, products) | src/config/scenes.mjs | src/assets/{site.css,site.js,logo.png} | public/{CNAME,favicon.png,favicon-32.png,downloads/} | .github/workflows/deploy.yml | docs/ (this file, SETUP_GUIDE_NAMECHEAP.md).
+package.json | scripts/build.mjs (templates, styleMap, scenes renderer, 3D flow blocks, engine script loader), serve.mjs, check.mjs (links, SEO, security, 3D data/privacy/size checks) | src/config/site.mjs (all content: site, contact, nav, platforms, services, reasons, industries, bookings, resources, testimonials, tips, products) | src/config/scenes.mjs, kit.mjs, envs.mjs, svcdetails.mjs, details.mjs | src/config/flows3d.mjs (3D flow definitions, autoFlow, validateFlow) | src/assets/{site.css,site.js,logo.png,gl-core.js,gl-galaxy.js,gl-flow.js} | tools/{make-icons.py,browser-tests/} | public/{CNAME,favicon.png,favicon-32.png,downloads/} | .github/workflows/deploy.yml | docs/ (this file, SETUP_GUIDE_NAMECHEAP.md).
 
 ## 5. Pages and design styles
 / Bento | /why-choose-us/ Minimalist | /industries/ Flat | /products/ Glassmorphism | /tools-tips/ Claymorphism | /book-online/ Material | /contact/ Neumorphism | /services/ Fluent.
@@ -64,7 +65,7 @@ Workflow deploy.yml (checkout v4, setup-node v4 Node 22, build, check, configure
 Grep-level review only: no innerHTML/eval/document.write, no inline handlers, no external hosts, no secret strings; check.mjs passes (links, SEO tags, one h1, no external refs; allows github.com/InfoXteK links). Not done: Lighthouse, accessibility tooling, contrast measurement, cross-browser test, formal threat model/SAST document, npm audit (no dependencies).
 
 ## 11. Next session
-Read CLAUDE.md and this file; ask owner for logo original, phone/address, form provider, product download files and descriptions; verify HTTPS; consider product detail pages, iFiNeX SQL schema, SEO sitemap submission.
+(See also section 24.) Read CLAUDE.md, docs/3D_ENGINE.md and this file; ask owner for logo original, phone/address, form provider, product download files and descriptions; verify HTTPS; consider product detail pages, iFiNeX SQL schema, SEO sitemap submission.
 
 ## 12. Scene system (v1.8.0)
 - Service page = band + "See it in action" scene + How we deliver + What we do + Technology. Scene SVG is built in build.mjs (customScene for `custom[slug]`, else sceneSvg from `scenes[slug]`).
@@ -155,3 +156,87 @@ Read CLAUDE.md and this file; ask owner for logo original, phone/address, form p
 - Favicon/logo: tools/make-icons.py generates public/favicon.ico, favicon-48/96/144/192/512.png, apple-touch-icon.png, logo-512.png (logo on white rounded tile); head links, site.webmanifest, og:image and Organization.logo added. What Google shows cannot be verified from here; steps in docs/GOOGLE_LOGO_FAVICON.md.
 - Tested (headless Chromium, sandbox): /services/ chip click opens Disaster Recovery in one click with scene (clock advancing), 8 sections, 4-step flow; canvas single click opens a panel; /products/, /platforms/ and home open panels (home without scene); mobile 390px no overflow; earlier regression tests (why/industries/tools panels, version selector, license preselect) pass; 0 console errors; check.mjs 0 problems.
 - NOT tested: touch devices, Safari/Firefox, screen readers, Lighthouse/performance on low-end phones, live site, Google's actual display of the logo.
+
+## 24. v3.0.0 notes (WebGL2 3D engine + logical 3D flows, port 3021)
+
+### 24.1 Owner request, diagnosis, decision
+- Owner re-sent every file (v2.9.0 ZIP, master prompt, memory and reference files) plus the whole slash-command list, repeated several times, and said "continue and complete my request": wants a **logical, professional 3D flow explanation for everything**, **higher-performance and more realistic 3D/XD graphics**, an **interactive, live, gaming-like feel**. This is the same ask as the v2.9.0 feedback, so v2.9.0 evidently did not satisfy it.
+- Direct diagnosis: v2.9.0 drew the map with Canvas 2D (CPU, no real lighting, depth, reflection or bloom) and its "3D flow" was CSS-tilted cards. Realism and speed both need the GPU, so more Canvas 2D polish could not fix it.
+- Decision: a hand-written **WebGL2 engine, no library** (Three.js not added: keeps zero dependencies, the strict `script-src 'self'` CSP and a small payload; no supply-chain surface). The v2.9.0 Canvas 2D map and the CSS step cards stay as automatic fallbacks.
+- The slash commands (`/godmode`, `/ghost`, `L99`, `/Model ...` and so on) are not features of this environment. They were treated as the workflow in the master prompt: inspect, plan, build, audit, remediate, test, document. Nothing was bypassed.
+- Version/port: **v3.0.0, port 3021** (next after 3020). v3.0.0 rather than v2.10.0 because the renderer is replaced and 2.10 reads as lower than 2.9 to non-developers. Port 3021 was bound successfully in the build sandbox only; it is not on the browser blocked-port list as far as known (list recalled, not re-checked). Check on the owner's PC (Windows: `netstat -ano | findstr :3021`; `serve.mjs` also auto-increments).
+
+### 24.2 Features
+1. **GPU service map** (`.ring3d`): lit glass-metal orbs (Fresnel rim, environment reflection, specular, latitude scan lines, per-node hue variation), glowing core with gyro rings, reflective floor with grid, shadows and light pools, orbit rings, links with moving pulses, GPU stars, dust and selection bursts, light shafts, nebula, MSAA, 2-level bloom, vignette, dither. Selected node scales with a spring, gets 3 satellites, a beam to the floor and a floor ripple. Labels and HUD are a 2D overlay; label collision avoidance; hit-testing shared with the 2D fallback. Touch: tap selects, vibrates 8 ms where supported.
+2. **3D flow stage** (`.flow3d`): typed 3D nodes (24 kinds) on pedestals, dashed zones, links with direction chevrons and travelling packets, mirror reflection, bloom. Camera glides to the active nodes of each step and dims the rest; step badge on the focus node. Controls: All, 1..n, previous, next, play/pause (attract mode starts automatically unless reduced motion; any user input stops it), reset view; drag to orbit (yaw +-1.25 rad, pitch 0.35 to 1.2), click a node to jump to its step; Left/Right/Space/Enter/Home on the focused stage. Narrow (portrait) stages read the flow top to bottom, labels wrap to two lines and try right, left, below, above before being skipped.
+3. **Flows for everything**: 23 hand-written flows (16 services, 3 products, 4 platforms) in `src/config/flows3d.mjs`, plus generated flows for all 5 reasons, 5 industries and 16 tips from their existing points (`autoFlow`). Panels (on /services/, /products/, /platforms/, home, reasons, industries, tips) and dedicated pages (services, products, platforms) all show one.
+4. **Performance and resilience**: quality tiers, governor, off-screen/hidden pause, reduced-motion on-demand rendering, context-loss recovery, shared flow context, preallocated buffers (see 24.6).
+5. **Build safety**: flows validated at build and again from the final HTML; engine privacy/size/order checks in `npm run check`.
+
+### 24.3 Files, functions, API
+| File | Contents |
+|---|---|
+| `src/assets/gl-core.js` | `IXGL.supported()`, `IXGL.forcedQ` (`?q=`), `IXGL.GL(canvas)` (program, use, set, seti, buf, sub, vao, tex, reset, dispose), `IXGL.geo` (sphere, box, frustum, torus), `IXGL.Post` (size, bind, finish: MSAA resolve, bright pass, blur, composite), `IXGL.Gov` (quality governor), `IXGL.shaders` (sprite and ribbon sources), quad and strip buffers |
+| `src/assets/gl-galaxy.js` | `IXGL.galaxy(canvas, {onFail})` returns `{resize(w,h), cam(yaw,pitch,punch), project([x,y,z]), draw(frame), burst([x,y,z]), info(), dispose(), q, fps}` |
+| `src/assets/gl-flow.js` | `IXGL.flowHost()` returns `{attach(el, data), root, info(), canvas, wake()}`; `attach` returns the controller `{goto(i,byUser), next(), prev(), play(bool), resetView(), setVisible(b), focusNode(i), destroy(), onStep(step,playing), step, playing, portrait}`; internals: `REC` (24 node recipes), `build`, `fitPts` (exact camera fit), `overlay` (labels), `draw`, input handlers |
+| `src/assets/site.js` | `/*G3*/` galaxy glue: creates `.g3gl` WebGL canvas under the 2D interaction canvas, `failGL()`, `glFrame()`, `hud()`, `kick()/wake()` loop control; the 2D renderer is the fallback. `/*F3*/` controller: builds each `.flow3d` skeleton at load, mounts lazily through IntersectionObserver (rootMargin 320 px), syncs buttons/caption/list, `fail()` removes the stage and leaves the step cards |
+| `src/config/flows3d.mjs` | `flows` (23), `autoFlow(set, title, points, example)`, `validateFlow(f, name)`, `KINDS`, `TONES` |
+| `scripts/build.mjs` | `flowBlock`, `flowSec` (panels), `flowPage` (dedicated pages), `autoSec` (reasons/industries/tips), `glScripts` (script loader), flow validation loop |
+| `scripts/check.mjs` | adds the 3D assertions (flow data, script order and need, privacy regex, size budget) |
+| `docs/3D_ENGINE.md` | architecture, performance, fallbacks, how to edit a flow, testing |
+| `tools/browser-tests/` | Playwright scripts used in this session (+ README) |
+
+### 24.4 App flow
+- **Build**: `build.mjs` validates all flows, renders `<div class="flow3d" data-f="{escaped JSON}" data-ttl="...">` (with `<ol class="flow f3list">` as the text alternative for hand-written flows), picks scripts per page (`gl-core`, then `gl-galaxy` and/or `gl-flow`, then `site.js`).
+- **Load**: deferred scripts run in order. Map: `IXGL.supported()` then `IXGL.galaxy()`; any error or no WebGL2 sets `data-gl="2d"` and the 2D renderer runs. Flows: skeletons are built immediately (layout final), the GL stage mounts only when the element is within 320 px of the viewport, the shared host re-parents its canvases into the active stage, leaving the viewport detaches it.
+- **Map frame** (`site.js loop` then `glFrame`): update camera and morph, compute world positions (morph + bob), `GLR.cam`, `GLR.project` for hit-testing, `GLR.draw`, `hud()`. The loop stops when off-screen, hidden or (reduced motion) idle.
+- **Flow frame** (`gl-flow.js frame`): advance autoplay, ease camera/dim/focus/link activity, fill instance buffers, draw, overlay labels.
+- **Fallbacks**: no WebGL2 or init error: 2D map and CSS step cards. Context lost: wait up to 2.5 s for restore, else 2D. Flow mount error: stage removed, step cards stay.
+
+### 24.5 Payloads and data
+- **Flow JSON** (`data-f`): `{t, z?:[[label,c0,r0,c1,r1,tone?]], n:[[id,kind,label,col,row,tone?]], l?:[[from,to,tone?]], s:[[title,caption,[nodeIds],['from>to',...]]]}`. Limits (`validateFlow`): title 80 chars; 2 to 12 nodes; id `[a-z0-9]{1,4}`; label 40; col 0 to 6, row 0 to 3, unique cells; 20 links; 1 to 6 steps (title 40, caption 240); 3 zones; known kinds and tones only.
+- **Kinds**: user device phone server db cloud shield lock key gear globe doc mail bell chart code router firewall ai package goal threat clock admin. **Tones**: info (cyan), good (green), warn (amber), bad (red), ai (violet), mute (steel).
+- **Galaxy `draw(frame)`**: `{T seconds, dt seconds, nodes [[x,y,z]...] (map coordinates, y down), sel, hover (-1 none), col [r,g,b 0-255], tr (morph 0-1), yaw, pitch, px, py}`. `cam()` flips the pitch sign so the camera sits above the floor; `project()` mirrors the shader maths.
+- **Instance layouts (floats)**: sphere 12 `[cx,cy,cz,r | r,g,b,sel | hover,phase,core,alpha]`; decal 12 `[x,z,hx,hz | rgba | kind,phase,0,0]`; ribbon 16 `[A.xyz,width | B.xyz,startLen | rgba | kind,segLen,0,0]`; sprite 12 `[pos.xyz,size | rgba | kind,phase,p1,p2]`; solid 16 `[pos.xyz,ry | scale.xyz,rx | rgb,emissive | dim,focus,hover,0]`. Sprite kinds 0 glow, 1 star, 2 ring, 3 hot dot, 5 dust, 6 burst, 7 pulse. Ribbon kinds 0 plain, 1 pulses, 2 chevrons, 3 shimmer.
+- **Debug attributes**: `.ring3d[data-gl="webgl2"|"2d", data-fps, data-q, data-frames (every 10 frames), data-dc, data-err]`; `.flow3d[data-gl="webgl2"|"off", data-frames, data-fps, data-q, data-err (every second)]`. URL `?q=0|1|2` pins the quality tier (testing only).
+
+### 24.6 Performance design and measurements
+- Tiers: 0 (DPR <= 1.25, no MSAA/bloom/reflection, 700 stars), 1 (DPR <= 1.5, MSAA 4x, 1-level bloom, reflection, 1200 stars, 120 dust), 2 (DPR <= 2, MSAA 4x, 2-level bloom, 1800 stars, 220 dust, nebula noise). Start: 2 on desktop, 1 for coarse pointer, deviceMemory <= 4 or <= 4 cores. Governor steps down only (after 30 warm-up frames, average frame > 27 ms for 40 frames).
+- Draw calls per frame (counted in the page): map 9 (tier 0), 14 (tier 1), 17 (tier 2); flow stage about 13.
+- **Measured here (headless Chromium 141, SwiftShader software WebGL2, 1100x900, CDP metrics over 8 s)**: main-thread JavaScript per frame about 1.6 ms (tier 0), 1.3 ms (tier 1), 1.5 ms (tier 2; the map's frame counter ticks every 10 frames so these are upper bounds) and 1.0 ms for the flow stage; JS heap flat at about 3 MB (no growth); map idle frames with reduced motion: 0 in 2.5 s. **GPU time and real frame rates were not measured**: software rendering ran at only a few fps in the sandbox, which says nothing about real GPUs.
+- Payload: engine 75 KB raw, about 25 KB gzipped, loaded only on pages with 3D content; `site.js` grew to 54 KB. /services/ HTML grew from about 180 KB to about 215 KB (flow JSON; compresses well).
+
+### 24.7 Design and UI
+- Visual language: dark navy "3D lab" panels (same family as the v2.9.0 holographic map) inside the light pages; semantic tone colours; pedestal rings and pills; dashed zone borders; chevrons show direction; packets show activity; reflection and bloom for depth. Page theme colours apply to the buttons and caption only.
+- Components: `.f3stage` (focusable group, aria-label), `.f3bar` (buttons), `.f3chips`, `.f3cap` (aria-live), `.f3list` (step cards, highlighted `.on`, clickable). Mobile: taller stage (clamp 340 to 470 px), chips on their own first row, 44 px targets.
+- Accessibility: keyboard (arrows, Space/Enter, Home), names on all buttons, text alternative always present, reduced motion honoured. Not verified with a screen reader.
+
+### 24.8 Defects found and fixed during this build (by looking at renders)
+1. First map render was blown out (white core, every orb clipped to flat cyan): rebalanced lighting, added a tone curve, switched bloom to a luma threshold, calmed halos and core.
+2. Floor reflection invisible: floor made more transparent, mirror stronger. Floor ripple was cropped: scene raised 14 px.
+3. Stripe pattern on orbs too heavy: softened. Core looked grey without bloom: brightened.
+4. Flow too small and links only 0.9 units long (no room for chevrons): exact bounding-box camera fit, spacing 6.2, model scale 1.15.
+5. Chevron shader pointed both ways: rewritten as a directional chevron with a length-scale uniform.
+6. Shield model read as a flat hexagon: rebuilt with a dark body, accent core and ring.
+7. Phone: diagram tiny, labels covering nodes, controls wrapped badly, two labels dropped: portrait orientation, two-line labels, multi-position label placement, taller stage, chip row first.
+8. Stage inserted on scroll shifted the page by about 500 px: skeletons are built at load, GL mount stays lazy with a 320 px preload margin.
+9. Per-frame allocations in both render loops: replaced by preallocated buffers; `getError()` sync reduced to every 900 frames (every 90 with `?q=`); data attributes throttled.
+10. Process notes: browser tests under software WebGL are slow, so run one scenario per command (300 s tool limit), start the dev server detached (`setsid nohup`), and never `pkill -f` a pattern that appears in your own command line.
+
+### 24.9 Tests run in this session (headless Chromium 141, software WebGL2) and results
+- Standalone galaxy harness at tiers 0, 1, 2: shaders compile, no GL errors, screenshots reviewed. Standalone flow harness: overview and step views reviewed.
+- In page `/services/`: WebGL2 active, tier 2, 17 draw calls, 0 GL errors, chip click and canvas click both open the panel in one click, 0 console messages, no overflow.
+- Flow functional (`flow-functional.cjs`): Disaster Recovery page (caption and list sync per step, aria-pressed on chips, ArrowLeft/ArrowRight, play toggles to Pause, All view), panel switching on /services/ (exactly one shared GL canvas, moves with the open panel), generated flow in a reasons panel (5 chips). 0 console errors. Passed.
+- No WebGL (`--disable-3d-apis`): map falls back to 2D, step cards remain, panels work, 0 console errors. Passed.
+- Context loss: restore resumes rendering (frames advance); permanent loss falls back to 2D within about 3.6 s and the page stays interactive. Passed (galaxy only; the flow host's recovery path is written the same way but was not exercised).
+- Reduced motion: Play hidden, no autoplay, map idle with 0 frames in 2.5 s. Passed.
+- Phone viewport 390x844 DPR 2 with touch emulation: starts at tier 1, no horizontal overflow, flow readable (reviewed screenshot), 0 console errors. Passed.
+- Smoke over all 31 pages: desktop, 31/31 returned 200 with 0 console errors or warnings and no overflow; phone viewport (390x844, DPR 2, touch emulation) 31/31 returned 200 with 0 console errors or warnings. A first metric (`scrollWidth - clientWidth`) flagged 14 pages by 2 to 51 px; the causes are decorative backdrop SVGs (Contact, Book online, Services, platform pages) and the Net-Monit versions table (which sits in its own horizontal scroller), all older than v3.0.0. A real `scrollTo(600,0)` test on all 31 pages in phone emulation and in a 390 px desktop window shows **none can scroll sideways**. Not checked on real iOS Safari or Android Chrome.
+- `npm run build` and `npm run check`: 32 HTML files, 0 problems; 91 flow blocks validated; engine 75 KB in 3 files; banned-sink and privacy scans pass.
+- **Not tested**: any real GPU or real FPS; the 8 ms vibration on touch selection; Safari, Firefox, Edge; real phones and touch gestures; low-end Android; screen readers; Lighthouse; long-session memory growth beyond 8 s; flow-host context-loss recovery; 3x DPR; the live site and DNS; Windows port check.
+
+### 24.10 Open items and next session
+- Owner: upload v3.0.0 to GitHub (browser upload as before), then look at it on the real PC and phone and report what feels slow or wrong (give device, browser, page). If frame rate is poor on some device, lower the tier table in `gl-galaxy.js` (`QS`) or `gl-flow.js` (`QF`).
+- Still open from earlier: pin GitHub Actions to commit SHAs, choose a form provider, verify DNS/HTTPS, Lighthouse and accessibility runs, phone/address/logo originals.
+- Ideas not built (ask first): sound effects (opt-in), more flow nodes per service, 3D flows on Book Online, a "tour" that walks the whole map.
+- Read `docs/3D_ENGINE.md` before touching the engine. Never claim a GPU or device result that was not measured.
