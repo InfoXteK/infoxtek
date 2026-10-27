@@ -88,3 +88,17 @@ Reasons, industries and tips flows are generated from the points already in `src
 - Labels are a 2D overlay: a label can cover a node behind it, and labels that would overlap another label are skipped.
 - Touch: horizontal drag orbits the flow; vertical drag scrolls the page (pitch cannot be changed by touch).
 - The map supports up to 28 nodes per group; flows up to 12 nodes.
+
+## v3.1.0: choreography (what makes each flow different)
+A flow may now carry a theme and per-step effects. Both are optional and validated (build and `npm run check`).
+```js
+th: ['circ', 'info', 'bits', [['cloud', 0, 2, 0.9, 3.3]]],        // floor, tone, ambient particles, decor [kind, col, row, scale, height]
+s: [['Fail over', 'Caption text.', ['us','tm','d'], ['us>tm'],     // title, caption, active nodes, active links, then effects:
+     [['s','tm>d','cube',3,1,1.2],                                   //   objects travel a>b: dot bit heart mail tok warn cube coin bad doc (count, end fraction, arc)
+      ['n','d','ok'],                                                //   node state: fail ok alert scan block hot build ghost
+      ['f','d','ring'],                                              //   node effect: ring radar burst smoke beam spark
+      ['c','d','Service restored','ok'],                             //   callout (glyph ok no warn lock up down)
+      ['b','r','Replicating']]]]                                     //   progress bar
+```
+End fraction below 1 stops the objects part way and bursts them (a blocked attack). Floors: grid hex circ ring dot wave rows. Particles: none rain bits sparks embers snow bubbles leaves stars. New prop kinds: tree turbine bank school gov sensor field plant pylon shop radar vault eye usb wifi coin book. Reasons, industries and tips live in `panelFlows` (tips take their four step texts from `details.mjs` and only add the scene).
+Map usability (v3.1.0): no status or FPS text, no pointer parallax, auto-rotation waits 6 s after the last interaction and never runs while a node is hovered, the hovered and selected node do not bob, hit targets are larger with hover hysteresis, a click on a node already in view does not rotate the globe, previous/next arrows sit on the stage, and every open panel has a sticky switcher (all items, plus group buttons).

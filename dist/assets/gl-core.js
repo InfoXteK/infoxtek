@@ -248,6 +248,10 @@ void main(){
   if(vKind<0.5)a=pow(1.0-r,2.2);
   else if(vKind<1.5)a=pow(1.0-r,1.6);
   else if(vKind<2.5)a=smoothstep(0.16,0.0,abs(r-0.82))*0.9;
+  else if(vKind>3.5&&vKind<4.5){float d=abs(vQ.x)+abs(vQ.y);a=smoothstep(0.8,0.6,d)+0.5*pow(1.0-r,2.0);}
+  else if(vKind>7.5&&vKind<8.5){vec2 p=vQ*1.3;p.y+=0.12;const float k=1.7320508;p.x=abs(p.x)-1.0;p.y=p.y+1.0/k;if(p.x+k*p.y>0.0)p=vec2(p.x-k*p.y,-k*p.x-p.y)/2.0;p.x-=clamp(p.x,-2.0,0.0);float sd=-length(p)*sign(p.y);a=smoothstep(0.1,-0.05,sd)*0.9+0.35*pow(1.0-r,2.0);}
+  else if(vKind>8.5&&vKind<9.5){vec2 p=abs(vQ*vec2(1.0,1.45));float rect=smoothstep(0.9,0.8,max(p.x,p.y*1.1));float fl=smoothstep(0.08,0.0,abs(vQ.y*1.45-(0.5-abs(vQ.x)*0.95)))*step(vQ.y*1.45,0.52);a=rect*0.62+fl*0.7;}
+  else if(vKind>9.5){float sm=pow(1.0-r,1.5);o=vec4(vC.rgb*vC.a*sm,vC.a*sm);return;}
   else a=pow(1.0-r,2.0)+0.8*smoothstep(0.28,0.0,r);
   o=vec4(vC.rgb*vC.a*a,0.0);
 }`;
