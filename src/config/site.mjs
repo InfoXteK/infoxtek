@@ -205,11 +205,10 @@ export const tips = [
 //         label (shown to visitors), status, repo (GitHub URL), note (one or two plain sentences).
 // ---------------------------------------------------------------------------
 export const netMonitVersions = [
-  { id: 'v11.3', label: 'V11.3', status: 'latest', repo: 'https://github.com/InfoXteK/Net-Monit',
-    note: 'Production-grade, self-hosted network monitoring platform. Monitors ping latency, packet loss, CPU, memory, disk and bandwidth across your infrastructure; web application uptime and SSL expiry; WAN speed tests; network scanner device discovery; email and SMS alerts with configurable thresholds and escalations.' },
+  { id: 'v11.3', label: 'V11.3', status: 'latest', repo: 'https://github.com/InfoXteK/Net-Monit-V11_3', note: 'Newest release of Net-Monit. Use Request license on the Contact page to get a license key for this version.' },
   { id: 'v11.2', label: 'V11.2', status: 'previous', repo: 'https://github.com/InfoXteK/Net-Monit-V11_2',
     note: 'Production-grade, self-hosted network monitoring platform. Monitors ping latency, packet loss, CPU, memory, disk and bandwidth across your infrastructure; web application uptime and SSL expiry; WAN speed tests; network scanner device discovery; email and SMS alerts with configurable thresholds and escalations.' },
-  { id: 'v11.0', label: 'V11.0', status: 'earlier', repo: 'https://github.com/InfoXteK/Net-monit-V11.0',
+  { id: 'v11.0', label: 'V11.0', status: 'previous', repo: 'https://github.com/InfoXteK/Net-monit-V11.0',
     note: 'Earlier release of the same platform: Flask and SQLite, multi-level L1/L2/L3 escalation by email, SMS and voice call, free vendor-issued license with a 30-day trial.' },
 ];
 // Extra choice at the bottom of the license-form drop-down for versions not listed above.
@@ -222,7 +221,7 @@ export const products = [
     features: ['Ping, SNMP, SSH, PowerShell and HTTP/HTTPS checks, plus disk usage and service/task status', 'Web application uptime and SSL expiry monitoring', 'Built-in WAN speed test with a live gauge and rate-limit handling', 'TCP and UDP port scanning and device discovery', 'Per-device escalation levels, thresholds and notification timing', 'Acknowledge and Resolve alert workflow with a full audit log', 'Multi-user with Admin and Viewer roles, per-user dashboards', 'AES-encrypted credential storage, backup and restore of device configuration'],
     start: ['Windows: right-click Setup.bat, Run as administrator (installs the service and opens http://localhost:50110)', 'Linux: sudo bash setup.sh', 'Manual: pip install -r requirements.txt, then python app.py'],
     facts: ['Flask and SQLite, no external dependencies', 'Offline Ed25519-signed license keys, tied to one installation (Device ID and Activation Code)', 'No phone-home or cloud authentication'] },
-  { slug: 'pc-admin-tools', page: true, title: 'PC Admin Tools', tag: 'Remote administration and performance tuning', icon: 'gear', download: 'https://github.com/InfoXteK/PC-AdminTools',
+  { slug: 'pc-admin-tools', page: true, title: 'PC Admin Tools', tag: 'Remote administration and performance tuning', icon: 'gear', download: 'https://github.com/InfoXteK/PC_Admin_Tools',
     summary: 'Best basic performance fine-tuning tool for admins and support persons. 36 remote operations run over WinRM against Windows machines, from a desktop app or a browser.',
     points: ['Three editions: Python GUI, Web-Service and PowerShell GUI', '36 remote admin operations with confirmation for sensitive ones', 'Every session logged to a timestamped file'],
     features: ['Same 36 operations and categories across all three editions', 'Sensitive operations (reboot, network interruption, long tasks) need explicit confirmation', 'Test Connection before running; choose the authentication transport', 'Timestamped log for every session', 'Targets need only WinRM enabled (Enable-PSRemoting -Force)'],
