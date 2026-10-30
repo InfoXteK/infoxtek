@@ -213,12 +213,4 @@ window.fetch = function (input, init) {
   return handle(method, url, body, hd).catch(e => J({ error: "Demo error: " + e.message }, 500));
 };
 
-/* ---------- demo banner ---------- */
-document.addEventListener("DOMContentLoaded", () => {
-  const b = document.createElement("div");
-  b.style.cssText = "position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#d97706;color:#000;font:600 12px system-ui,sans-serif;padding:5px 10px;text-align:center";
-  b.innerHTML = 'LIVE DEMO · simulated data in your browser, nothing is sent anywhere · Sign in with any email + token · <a href="https://github.com/MohamedAbdullahKhan/Net-Monit" style="color:#000">Get the real app</a> · <a href="#" id="nm-reset" style="color:#000">Reset demo</a>';
-  document.body.appendChild(b);
-  document.getElementById("nm-reset").onclick = e => { e.preventDefault(); sessionStorage.clear(); location.href = "index.html"; };
-});
 })();
