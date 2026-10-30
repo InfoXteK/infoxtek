@@ -1,0 +1,24 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>iFiNeX Live Demo</title><link rel="stylesheet" href="shared.css">
+<style>
+main{max-width:860px;margin:0 auto;padding:34px 16px 40px;text-align:center}
+h1{font-size:28px;margin:0 0 6px}.lead{color:var(--mut);margin:0 auto 26px;max-width:560px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.opt{display:block;text-decoration:none;background:var(--card);border:1px solid var(--ln);border-radius:18px;padding:26px 18px;transition:.15s}
+.opt:hover,.opt:focus-visible{border-color:var(--ac);transform:translateY(-2px);outline:0}
+.opt .ic{font-size:46px}.opt h2{margin:8px 0 4px;font-size:20px}.opt p{margin:0;color:var(--mut)}
+.opt .go{display:inline-block;margin-top:14px;background:var(--ac);color:#fff;border-radius:10px;padding:8px 16px;font-weight:600}
+.both{display:block;margin-top:16px;color:var(--mut);text-decoration:none;border:1px dashed var(--ln);border-radius:14px;padding:12px}
+.both:hover{border-color:var(--ac);color:var(--tx)}
+.foot{margin-top:22px}
+@media(max-width:600px){.grid{grid-template-columns:1fr}h1{font-size:23px}}
+</style></head><body><main>
+<h1>Try iFiNeX live</h1>
+<p class="lead">Pick how you want to experience it. Everything uses fictional people and fake data and runs only in your browser — nothing is saved or sent anywhere.</p>
+<div class="grid">
+ <a class="opt" href="web.html"><div class="ic">🖥️</div><h2>Website</h2><p>The full web app on a desktop-size screen. You are <b>Alex</b>, the admin.</p><span class="go">Open website demo →</span></a>
+ <a class="opt" href="mobile.html"><div class="ic">📱</div><h2>Mobile app</h2><p>The Android app experience in a phone frame. You are <b>Priya</b>, a member.</p><span class="go">Open mobile demo →</span></a>
+</div>
+<a class="both" href="both.html">↔ Want to see both at once? <b>Website + phone side by side</b> with a realtime activity feed</a>
+<p class="note foot">Includes Bill Tracker, Expense Tracker, Budget planner and multi-squad Squad Split. The real app connects to your own Supabase database; this demo uses an in-browser stand-in.</p>
+</main></body></html>
