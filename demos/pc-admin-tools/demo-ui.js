@@ -71,6 +71,18 @@
       load() { choose(['rt_set_static_ip'], { rt_set_static_ip: { ADAPTER: 'Ethernet', IP: '999.1.1.1', MASK: '255.255.255.0', GATEWAY: '192.168.10.1' } }, 'Remote Tools'); } },
     reboot: { hint: '<b>Forced restart</b> -- press RUN, confirm the warning. The simulated PC goes down for ~28 s. Then run the <b>Ping Monitor</b> (Network Push tab, run it alone) to watch it disappear and come back.',
       load() { choose(['pr_force_restart'], {}, 'Power Recycle'); } },
+    quick: { hint: '<b>Quick clean-up</b> -- temp files, browser cache, recycle bin, then a disk report. Press <b>RUN SELECTED TASKS</b>; the Recycle Bin step is sensitive and asks for confirmation.',
+      load() { choose(['clear_user_temp', 'clear_windows_temp', 'clear_browser_cache', 'empty_recycle_bin', 'disk_space_report'], {}, 'sel'); } },
+    inline: { hint: '<b>Change IP inline + reconnect</b> -- the verified Set Static IP applies the address and the connection drops (expected). The tool reconnects on the <b>NEW</b> IP and prints the status. Watch the tiles above the log.',
+      load() { D.ensure(host()); const T = D.T; choose(['rt_set_static_ip'], { rt_set_static_ip: staticParams(net3(T.ip) + '.231', T.gw, { ROLLBACK: 'true' }) }, 'sel'); } },
+    rename: { hint: '<b>Rename PC + restart</b> -- domain-joined rename with automatic restart. Tasks that follow are skipped while the PC reboots.',
+      load() { choose(['system_info', 'rt_rename_pc_domain', 'run_dism'], { rt_rename_pc_domain: { NEW_NAME: 'FINANCE-PC07', AUTO_RESTART: 'true' } }, 'sel'); } },
+    mapdrive: { hint: '<b>Map a network drive</b> -- map Z: for a user, then list that user\'s mapped drives.',
+      load() { choose(['rt_map_network_drive', 'rt_list_mapped_drives'], { rt_map_network_drive: { SHARE_PATH: '\\\\fs01\\shared', DRIVE_LETTER: 'Z', USER_ACCOUNT: 'CORP\\demo.user', APPLY_NOW: 'true', REPLACE_EXISTING: 'false' }, rt_list_mapped_drives: { USER_ACCOUNT: 'CORP\\demo.user' } }, 'sel'); } },
+    vss: { hint: '<b>Shadow copies (VSS)</b> -- view, delete the oldest, resize storage to 20GB, then check the size report.',
+      load() { choose(['rt_vss_view', 'rt_vss_delete_oldest', 'rt_vss_set_maxsize', 'rt_vss_size_report'], { rt_vss_delete_oldest: { VOLUME: 'C' }, rt_vss_set_maxsize: { VOLUME: 'C', MAX_SIZE: '20GB', STORAGE_VOLUME: 'C' } }, 'sel'); } },
+    longjobs: { hint: '<b>Long jobs: SFC, DISM, CHKDSK</b> -- these run as background jobs on the target. Watch the \"still running\" heartbeat lines.',
+      load() { choose(['run_sfc', 'run_dism', 'disk_health_scan'], {}, 'sel'); } },
   };
   $('scenGo').onclick = async () => {
     const k = $('scen').value; if (!k) { alert('Pick a scenario first.'); return; }
@@ -92,4 +104,20 @@
   // deep link from the landing page: demo/?scenario=pushwatch
   const q = new URLSearchParams(location.search).get('scenario');
   if (q && SCEN[q]) { $('scen').value = q; setTimeout(() => $('scenGo').click(), 500); }
+
+  // ── V19-style scenario cards, virtual PC tiles, log buttons ──
+  document.querySelectorAll('#scenCards button').forEach(b => { b.onclick = () => { $('scen').value = b.dataset.scen; $('scenGo').click(); $('scenHint').scrollIntoView({ block: 'nearest' }); }; });
+  $('clrLog').onclick = () => { $('log').innerHTML = ''; };
+  $('cpLog').onclick = () => { const t = $('log').textContent; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { $('cpLog').textContent = 'Copied'; setTimeout(() => $('cpLog').textContent = 'Copy log', 1200); }).catch(() => { }); };
+  const dur = ms => { const s = Math.floor(ms / 1000); return Math.floor(s / 86400) + 'd ' + Math.floor(s % 86400 / 3600) + 'h ' + Math.floor(s % 3600 / 60) + 'm'; };
+  function tiles() {
+    const T = D.T, down = D.isDown(), link = $('vpLink');
+    $('vpName').textContent = T.name + ' - ' + T.domain;
+    $('vpNet').textContent = T.ip + ' /' + T.prefix + (T.dhcp ? ' (DHCP)' : ' (static)');
+    link.textContent = down ? 'DOWN (no answer)' : (T.unreachable.has(T.ip) ? 'UP but not routable from here' : 'UP at ' + T.ip); link.className = down ? 'down' : 'up';
+    $('vpDns').textContent = T.host === T.ip ? T.nameIp : T.name.toLowerCase() + ' -> ' + T.nameIp;
+    $('vpUp').textContent = down && Date.now() < T.rebootUntil ? 'rebooting' : dur(Date.now() - T.bootTime);
+    $('vpClk').textContent = D.clock(new Date());
+  }
+  tiles(); setInterval(tiles, 1000);
 })();

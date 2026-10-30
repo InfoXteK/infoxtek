@@ -107,26 +107,20 @@
 </head>
 <body>
 <div id="demoBar">
-  <div class="db-l"><span class="db-badge">LIVE DEMO</span>Simulated target <b>DEMO-PC01</b> &mdash; nothing is sent to any real computer. The interface, the 113 operations and their PowerShell scripts are the real ones.</div>
+  <div class="db-intro"><h2>Live demo</h2><p>Pick a scenario below (or tick tasks yourself), press <b>RUN SELECTED TASKS</b> and watch the log. The virtual PC remembers what you change: push a static IP, then run <i>Network Adapter &amp; IP Configuration</i> and you will see the new address.</p></div>
+  <div class="db-sim"><b>This is a simulation.</b> A web page cannot open WinRM connections, so every task runs against a pretend PC (<b>DEMO-PC01</b>) inside your browser. The interface, the 113 operations and their PowerShell scripts are the real ones; the numbers are made up. Nothing you type is sent anywhere.</div>
+  <div id="scenCards"><button type="button" data-scen="quick"><b>Quick clean-up</b><span>Temp files, browser cache, recycle bin, then a disk report.</span></button><button type="button" data-scen="health"><b>Health check</b><span>Four read-only reports: system info, processes, disk and network.</span></button><button type="button" data-scen="pushwatch"><b>Change IP safely: Push + Ping</b><span>Push a new static IP without waiting, then watch old IP, new IP and DNS live. Press STOP when done.</span></button><button type="button" data-scen="inline"><b>Change IP inline + reconnect</b><span>Connection drops (expected), the tool reconnects on the NEW IP and prints the status.</span></button><button type="button" data-scen="rename"><b>Rename PC + restart</b><span>Domain-joined rename, auto restart, remaining tasks skipped while it reboots.</span></button><button type="button" data-scen="mapdrive"><b>Map a network drive</b><span>Map Z: for a user, then list that user's mapped drives.</span></button><button type="button" data-scen="vss"><b>Shadow copies (VSS)</b><span>View, delete the oldest, resize storage to 20GB, view again.</span></button><button type="button" data-scen="longjobs"><b>Long jobs: SFC, DISM, CHKDSK</b><span>See the detached engine with "still running" lines.</span></button><button type="button" data-scen="typo"><b>The gateway typo</b><span>IP 192.168.16.205 with gateway 192.168.6.1: the pre-check refuses it before anything is sent.</span></button><button type="button" data-scen="rollback"><b>Auto-rollback safety net</b><span>Wrong network: the PC reverts itself. Untick rollback and the tool loses it.</span></button><button type="button" data-scen="validation"><b>Input validation</b><span>An invalid IP turns red and Run lists exactly what to fix.</span></button><button type="button" data-scen="reboot"><b>Forced restart, then ping it</b><span>Confirm the warning, then watch the PC go down and come back.</span></button><button type="button" data-scen="cleanup"><b>Cleanup + danger popup</b><span>Empty the Recycle Bin behind a confirmation. Run twice: the second run frees almost nothing.</span></button></div>
+  <select id="scen" hidden><option value="">&mdash; pick one &mdash;</option><option value="quick">Quick clean-up</option><option value="health">Health check</option><option value="pushwatch">Change IP safely: Push + Ping</option><option value="inline">Change IP inline + reconnect</option><option value="rename">Rename PC + restart</option><option value="mapdrive">Map a network drive</option><option value="vss">Shadow copies (VSS)</option><option value="longjobs">Long jobs: SFC, DISM, CHKDSK</option><option value="typo">The gateway typo</option><option value="rollback">Auto-rollback safety net</option><option value="validation">Input validation</option><option value="reboot">Forced restart, then ping it</option><option value="cleanup">Cleanup + danger popup</option></select><button id="scenGo" type="button" hidden>Load</button>
   <div class="db-r">
-    <label for="scen">Try a scenario:</label>
-    <select id="scen"><option value="">&mdash; pick one &mdash;</option>
-      <option value="health">Health check (4 reports)</option>
-      <option value="cleanup">Cleanup run (+ danger popup)</option>
-      <option value="pushwatch">Push a static IP, then watch it live</option>
-      <option value="typo">The gateway-typo that v16 missed</option>
-      <option value="rollback">Auto-rollback safety net</option>
-      <option value="validation">Input validation</option>
-      <option value="reboot">Forced restart (then ping it)</option>
-    </select><button id="scenGo">Load</button>
-    <label for="spd">Speed:</label>
+    <label for="spd">Demo speed</label>
     <select id="spd"><option value="1">Normal</option><option value="0.35">Fast</option><option value="0">Instant</option></select>
-    <button id="dlLast" title="Download the log of the last run">&#11015; Last log</button>
-    <a class="db-link" href="../">About</a>
+    <button id="clrLog" type="button">Clear log</button><button id="cpLog" type="button">Copy log</button>
+    <button id="dlLast" type="button" title="Download the log of the last run">&#11015; Last log</button>
     <a class="db-link" href="https://github.com/MohamedAbdullahKhan/PC-AdminTools" target="_blank" rel="noopener">GitHub</a>
   </div>
 </div>
 <div id="scenHint"></div>
+<div id="vpcStrip"><div><span>Virtual PC</span><b id="vpName">-</b></div><div><span>Network (Ethernet)</span><b id="vpNet">-</b></div><div><span>Link right now</span><b id="vpLink">-</b></div><div><span>Name resolves to</span><b id="vpDns">-</b></div><div><span>Uptime</span><b id="vpUp">-</b></div><div><span>Virtual clock</span><b id="vpClk">-</b></div></div>
 <div id="scrModal"><div class="box">
   <div class="mh"><h4 id="scrTitle"></h4><button id="scrCopy">Copy</button><button id="scrClose">Close</button></div>
   <div class="note">This is the real PowerShell the tool sends to the target PC (with your current parameter values filled in). The demo only <b>shows</b> it &mdash; it is never executed.</div>
@@ -271,17 +265,18 @@ function buildTabs(){
     tabs.appendChild(b);
   };
   mk('all', 'All');
+  mk('sel', 'Selected (0)');
   CATS.forEach(c => mk(c, c));
 }
 
 function renderTasks(){
   document.querySelectorAll('#tabs button').forEach((b,i) => {
-    const key = i === 0 ? 'all' : CATS[i-1];
+    const key = i === 0 ? 'all' : (i === 1 ? 'sel' : CATS[i-2]);
     b.className = (key === activeCat) ? 'active' : '';
   });
   const list = document.getElementById('tasklist');
   list.innerHTML = '';
-  OPS.filter(o => activeCat === 'all' || o.category === activeCat).forEach(op => {
+  OPS.filter(o => activeCat === 'all' || (activeCat === 'sel' ? selected.has(o.id) : o.category === activeCat)).forEach(op => {
     const danger = DANGER_IDS.has(op.id);
     const row = document.createElement('div');
     row.className = 'task' + (selected.has(op.id) ? ' checked' : '') + (danger ? ' danger' : '');
@@ -351,10 +346,11 @@ function renderTasks(){
 function updateCount(){
   const n = selected.size;
   document.getElementById('count').textContent = `${n} task${n!==1?'s':''} selected`;
+  const st = document.querySelectorAll('#tabs button')[1]; if (st) st.textContent = `Selected (${n})`;
 }
 
 function selectAll(){
-  OPS.filter(o => activeCat === 'all' || o.category === activeCat)
+  OPS.filter(o => activeCat === 'all' || (activeCat === 'sel' ? selected.has(o.id) : o.category === activeCat))
      .forEach(o => selected.add(o.id));
   renderTasks(); updateCount();
 }
