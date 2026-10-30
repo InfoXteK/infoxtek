@@ -7,6 +7,7 @@ import { site, contact, nav, platforms, services, reasons, industries, bookings,
 import { reasonDetails, industryDetails, tipDetails } from '../src/config/details.mjs';
 import { svcExtra, prodExtra } from '../src/config/svcdetails.mjs';
 import { demos } from '../src/config/demos.mjs';
+import { detail, pcScenarios } from '../src/config/demodetail.mjs';
 
 import { flows, panelFlows, autoFlow, validateFlow } from '../src/config/flows3d.mjs';
 const VERSION = JSON.parse(readFileSync('package.json', 'utf8')).version;
@@ -64,7 +65,7 @@ const svcRing = (id, sc) => ring3d(id, ['IT & Security', 'Digital & Software'].m
 const pages = [];
 // ---- v3.2.0 live demos hosted inside InfoXteK ----
 const pcData = (() => { const w = {}; vm.runInNewContext(readFileSync('demos/pc-admin-tools/ops-data.js', 'utf8'), { window: w }); return w; })();
-const demoGroups = (slug) => (slug === 'pc-admin-tools' ? pcData.DEMO_CATS.map((c) => [c, pcData.DEMO_OPS.filter((o) => o.category === c).map((o) => [o.label + (o.danger ? ' (asks for confirmation)' : ''), o.description])]) : demos[slug].groups);
+const demoGroups = (slug) => (slug === 'pc-admin-tools' ? pcData.DEMO_CATS.map((c) => [c, pcData.DEMO_OPS.filter((o) => o.category === c).map((o) => [o.label + (o.danger ? ' (asks for confirmation)' : ''), o.description + (o.params && o.params.length ? ' Needs: ' + o.params.map((q) => q.label).join(', ') + '.' : '')])]) : demos[slug].groups);
 const fnList = (groups) => `<div class="fngrp">${groups.map(([g, items], i) => `<details${i === 0 ? ' open' : ''}><summary>${esc(g)} <span class="cnt">${items.length}</span></summary><dl>${items.map(([a, b]) => `<dt>${esc(a)}</dt><dd>${esc(b)}</dd>`).join('')}</dl></details>`).join('')}</div>`;
 const fnGlance = (slug) => `<div class="grid">${demoGroups(slug).map(([g, items]) => `<article class="card rv"><h3>${esc(g)}</h3><p class="note">${items.length} ${items.length === 1 ? 'function' : 'functions'}</p><ul class="ticks">${items.slice(0, 4).map((it) => `<li>${esc(it[0])}</li>`).join('')}</ul></article>`).join('')}</div>`;
 // Links that leave InfoXteK, and links to live demos, open in a new tab so the visitor stays on the site.
@@ -75,6 +76,25 @@ const newTab = (html) => html.replace(/<a\s([^>]*)>([\s\S]*?)<\/a>/g, (m, attrs,
   if ((!ext && !demo) || /\starget=/.test(' ' + attrs)) return m;
   return `<a ${attrs.replace(/\srel="[^"]*"/, '')} target="_blank" rel="noopener noreferrer">${inner}<span class="sr"> (opens in a new tab)</span></a>`;
 });
+const guideData = (() => { const f = 'demos/net-monit/static/js/guide-data.js'; if (!existsSync(f)) return null; const w = {}; vm.runInNewContext(readFileSync(f, 'utf8'), { window: w }); return w.GUIDE; })();
+const plain = (t) => String(t).replace(/<[^>]+>/g, '');
+const renderSection = (slug, sct) => {
+  const hd = `<h2>${esc(sct.title)}</h2>${sct.lead ? `<p>${esc(sct.lead)}</p>` : ''}`;
+  const card = ([h, t, tag]) => `<article class="card rv"><h3>${esc(h)}${tag ? ` <span class="cnt">${esc(tag)}</span>` : ''}</h3><p>${esc(t)}</p></article>`;
+  let b = '';
+  if (sct.type === 'cards') b = `<div class="grid">${sct.items.map(card).join('')}</div>`;
+  else if (sct.type === 'list') b = `<ul class="ticks">${sct.items.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>`;
+  else if (sct.type === 'steps') b = `${sct.flow ? `<ol class="flowrow">${sct.flow.map((t) => `<li>${esc(t)}</li>`).join('')}</ol>` : ''}<div class="grid">${sct.items.map(([h, t, code]) => `<article class="card rv"><h3>${esc(h)}</h3><p>${esc(t)}</p>${code ? `<pre><code>${esc(code)}</code></pre>` : ''}</article>`).join('')}</div>`;
+  else if (sct.type === 'table') b = `<div class="tw"><table><thead><tr>${sct.head.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${sct.rows.map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>${sct.note ? `<p class="note">${esc(sct.note)}</p>` : ''}`;
+  else if (sct.type === 'versions') b = `<div class="tw"><table><thead><tr><th>Version</th><th>What changed</th></tr></thead><tbody>${sct.rows.map(([v, t]) => `<tr><td>${esc(v)}</td><td>${esc(t)}</td></tr>`).join('')}</tbody></table></div>`;
+  else if (sct.type === 'ops') b = fnList(demoGroups(slug));
+  else if (sct.type === 'ref' && guideData) b = `<div class="fngrp">${Object.entries(guideData.pages).map(([k, pg], i) => `<details${i === 0 ? ' open' : ''}><summary>${esc(pg.title)} <span class="cnt">${pg.sections.reduce((a, q) => a + q.items.length, 0)}</span></summary><p>${esc(pg.intro)}</p>${pg.sections.map((q) => `<h4>${esc(q.h)}</h4><dl>${q.items.map((it) => `<dt>${esc(it[1])}</dt><dd>${esc(it[2])}</dd>`).join('')}</dl>`).join('')}<p><a href="/demos/${slug}/${k === 'index' ? 'index' : k}.html">Open this page in the demo</a></p></details>`).join('')}</div>`;
+  else if (sct.type === 'scen') {
+    const list = slug === 'net-monit' && guideData ? Object.entries(guideData.scenarios).map(([k, q]) => [q.label, plain(q.hint).split(' - ')[1] || plain(q.hint), `/demos/${slug}/${q.page}?scenario=${k}`]) : pcScenarios.map(([k, l, t]) => [l, t, `/demos/${slug}/index.html?scenario=${k}`]);
+    b = `<div class="grid">${list.map(([l, t, u]) => `<article class="card rv"><h3>${esc(l)}</h3><p>${esc(t)}</p><p><a class="btn" href="${esc(u)}">Try it</a></p></article>`).join('')}</div>`;
+  }
+  return `<section class="sec${sct.alt ? ' alt' : ''}" id="${sct.id}"><div class="wrap">${hd}${b}</div></section>`;
+};
 const page = (path, title, description, body, crumbs = []) => pages.push({ path, title, description, body, crumbs });
 const head = (t, s = '', h = 0) => `<section class="band" data-h="${h}"><div class="wrap"><h1>${esc(t)}</h1>${s ? `<p class="lead">${esc(s)}</p>` : ''}</div></section>`;
 const cta = `<section class="cta"><div class="wrap"><h2>Talk to us about your IT</h2><p>Tell us what you need and we will suggest a sensible next step.</p><a class="btn" href="/contact/">Request a consultation</a></div></section>`;
@@ -130,8 +150,7 @@ for (const [slug, d] of Object.entries(demos)) {
 <iframe class="demo-frame" name="demoframe" title="${esc(x.title)} live demo" src="/demos/${slug}/${d.entry}" sandbox="${FRAME_SANDBOX}" loading="lazy"></iframe>
 <p class="note">${esc(d.version)}. ${esc(d.simulated)}</p>
 <p><a class="btn" href="/demos/${slug}/${d.entry}">Open full screen</a> <a class="btn ghost" href="${ppath}">Product details</a> <a class="btn ghost" href="${esc(x.download)}">${slug === 'ifinex' ? 'Download from GitHub Releases' : 'Get it on GitHub'}</a>${slug === 'net-monit' ? ' <a class="btn ghost" href="/contact/#license">Request a license</a>' : ''}</p></div></section>
-<section class="sec alt"><div class="wrap"><h2>What to try</h2><ol class="flow">${li(d.tryIt)}</ol></div></section>
-${d.howItWorks ? `<section class="sec"><div class="wrap"><h2>How it works</h2>${cards(d.howItWorks, ([n, t]) => `<article class="card rv"><h3>${esc(n)}</h3><p>${esc(t)}</p></article>`)}</div></section>` : ''}<section class="sec${d.howItWorks ? ' alt' : ''}"><div class="wrap"><h2>Operations and functions</h2><p>Everything this product does, as shown in the demo. Click a group to open it.</p>${fnList(demoGroups(slug))}</div></section>${cta}`,
+${detail[slug] ? `<section class="sec alt"><div class="wrap"><ul class="stats">${detail[slug].stats.map(([n, t]) => `<li><b>${esc(n)}</b><span>${esc(t)}</span></li>`).join('')}</ul><p class="note"><strong>About the demo:</strong> ${esc(detail[slug].about)}</p><nav class="demo-views" aria-label="On this page">${detail[slug].sections.map((q) => `<a class="chip" href="#${q.id}">${esc(q.title.replace('Try it: ', ''))}</a>`).join('')}</nav></div></section>${detail[slug].sections.map((q, i) => renderSection(slug, { ...q, alt: i % 2 === 1 })).join('')}` : `<section class="sec alt"><div class="wrap"><h2>What to try</h2><ol class="flow">${li(d.tryIt)}</ol></div></section><section class="sec"><div class="wrap"><h2>Operations and functions</h2><p>Everything this product does, as shown in the demo. Click a group to open it.</p>${fnList(demoGroups(slug))}</div></section>`}${cta}`,
     [['Products', '/products/'], [x.title, ppath], ['Live demo', path]]);
 }
 page('/platforms/', `Platforms | ${site.name}`, 'Explore the security and cloud platforms InfoXteK designs, deploys and supports.',

@@ -1,4 +1,4 @@
-# InfoXteK: Complete Claude Reference (v3.2.0, port 3023)
+# InfoXteK: Complete Claude Reference (v3.3.0, port 3024)
 Living record from the start of the project. Update on every change. Repository and docs are the source of truth.
 
 ## 1. Identity
@@ -290,3 +290,12 @@ Read CLAUDE.md, docs/3D_ENGINE.md and this file. Do not start a long session: op
 - Standalone owner pages (infoxtek.github.io/Net-Monit, /PC-AdminTools, /PC_Admin_Tools_Demo, /iFiNeX-Demo; mohamedabdullahkhan.github.io/Net-Monit, /PC-AdminTools, /PC_Admin_Tools-old; squadsplit.github.io/iFiNeX-Demo) are in `demoStandalone`, not linked.
 - Not tested: no real browser available in the build sandbox. Build and static checks pass (36 html, 0 problems); the demos running inside the frame, the iFiNeX service worker under the infoxtek.com origin, and the new-tab behaviour were not exercised in a browser. iFiNeX Google Fonts requests are blocked by the demo CSP, so it falls back to system fonts.
 - Demos run on the infoxtek.com origin; fine while the site has no login or secrets.
+
+## 27. v3.3.0 notes (full demo explanations, latest Net-Monit demo, port 3024)
+- Request: use the latest Net-Monit demo; PC Admin Tool demo pages lacked the sections that exist in the V19.1 demo landing page (all operations details, Run the real thing, Version history, Good to know before you deploy, Try it guided scenarios, What it can do, Three editions, How it works) and the 113-operation details.
+- Finding: the PC demo folder already shipped (demo/ of PC-AdminTools-GitHub-Pages-Demo-V19_1) is identical to the V19.1 demo; only its landing page content had never been ported. The older PC-AdminTools-GitHub-Demo-v19 bundle (90 operations, tool v3.8) was NOT used.
+- `demos/net-monit/` replaced by the docs/demo of Net-monit-GitHub-Pages (V11.4 with Explain mode, Page guide, 9 scenarios, guide-data.js with 173 explained options). Its landing page and tools/tests are not shipped.
+- New `src/config/demodetail.mjs`: per-product sections rendered on `/products/<slug>/demo/` by `renderSection()` in build.mjs (types cards, table, steps, scen, ops, ref, versions, list), with a stats row, an about-the-demo note and an "on this page" chip nav. Net-Monit: How it works, What it monitors, How alerting works, Every page and option explained (173 items read from guide-data.js at build), guided scenarios (9, read from guide-data.js), Run the real thing, Good to know (first login, licensing, limits), Version history. PC Admin Tools: How it works, Three editions, What it can do, guided scenarios (6, `pcScenarios`), All operations (113 read from ops-data.js, with "Needs" parameters and confirmation flags), Run the real thing, Good to know, Version history.
+- Scenario cards open the full demo in a new tab with `?scenario=<id>`. iFiNeX demo page unchanged (old layout).
+- The licensing text no longer prints the owner's email; it points to the contact page.
+- Not tested in a real browser. Build and static checks pass (36 html, 0 problems); counts verified in built html (113 operations, 173 options).

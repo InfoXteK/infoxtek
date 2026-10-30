@@ -8,7 +8,7 @@
 ## Where things live
 | Product | Source folder | Built to | Page |
 |---|---|---|---|
-| Net-Monit | `demos/net-monit/` (demo V11.4) | `/demos/net-monit/` | `/products/net-monit/demo/` |
+| Net-Monit | `demos/net-monit/` (GitHub Pages demo V11.4 with Explain mode and scenarios) | `/demos/net-monit/` | `/products/net-monit/demo/` |
 | PC Admin Tools | `demos/pc-admin-tools/` (Web edition demo v4.0, 113 operations) | `/demos/pc-admin-tools/` | `/products/pc-admin-tools/demo/` |
 | iFiNeX | `demos/ifinex/` (web v9.6 demo) | `/demos/ifinex/` | `/products/ifinex/demo/` |
 
@@ -25,3 +25,6 @@ Text shown on the pages (what to try, function groups, limits) is in `src/config
 - `robots.txt` disallows `/demos/`.
 - Demos run on the infoxtek.com origin (needed for their browser storage). InfoXteK has no login, cookies or private data, so the exposure is limited. Do not add accounts or secrets to this origin without moving demos to their own subdomain.
 - Standalone repo pages (infoxtek.github.io/..., mohamedabdullahkhan.github.io/...) are listed in `demoStandalone` for reference and are not linked from the site.
+
+## Demo page content (v3.3.0)
+Sections on `/products/net-monit/demo/` and `/products/pc-admin-tools/demo/` come from `src/config/demodetail.mjs` plus the demo data (`demos/net-monit/static/js/guide-data.js`, `demos/pc-admin-tools/ops-data.js`). Replace those files with newer ones and rebuild; counts update automatically. Edit text in demodetail.mjs.

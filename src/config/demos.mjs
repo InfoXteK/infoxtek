@@ -15,7 +15,7 @@ export const demos = {
   'net-monit': {
     entry: 'index.html', height: 'tall',
     version: 'V11.4 demo of Net-Monit V11.3',
-    lead: 'The real Net-Monit pages, running on fake data in your browser. Nothing is installed, sent or saved on a server.',
+    lead: 'The real Net-Monit pages, running on fake data in your browser. Use Explain mode and Page guide in the bottom bar to read what every control does. Nothing is installed, sent or saved on a server.',
     views: [['Dashboard', 'index.html'], ['Devices', 'devices.html'], ['Alerts', 'alerts.html'], ['Sites', 'urlmonitor.html'], ['Speed test', 'speedtest.html'], ['Network scan', 'networkscan.html'], ['Settings', 'settings.html'], ['Admin', 'admin.html'], ['License', 'activation.html']],
     tryIt: [
       'Open Dashboard: 17 demo devices with live changing numbers. Use the severity filters and switch between grid and list.',
