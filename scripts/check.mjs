@@ -2,8 +2,10 @@
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { validateFlow } from '../src/config/flows3d.mjs';
+import { demos } from '../src/config/demos.mjs';
 const walk = (d) => readdirSync(d).flatMap((n) => { const p = join(d, n); return statSync(p).isDirectory() ? walk(p) : [p]; });
-const files = walk('dist'), html = files.filter((f) => f.endsWith('.html')); let bad = 0;
+const norm = (f) => f.replace(/\\/g, '/'), isDemo = (f) => norm(f).startsWith('dist/demos/');
+const files = walk('dist').filter((f) => !isDemo(f)), demoFiles = walk('dist').filter(isDemo), html = files.filter((f) => f.endsWith('.html')); let bad = 0;
 const fail = (m) => { console.error('FAIL', m); bad++; };
 for (const f of html) {
   const s = readFileSync(f, 'utf8');
@@ -17,6 +19,33 @@ for (const f of html) {
     if (!(existsSync(t) && (!statSync(t).isDirectory() || existsSync(join(t, 'index.html'))))) fail(`${f} broken link ${u}`);
   }
 }
+// v3.2.0: every external link and every live-demo link opens in a new tab; demo frames cannot navigate the site away.
+for (const f of html) {
+  const s = readFileSync(f, 'utf8');
+  for (const m of s.matchAll(/<a\s([^>]*)>/g)) {
+    const h = (m[1].match(/href="([^"]*)"/) || [])[1] || '';
+    const ext = /^https?:\/\//i.test(h) && !/^https?:\/\/(www\.)?infoxtek\.com(\/|$)/i.test(h), dm = /^\/(demos\/|products\/[^/]+\/demo\/)/.test(h);
+    if ((ext || dm) && !/target="(_blank|demoframe)"/.test(m[1])) fail(`${f} link ${h} must open in a new tab`);
+    if ((ext || dm) && /target="_blank"/.test(m[1]) && !/rel="[^"]*noopener[^"]*noreferrer|rel="[^"]*noreferrer[^"]*noopener/.test(m[1])) fail(`${f} link ${h} needs rel="noopener noreferrer"`);
+  }
+  for (const m of s.matchAll(/<iframe\b[^>]*>/g)) { if (!/sandbox="/.test(m[0])) fail(`${f} iframe without sandbox`); if (/allow-top-navigation/.test(m[0])) fail(`${f} iframe allows top navigation`); if (!/src="\/demos\//.test(m[0])) fail(`${f} iframe source is not a local demo`); }
+}
+for (const [slug, d] of Object.entries(demos)) {
+  const pg = `dist/products/${slug}/demo/index.html`;
+  if (!existsSync(pg)) fail(`${pg} missing`);
+  if (!existsSync(join('dist/demos', slug, d.entry))) fail(`demo entry dist/demos/${slug}/${d.entry} missing`);
+  for (const [, v] of d.views) if (!existsSync(join('dist/demos', slug, v.split('?')[0]))) fail(`demo view ${slug}/${v} missing`);
+}
+let demoHtml = 0;
+for (const f of demoFiles.filter((x) => x.endsWith('.html'))) {
+  const s = readFileSync(f, 'utf8'); demoHtml++;
+  if (!s.includes('Content-Security-Policy')) fail(`${f} demo page missing CSP`);
+  if (!s.includes('/demos/_shared/links.js')) fail(`${f} demo page missing links.js`);
+  if (!s.includes('name="robots" content="noindex"')) fail(`${f} demo page missing noindex`);
+  if (/<script[^>]+src="https?:/i.test(s) || /<link[^>]+href="https?:[^"]*\.css/i.test(s)) fail(`${f} loads an external script or stylesheet`);
+  for (const m of s.matchAll(/<a\s([^>]*)>/g)) { const h = (m[1].match(/href="([^"]*)"/) || [])[1] || ''; if (/^https?:\/\//i.test(h) && !/target="_blank"/.test(m[1])) fail(`${f} demo link ${h} must open in a new tab`); }
+}
+console.log(`demo checks: ${Object.keys(demos).length} demos, ${demoHtml} demo pages hardened`);
 console.log(`${html.length} html files checked, ${bad} problems`);
 for (const f of ['dist/favicon.ico', 'dist/favicon-48.png', 'dist/favicon-192.png', 'dist/apple-touch-icon.png', 'dist/logo-512.png', 'dist/site.webmanifest']) if (!existsSync(f)) fail(`${f} missing`);
 // v2.6.0 security assertions

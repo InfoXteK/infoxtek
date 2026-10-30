@@ -181,7 +181,7 @@ export const flows = {
     t: 'PC Admin Tools', th: ['grid', 'info', 'none', [['device', 4, 0, 0.7], ['device', 4, 2, 0.7]]],
     n: [['ad', 'user', 'Admin or support person', 0, 1], ['ap', 'code', 'Desktop or web app', 1, 1], ['cf', 'lock', 'Confirmation', 2, 0, 'warn'], ['lg', 'doc', 'Timestamped log', 2, 2], ['wr', 'router', 'WinRM', 3, 1], ['pc', 'device', 'Windows PCs', 4, 1]],
     l: [['ad', 'ap'], ['ap', 'cf'], ['cf', 'wr'], ['wr', 'pc'], ['ap', 'lg']],
-    s: [['Choose', 'Pick one of the 36 operations; the same list exists in all three editions.', ['ad', 'ap'], ['ad>ap'], [['s', 'ad>ap', 'dot', 3], ['n', 'ap', 'hot'], ['c', 'ap', 'One of 36 operations', 'ok']]],
+    s: [['Choose', 'Pick one of the 113 operations in the Web edition, grouped in nine categories.', ['ad', 'ap'], ['ad>ap'], [['s', 'ad>ap', 'dot', 3], ['n', 'ap', 'hot'], ['c', 'ap', 'One of 36 operations', 'ok']]],
       ['Confirm', 'Sensitive operations such as a reboot or network interruption ask for explicit confirmation.', ['ap', 'cf'], ['ap>cf'], [['s', 'ap>cf', 'warn', 2], ['n', 'cf', 'alert'], ['f', 'cf', 'ring'], ['c', 'cf', 'Reboot? Confirm first', 'warn']]],
       ['Run over WinRM', 'The operation runs remotely on each target; only WinRM needs to be enabled there. Use Test Connection first.', ['cf', 'wr', 'pc'], ['cf>wr', 'wr>pc'], [['s', 'cf>wr', 'cube', 3], ['s', 'wr>pc', 'cube', 3, 1, 0.8], ['n', 'pc', 'hot'], ['f', 'pc', 'ring'], ['c', 'pc', 'Result returned', 'ok']]],
       ['Log', 'Every session is written to a timestamped log.', ['ap', 'lg'], ['ap>lg'], [['s', 'ap>lg', 'doc', 3], ['n', 'lg', 'ok'], ['c', 'lg', 'Timestamped log', 'ok']]]],

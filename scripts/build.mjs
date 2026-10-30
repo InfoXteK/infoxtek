@@ -1,10 +1,12 @@
-import { readFileSync, writeFileSync, mkdirSync, cpSync, rmSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, cpSync, rmSync, existsSync, readdirSync, statSync } from 'node:fs';
+import vm from 'node:vm';
 import { scenes, custom } from '../src/config/scenes.mjs';
 import { K, nn } from '../src/config/kit.mjs';
 import { envs, pageEnv } from '../src/config/envs.mjs';
 import { site, contact, nav, platforms, services, reasons, industries, bookings, resources, testimonials, tips, products, platformInfo , netMonitVersions, netMonitOlderOption } from '../src/config/site.mjs';
 import { reasonDetails, industryDetails, tipDetails } from '../src/config/details.mjs';
 import { svcExtra, prodExtra } from '../src/config/svcdetails.mjs';
+import { demos } from '../src/config/demos.mjs';
 
 import { flows, panelFlows, autoFlow, validateFlow } from '../src/config/flows3d.mjs';
 const VERSION = JSON.parse(readFileSync('package.json', 'utf8')).version;
@@ -55,11 +57,24 @@ const prodPanel = (x, withScene) => { const e = prodExtra[x.slug]; const path = 
 const platPanel = (x, withScene) => { const path = `/platforms/${x.slug}/`; const rel = services.find((q) => q.slug === x.svc); return `<div class="sp why"><h4>What it is</h4><p>${esc(x.what)}</p></div>${flowSec(x.slug, x.name)}${withScene && custom[x.slug] ? `<div class="sp sp-scene"><h4>What it does, in motion</h4>${customScene(custom[x.slug], x.name, pageEnv[path])}${sceneNote}</div>` : ''}<div class="sp-grid"><div class="sp"><h4>Security</h4><ul class="ticks">${li(x.security)}</ul></div><div class="sp"><h4>AI direction</h4><ul class="ticks">${li(x.ai)}</ul></div></div>${rel ? `<div class="sp spec"><h4>How we use it</h4><p>This platform is part of our <a href="/services/${rel.slug}/">${esc(rel.title)}</a> work.</p></div>` : ''}<p class="note">Summary for orientation only: check the vendor's documentation for current features. Product names are trademarks of their owners; InfoXteK does not claim a vendor partnership.</p>`; };
 const dtls = (id, groups) => { const all = groups.flatMap((g, gi) => g.items.map((x, xi) => ({ g, gi, x, xi }))).filter((o) => o.x.det || o.x.panel); if (!all.length) return ''; const nav = '<p class="dtl-nav"><button type="button" data-a="prev">&lsaquo; Previous</button><button type="button" data-a="map">Back to 3D map</button><button type="button" data-a="next">Next &rsaquo;</button></p>'; const sw = (gi, xi) => { const items = groups[gi].items.map((it, k) => [it, k]).filter(([it]) => it.det || it.panel); const gb = groups.length > 1 ? `<span class="dsw-groups">${groups.map((gg, k) => `<button type="button" data-a="grp" data-g="${k}"${k === gi ? ' aria-current="true"' : ''}>${esc(gg.name)}</button>`).join('')}</span>` : ''; return `<nav class="dtl-switch" aria-label="Switch to another item">${gb}<button type="button" class="dsw-arrow" data-a="prev" aria-label="Previous item">&lsaquo;</button><span class="dsw-list">${items.map(([it, k]) => `<button type="button" data-a="go" data-to="${k}"${k === xi ? ' aria-current="true"' : ''}>${esc(it.t)}</button>`).join('')}</span><button type="button" class="dsw-arrow" data-a="next" aria-label="Next item">&rsaquo;</button></nav>`; }; return `<div class="dtls">${all.map(({ g, gi, x, xi }) => { const did = `d-${id}-${gi}-${xi}`, d = x.det; const head = `<p class="dtl-k">${esc(g.name)}</p><h3 id="${did}-h" tabindex="-1">${esc(x.t)}</h3>`; const body = x.panel ? `<p class="dtl-lead">${esc(x.d)}</p>${x.panel}` : `<p class="dtl-lead">${esc(d.intro)}</p>${autoSec(id, x, d)}<div class="dtl-grid">${d.points.map(([a, b]) => `<div class="dtl-pt"><b>${esc(a)}</b><p>${esc(b)}</p></div>`).join('')}</div>${d.example ? `<p class="dtl-ex">${esc(d.example)}</p>` : ''}`; const lk = x.panel ? x.plinks : d.links; return `<article class="dtl${x.panel ? ' sv' : ''}" id="${did}" aria-labelledby="${did}-h" data-g="${gi}" data-i="${xi}">${sw(gi, xi)}<div class="dtl-in">${head}${body}${lk && lk.length ? `<p class="dtl-links">${lk.map(([a, h]) => `<a class="btn" href="${esc(h)}">${esc(a)}</a>`).join('')}</p>` : ''}${nav}</div></article>`; }).join('')}</div>`; };
 const ring3d = (id, groups) => `<div class="ring3d" id="${id}"><div class="tabs" role="tablist">${groups.map((g, gi) => `<button type="button" role="tab" aria-selected="${gi === 0}" data-g="${gi}">${esc(g.name)}</button>`).join('')}</div><div class="stage"><div class="rings">${groups.map((g, gi) => `<div class="ring${gi === 0 ? ' on' : ''}" data-g="${gi}">${g.items.map((x, xi) => `<a class="c3" ${(x.det || x.panel) ? `href="#d-${id}-${gi}-${xi}" data-det="d-${id}-${gi}-${xi}"` : x.h ? `href="${x.h}"` : 'role="button"'} data-t="${esc(x.t)}" data-d="${esc(x.d)}">${x.i ? icon(x.i) : ''}<b>${esc(x.t)}</b><span>${esc(short(x.d))}</span></a>`).join('')}</div>`).join('')}</div><button class="nav prev" type="button" aria-label="Previous">&lsaquo;</button><button class="nav next" type="button" aria-label="Next">&rsaquo;</button></div><div class="sel" aria-live="polite"><div><h3></h3><p></p></div><a class="btn" hidden>Open</a></div><p class="tip">Drag the ring, use the arrow buttons or the left and right keys. Click the highlighted front card to open it.</p>${dtls(id, groups)}</div>`;
-const prodItem = (x, sc) => ({ t: x.title, d: x.summary, h: x.page ? `/products/${x.slug}/` : (x.download || ''), i: x.icon, panel: prodPanel(x, sc), plinks: [...(x.page ? [['Open the full page', `/products/${x.slug}/`]] : (x.download ? [['Open ' + x.title, x.download]] : [])), ...(x.slug === 'net-monit' ? [['Request a license', '/contact/#license']] : []), ['Talk to us', '/contact/']] });
+const prodItem = (x, sc) => ({ t: x.title, d: x.summary, h: x.page ? `/products/${x.slug}/` : (x.download || ''), i: x.icon, panel: prodPanel(x, sc), plinks: [...(x.page ? [['Open the full page', `/products/${x.slug}/`]] : (x.download ? [['Open ' + x.title, x.download]] : [])), ...(demos[x.slug] ? [['Live demo', `/products/${x.slug}/demo/`]] : []), ...(x.slug === 'net-monit' ? [['Request a license', '/contact/#license']] : []), ['Talk to us', '/contact/']] });
 const platItem = (x, sc) => ({ t: x.name, d: x.tag, h: `/platforms/${x.slug}/`, i: 'shield', panel: platPanel(x, sc), plinks: [['Open the full page', `/platforms/${x.slug}/`], ['Talk to us', '/contact/']] });
 const svcItems = (g, sc) => services.filter((s) => (s.grp || 'IT & Security') === g).map((s) => ({ t: s.title, d: s.summary, h: `/services/${s.slug}/`, i: s.icon, panel: svcPanel(s, sc), plinks: [['Open the full page', `/services/${s.slug}/`], ['Request a consultation', '/contact/'], ['Book online', '/book-online/']] }));
 const svcRing = (id, sc) => ring3d(id, ['IT & Security', 'Digital & Software'].map((g) => ({ name: g, items: svcItems(g, sc) })));
 const pages = [];
+// ---- v3.2.0 live demos hosted inside InfoXteK ----
+const pcData = (() => { const w = {}; vm.runInNewContext(readFileSync('demos/pc-admin-tools/ops-data.js', 'utf8'), { window: w }); return w; })();
+const demoGroups = (slug) => (slug === 'pc-admin-tools' ? pcData.DEMO_CATS.map((c) => [c, pcData.DEMO_OPS.filter((o) => o.category === c).map((o) => [o.label + (o.danger ? ' (asks for confirmation)' : ''), o.description])]) : demos[slug].groups);
+const fnList = (groups) => `<div class="fngrp">${groups.map(([g, items], i) => `<details${i === 0 ? ' open' : ''}><summary>${esc(g)} <span class="cnt">${items.length}</span></summary><dl>${items.map(([a, b]) => `<dt>${esc(a)}</dt><dd>${esc(b)}</dd>`).join('')}</dl></details>`).join('')}</div>`;
+const fnGlance = (slug) => `<div class="grid">${demoGroups(slug).map(([g, items]) => `<article class="card rv"><h3>${esc(g)}</h3><p class="note">${items.length} ${items.length === 1 ? 'function' : 'functions'}</p><ul class="ticks">${items.slice(0, 4).map((it) => `<li>${esc(it[0])}</li>`).join('')}</ul></article>`).join('')}</div>`;
+// Links that leave InfoXteK, and links to live demos, open in a new tab so the visitor stays on the site.
+const newTab = (html) => html.replace(/<a\s([^>]*)>([\s\S]*?)<\/a>/g, (m, attrs, inner) => {
+  const h = (attrs.match(/href="([^"]*)"/) || [])[1] || '';
+  const ext = /^https?:\/\//i.test(h) && !/^https?:\/\/(www\.)?infoxtek\.com(\/|$)/i.test(h);
+  const demo = /^\/(demos\/|products\/[^/]+\/demo\/)/.test(h);
+  if ((!ext && !demo) || /\starget=/.test(' ' + attrs)) return m;
+  return `<a ${attrs.replace(/\srel="[^"]*"/, '')} target="_blank" rel="noopener noreferrer">${inner}<span class="sr"> (opens in a new tab)</span></a>`;
+});
 const page = (path, title, description, body, crumbs = []) => pages.push({ path, title, description, body, crumbs });
 const head = (t, s = '', h = 0) => `<section class="band" data-h="${h}"><div class="wrap"><h1>${esc(t)}</h1>${s ? `<p class="lead">${esc(s)}</p>` : ''}</div></section>`;
 const cta = `<section class="cta"><div class="wrap"><h2>Talk to us about your IT</h2><p>Tell us what you need and we will suggest a sensible next step.</p><a class="btn" href="/contact/">Request a consultation</a></div></section>`;
@@ -95,14 +110,29 @@ ${flowPage(s.slug, s.title)}<section class="sec"><div class="wrap two"><div clas
 }
 
 page('/products/', `Products | ${site.name}`, 'Net-Monit network monitoring, PC Admin Tools and the iFiNeX expense app from InfoXteK.',
-  `${head('Our products', 'Software we build and run ourselves.')}<section class="sec"><div class="wrap">${ring3d('prod', [{ name: 'Products', items: products.map((x) => prodItem(x, true)) }, { name: 'Platforms', items: platformInfo.map((x) => platItem(x, true)) }])}<div class="gap"></div>${cards(products, (x) => `<article class="card rv" id="${x.slug}">${icon(x.icon)}<h2>${x.page ? `<a href="/products/${x.slug}/">${esc(x.title)}</a>` : esc(x.title)}</h2><p><strong>${esc(x.tag)}</strong></p><p>${esc(x.summary)}</p><ul class="ticks">${x.points.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>${x.page ? `<a class="btn" href="/products/${x.slug}/">Explore</a> <a class="btn ghost" href="${esc(x.download)}">GitHub</a>` : x.download ? `${x.howto ? `<p class="note">${esc(x.howto)}</p>` : ''}<a class="btn" href="${esc(x.download)}">Download from GitHub Releases</a>` : '<span class="btn ghost soon" aria-disabled="true">Download link coming soon</span>'}</article>`)}</div></section>${verTable()}${cta}`, [['Products', '/products/']]);
-Object.assign(styleMap, { '/products/net-monit/': 'cyber', '/products/pc-admin-tools/': 'brutal', '/platforms/': 'flat' });
+  `${head('Our products', 'Software we build and run ourselves.')}<section class="sec"><div class="wrap">${ring3d('prod', [{ name: 'Products', items: products.map((x) => prodItem(x, true)) }, { name: 'Platforms', items: platformInfo.map((x) => platItem(x, true)) }])}<div class="gap"></div>${cards(products, (x) => `<article class="card rv" id="${x.slug}">${icon(x.icon)}<h2>${x.page ? `<a href="/products/${x.slug}/">${esc(x.title)}</a>` : esc(x.title)}</h2><p><strong>${esc(x.tag)}</strong></p><p>${esc(x.summary)}</p><ul class="ticks">${x.points.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>${x.page ? `<a class="btn" href="/products/${x.slug}/">Explore</a> ${demos[x.slug] ? `<a class="btn" href="/products/${x.slug}/demo/">Live demo</a> ` : ''}<a class="btn ghost" href="${esc(x.download)}">${x.slug === 'ifinex' ? 'Download (GitHub Releases)' : 'GitHub'}</a>` : x.download ? `${x.howto ? `<p class="note">${esc(x.howto)}</p>` : ''}<a class="btn" href="${esc(x.download)}">Download from GitHub Releases</a>` : '<span class="btn ghost soon" aria-disabled="true">Download link coming soon</span>'}</article>`)}</div></section>${verTable()}${cta}`, [['Products', '/products/']]);
+Object.assign(styleMap, { '/products/net-monit/': 'cyber', '/products/pc-admin-tools/': 'brutal', '/products/ifinex/': 'material', '/platforms/': 'flat' });
 for (const x of products.filter((q) => q.page)) {
-  const path = `/products/${x.slug}/`;
-  page(path, `${x.title} | ${site.name}`, x.summary.slice(0, 155), `<section class="band" data-h="${x.slug.length}"><div class="wrap">${icon(x.icon)}<h1>${esc(x.title)}</h1><p class="lead">${esc(x.tag)}</p></div></section>
+  const path = `/products/${x.slug}/`, d = demos[x.slug];
+  page(path, `${x.title} | ${site.name}`, x.summary.slice(0, 155), `<section class="band" data-h="${x.slug.length}"><div class="wrap">${icon(x.icon)}<h1>${esc(x.title)}</h1><p class="lead">${esc(x.tag)}</p>${d ? `<p><a class="btn" href="/products/${x.slug}/demo/">Open the live demo</a> <a class="btn ghost" href="#details">Product details</a></p><p class="note">The demo opens in a new tab on this site. Fake data, nothing is sent anywhere.</p>` : ''}</div></section>
 <section class="sec"><div class="wrap"><h2>How it works</h2>${customScene(custom[x.slug], x.title, pageEnv[path])}<p class="note">Illustrative simulation of a typical scenario. Not live data.</p></div></section>
-${flowPage(x.slug, x.title)}<section class="sec alt"><div class="wrap two"><div class="rv"><h2>Overview</h2><p>${esc(x.summary)}</p><h3>Key features</h3><ul class="ticks">${x.features.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></div><aside class="rv"><h2>Get it</h2>${x.slug === 'net-monit' ? verPanels() : `<p><a class="btn" href="${esc(x.download)}">View on GitHub</a></p>`}${x.start ? `<h3>Quick start</h3><ul class="ticks">${x.start.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}<h3>Good to know</h3><ul class="ticks">${x.facts.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></aside></div></section>
-${x.editions ? `<section class="sec"><div class="wrap"><h2>Editions</h2>${cards(x.editions, ([n, d]) => `<article class="card rv"><h3>${esc(n)}</h3><p>${esc(d)}</p></article>`)}</div></section>` : ''}${cta}`, [['Products', '/products/'], [x.title, path]]);
+${flowPage(x.slug, x.title)}<section class="sec alt" id="details"><div class="wrap two"><div class="rv"><h2>Overview</h2><p>${esc(x.summary)}</p><h3>Key features</h3><ul class="ticks">${x.features.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></div><aside class="rv"><h2>Get it</h2>${d ? `<p><a class="btn" href="/products/${x.slug}/demo/">Live demo</a></p>` : ''}${x.slug === 'net-monit' ? verPanels() : `${x.howto ? `<p class="note">${esc(x.howto)}</p>` : ''}<p><a class="btn ghost" href="${esc(x.download)}">${x.slug === 'ifinex' ? 'Download from GitHub Releases' : 'View on GitHub'}</a></p>`}${x.start ? `<h3>Quick start</h3><ul class="ticks">${x.start.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}<h3>Good to know</h3><ul class="ticks">${x.facts.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></aside></div></section>
+${d ? `<section class="sec"><div class="wrap"><h2>Operations and functions at a glance</h2>${fnGlance(x.slug)}<p><a class="btn" href="/products/${x.slug}/demo/">See every function in the live demo</a></p></div></section>` : ''}${x.editions ? `<section class="sec"><div class="wrap"><h2>Editions</h2>${cards(x.editions, ([n, t]) => `<article class="card rv"><h3>${esc(n)}</h3><p>${esc(t)}</p></article>`)}</div></section>` : ''}${cta}`, [['Products', '/products/'], [x.title, path]]);
+}
+// Live demo pages: /products/<slug>/demo/ (InfoXteK header stays; the simulation runs in a frame from /demos/<slug>/).
+const FRAME_SANDBOX = 'allow-scripts allow-same-origin allow-forms allow-modals allow-downloads allow-popups allow-popups-to-escape-sandbox';
+for (const [slug, d] of Object.entries(demos)) {
+  const x = products.find((q) => q.slug === slug), ppath = `/products/${slug}/`, path = `${ppath}demo/`;
+  pageEnv[path] = pageEnv[ppath]; styleMap[path] = styleMap[ppath] || 'flat';
+  page(path, `${x.title} live demo | ${site.name}`, `Try ${x.title} in your browser: ${d.lead}`.slice(0, 155),
+    `${head(`${x.title} live demo`, d.lead)}
+<section class="sec"><div class="wrap"><nav class="demo-views" aria-label="Demo views">${d.views.map(([l, v]) => `<a class="chip" href="/demos/${slug}/${v}" target="demoframe">${esc(l)}</a>`).join('')}</nav>
+<iframe class="demo-frame" name="demoframe" title="${esc(x.title)} live demo" src="/demos/${slug}/${d.entry}" sandbox="${FRAME_SANDBOX}" loading="lazy"></iframe>
+<p class="note">${esc(d.version)}. ${esc(d.simulated)}</p>
+<p><a class="btn" href="/demos/${slug}/${d.entry}">Open full screen</a> <a class="btn ghost" href="${ppath}">Product details</a> <a class="btn ghost" href="${esc(x.download)}">${slug === 'ifinex' ? 'Download from GitHub Releases' : 'Get it on GitHub'}</a>${slug === 'net-monit' ? ' <a class="btn ghost" href="/contact/#license">Request a license</a>' : ''}</p></div></section>
+<section class="sec alt"><div class="wrap"><h2>What to try</h2><ol class="flow">${li(d.tryIt)}</ol></div></section>
+${d.howItWorks ? `<section class="sec"><div class="wrap"><h2>How it works</h2>${cards(d.howItWorks, ([n, t]) => `<article class="card rv"><h3>${esc(n)}</h3><p>${esc(t)}</p></article>`)}</div></section>` : ''}<section class="sec${d.howItWorks ? ' alt' : ''}"><div class="wrap"><h2>Operations and functions</h2><p>Everything this product does, as shown in the demo. Click a group to open it.</p>${fnList(demoGroups(slug))}</div></section>${cta}`,
+    [['Products', '/products/'], [x.title, ppath], ['Live demo', path]]);
 }
 page('/platforms/', `Platforms | ${site.name}`, 'Explore the security and cloud platforms InfoXteK designs, deploys and supports.',
   `${head('Platforms we work with', 'Click a platform to see what it is, how it is secured and where AI is taking it.')}<section class="sec"><div class="wrap">${ring3d('plat', [{ name: 'Platforms', items: platformInfo.map((x) => platItem(x, true)) }])}<p class="note">More platform pages are being added. Product names are trademarks of their owners; listing a platform does not imply a partnership.</p></div></section>${cta}`, [['Platforms', '/platforms/']]);
@@ -181,13 +211,30 @@ mkdirSync(`${OUT}/assets`, { recursive: true });
 for (const p of pages) {
   const dir = p.path === '/' ? OUT : `${OUT}${p.path}`;
   mkdirSync(dir, { recursive: true });
-  writeFileSync(`${dir}/index.html`, brandize(layout(p)));
+  writeFileSync(`${dir}/index.html`, newTab(brandize(layout(p))));
 }
-writeFileSync(`${OUT}/404.html`, layout({ path: '/404/', noindex: true, title: `Page not found | ${site.name}`, description: 'Page not found.', crumbs: [], body: `${head('Page not found', 'That page does not exist or has moved.')}<section class="sec"><div class="wrap"><a class="btn" href="/">Back to home</a></div></section>` }));
+writeFileSync(`${OUT}/404.html`, newTab(layout({ path: '/404/', noindex: true, title: `Page not found | ${site.name}`, description: 'Page not found.', crumbs: [], body: `${head('Page not found', 'That page does not exist or has moved.')}<section class="sec"><div class="wrap"><a class="btn" href="/">Back to home</a></div></section>` })));
 cpSync('src/assets', `${OUT}/assets`, { recursive: true });
 writeFileSync(`${OUT}/assets/site.css`, readFileSync(`${OUT}/assets/site.css`, 'utf8') + Object.entries(accents).map(([k, [a, b]]) => `body[data-svc="${k}"]{--indigo:${a};--indigo-d:${a};--teal:${b}}`).join('\n') + services.map((_, i) => `.band[data-h="${i}"]::before{filter:hue-rotate(${i * 22}deg)}`).join('\n'));
 if (existsSync('public')) cpSync('public', OUT, { recursive: true });
+// ---- v3.2.0: copy the demo bundles to dist/demos/<slug>/ and harden every demo page ----
+const DEMO_CSP = (extra = '') => `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'${extra}; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'`;
+const DEMO_CONNECT = { 'net-monit/speedtest.html': ' https://speed.cloudflare.com https://api.ipify.org' }; // only user-started browser speed test
+if (existsSync('demos')) {
+  cpSync('demos', `${OUT}/demos`, { recursive: true });
+  const walkD = (d) => readdirSync(d).flatMap((n) => { const q = `${d}/${n}`; return statSync(q).isDirectory() ? walkD(q) : [q]; });
+  let n = 0;
+  for (const f of walkD(`${OUT}/demos`).filter((q) => q.endsWith('.html'))) {
+    const rel = f.slice(`${OUT}/demos/`.length);
+    let h = readFileSync(f, 'utf8');
+    const tags = `<meta http-equiv="Content-Security-Policy" content="${esc(DEMO_CSP(DEMO_CONNECT[rel] || ''))}"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex"><script src="/demos/_shared/links.js"></script>`;
+    if (/<meta charset[^>]*>/i.test(h)) h = h.replace(/<meta charset[^>]*>/i, (m) => m + tags); else if (/<head[^>]*>/i.test(h)) h = h.replace(/<head[^>]*>/i, (m) => m + tags); else h = h.replace(/<html[^>]*>/i, (m) => m + '<head>' + tags + '</head>');
+    if (rel === 'pc-admin-tools/index.html') h = h.replace('href="../"', 'href="/products/pc-admin-tools/" target="_blank" rel="noopener noreferrer"');
+    h = newTab(h); writeFileSync(f, h); n++;
+  }
+  console.log(`Demos: ${n} html files hardened (CSP, noindex, new-tab links)`);
+}
 const day = new Date().toISOString().slice(0, 10);
 writeFileSync(`${OUT}/sitemap.xml`, `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages.map((p) => `<url><loc>${url(p.path)}</loc><lastmod>${day}</lastmod></url>`).join('\n')}\n</urlset>\n`);
-writeFileSync(`${OUT}/robots.txt`, `User-agent: *\nAllow: /\n\nSitemap: ${site.url}/sitemap.xml\n`);
+writeFileSync(`${OUT}/robots.txt`, `User-agent: *\nAllow: /\nDisallow: /demos/\n\nSitemap: ${site.url}/sitemap.xml\n`);
 console.log(`Built ${pages.length} pages + 404 -> ${OUT}/ (v${VERSION})`);
