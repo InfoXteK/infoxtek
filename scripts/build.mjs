@@ -78,20 +78,23 @@ const newTab = (html) => html.replace(/<a\s([^>]*)>([\s\S]*?)<\/a>/g, (m, attrs,
 });
 const guideData = (() => { const f = 'demos/net-monit/static/js/guide-data.js'; if (!existsSync(f)) return null; const w = {}; vm.runInNewContext(readFileSync(f, 'utf8'), { window: w }); return w.GUIDE; })();
 const plain = (t) => String(t).replace(/<[^>]+>/g, '');
+const opsExplorer = () => { const ops = pcData.DEMO_OPS, cats = pcData.DEMO_CATS;
+  return `<div class="opsx" data-opsx><input type="search" placeholder="Search operations… (e.g. dns, vss, usb, rename)" aria-label="Search operations"><div class="chips">${`<button type="button" class="on" data-c="all">All (${ops.length})</button>${cats.map((c) => `<button type="button" data-c="${esc(c)}">${esc(c)} (${ops.filter((o) => o.category === c).length})</button>`).join('')}`}</div><ul class="oplist">${ops.map((o) => `<li data-cat="${esc(o.category)}" data-q="${esc((o.label + ' ' + o.description + ' ' + o.category).toLowerCase())}"><div class="r1"><b${o.danger ? ' class="sens"' : ''}>${o.danger ? '! ' : ''}${esc(o.label)}</b><span class="cat">${esc(o.category)}</span>${o.danger ? '<span class="bd sn">sensitive</span>' : ''}${o.detached || o.net_disruptive ? '<span class="bd bg">background job</span>' : ''}${o.params && o.params.length ? `<span class="bd in">${o.params.length} input${o.params.length > 1 ? 's' : ''}</span>` : ''}</div><p>${esc(o.description)}${o.params && o.params.length ? ` Needs: ${esc(o.params.map((q) => q.label).join(', '))}.` : ''}</p></li>`).join('')}</ul><p class="note" data-count>${ops.length} of ${ops.length} operations shown</p></div>`; };
 const renderSection = (slug, sct) => {
   const hd = `<h2>${esc(sct.title)}</h2>${sct.lead ? `<p>${esc(sct.lead)}</p>` : ''}`;
-  const card = ([h, t, tag]) => `<article class="card rv"><h3>${esc(h)}${tag ? ` <span class="cnt">${esc(tag)}</span>` : ''}</h3><p>${esc(t)}</p></article>`;
+  const card = ([h, t, tag]) => `<article class="card rv"><h3>${esc(h)}${tag ? ` <span class="cnt${/not updated/.test(tag) ? ' warn' : ''}">${esc(tag)}</span>` : ''}</h3><p>${esc(t)}</p></article>`;
   let b = '';
   if (sct.type === 'cards') b = `<div class="grid">${sct.items.map(card).join('')}</div>`;
   else if (sct.type === 'list') b = `<ul class="ticks">${sct.items.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>`;
   else if (sct.type === 'steps') b = `${sct.flow ? `<ol class="flowrow">${sct.flow.map((t) => `<li>${esc(t)}</li>`).join('')}</ol>` : ''}<div class="grid">${sct.items.map(([h, t, code]) => `<article class="card rv"><h3>${esc(h)}</h3><p>${esc(t)}</p>${code ? `<pre><code>${esc(code)}</code></pre>` : ''}</article>`).join('')}</div>`;
   else if (sct.type === 'table') b = `<div class="tw"><table><thead><tr>${sct.head.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${sct.rows.map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>${sct.note ? `<p class="note">${esc(sct.note)}</p>` : ''}`;
+  else if (sct.type === 'versions' && sct.timeline) b = `<ul class="tl">${sct.rows.map(([v, t]) => `<li><b>${esc(v)}</b>${esc(t)}</li>`).join('')}</ul>`;
   else if (sct.type === 'versions') b = `<div class="tw"><table><thead><tr><th>Version</th><th>What changed</th></tr></thead><tbody>${sct.rows.map(([v, t]) => `<tr><td>${esc(v)}</td><td>${esc(t)}</td></tr>`).join('')}</tbody></table></div>`;
-  else if (sct.type === 'ops') b = fnList(demoGroups(slug));
+  else if (sct.type === 'ops') b = opsExplorer();
   else if (sct.type === 'ref' && guideData) b = `<div class="fngrp">${Object.entries(guideData.pages).map(([k, pg], i) => `<details${i === 0 ? ' open' : ''}><summary>${esc(pg.title)} <span class="cnt">${pg.sections.reduce((a, q) => a + q.items.length, 0)}</span></summary><p>${esc(pg.intro)}</p>${pg.sections.map((q) => `<h4>${esc(q.h)}</h4><dl>${q.items.map((it) => `<dt>${esc(it[1])}</dt><dd>${esc(it[2])}</dd>`).join('')}</dl>`).join('')}<p><a href="/demos/${slug}/${k === 'index' ? 'index' : k}.html">Open this page in the demo</a></p></details>`).join('')}</div>`;
   else if (sct.type === 'scen') {
-    const list = slug === 'net-monit' && guideData ? Object.entries(guideData.scenarios).map(([k, q]) => [q.label, plain(q.hint).split(' - ')[1] || plain(q.hint), `/demos/${slug}/${q.page}?scenario=${k}`]) : pcScenarios.map(([k, l, t]) => [l, t, `/demos/${slug}/index.html?scenario=${k}`]);
-    b = `<div class="grid">${list.map(([l, t, u]) => `<article class="card rv"><h3>${esc(l)}</h3><p>${esc(t)}</p><p><a class="btn" href="${esc(u)}">Try it</a></p></article>`).join('')}</div>`;
+    const list = slug === 'net-monit' && guideData ? Object.entries(guideData.scenarios).map(([k, q]) => [q.label, plain(q.hint).split(' - ')[1] || plain(q.hint), `/demos/${slug}/${q.page}?scenario=${k}`]) : pcScenarios.map(([k, l, t, f]) => [l, t, `/demos/${slug}/index.html?scenario=${k}`, f]);
+    b = `<div class="grid">${list.map(([l, t, u, f]) => `<article class="card rv"><h3>${f ? `<span class="cnt">${esc(f)}</span> ` : ''}${esc(l)}</h3><p>${esc(t)}</p><p><a class="scn" href="${esc(u)}">Open scenario →</a></p></article>`).join('')}</div>`;
   }
   return `<section class="sec${sct.alt ? ' alt' : ''}" id="${sct.id}"><div class="wrap">${hd}${b}</div></section>`;
 };
@@ -144,13 +147,15 @@ const FRAME_SANDBOX = 'allow-scripts allow-same-origin allow-forms allow-modals 
 for (const [slug, d] of Object.entries(demos)) {
   const x = products.find((q) => q.slug === slug), ppath = `/products/${slug}/`, path = `${ppath}demo/`;
   pageEnv[path] = pageEnv[ppath]; styleMap[path] = styleMap[ppath] || 'flat';
-  page(path, `${x.title} live demo | ${site.name}`, `Try ${x.title} in your browser: ${d.lead}`.slice(0, 155),
-    `${head(`${x.title} live demo`, d.lead)}
-<section class="sec"><div class="wrap"><nav class="demo-views" aria-label="Demo views">${d.views.map(([l, v]) => `<a class="chip" href="/demos/${slug}/${v}" target="demoframe">${esc(l)}</a>`).join('')}</nav>
+  const dt = detail[slug];
+  const frameSec = `<section class="sec" id="demo"><div class="wrap"><nav class="demo-views" aria-label="Demo views">${d.views.map(([l, v]) => `<a class="chip" href="/demos/${slug}/${v}" target="demoframe">${esc(l)}</a>`).join('')}</nav>
 <iframe class="demo-frame" name="demoframe" title="${esc(x.title)} live demo" src="/demos/${slug}/${d.entry}" sandbox="${FRAME_SANDBOX}" loading="lazy"></iframe>
 <p class="note">${esc(d.version)}. ${esc(d.simulated)}</p>
-<p><a class="btn" href="/demos/${slug}/${d.entry}">Open full screen</a> <a class="btn ghost" href="${ppath}">Product details</a> <a class="btn ghost" href="${esc(x.download)}">${slug === 'ifinex' ? 'Download from GitHub Releases' : 'Get it on GitHub'}</a>${slug === 'net-monit' ? ' <a class="btn ghost" href="/contact/#license">Request a license</a>' : ''}</p></div></section>
-${detail[slug] ? `<section class="sec alt"><div class="wrap"><ul class="stats">${detail[slug].stats.map(([n, t]) => `<li><b>${esc(n)}</b><span>${esc(t)}</span></li>`).join('')}</ul><p class="note"><strong>About the demo:</strong> ${esc(detail[slug].about)}</p><nav class="demo-views" aria-label="On this page">${detail[slug].sections.map((q) => `<a class="chip" href="#${q.id}">${esc(q.title.replace('Try it: ', ''))}</a>`).join('')}</nav></div></section>${detail[slug].sections.map((q, i) => renderSection(slug, { ...q, alt: i % 2 === 1 })).join('')}` : `<section class="sec alt"><div class="wrap"><h2>What to try</h2><ol class="flow">${li(d.tryIt)}</ol></div></section><section class="sec"><div class="wrap"><h2>Operations and functions</h2><p>Everything this product does, as shown in the demo. Click a group to open it.</p>${fnList(demoGroups(slug))}</div></section>`}${cta}`,
+<p><a class="btn" href="/demos/${slug}/${d.entry}">Open full screen</a> <a class="btn ghost" href="${ppath}">Product details</a> <a class="btn ghost" href="${esc(x.download)}">${slug === 'ifinex' ? 'Download from GitHub Releases' : 'Get it on GitHub'}</a>${slug === 'net-monit' ? ' <a class="btn ghost" href="/contact/#license">Request a license</a>' : ''}</p></div></section>`;
+  const statsSec = dt ? `<section class="sec"><div class="wrap"><ul class="stats">${dt.stats.map(([n, t]) => `<li><b>${esc(n)}</b><span>${esc(t)}</span></li>`).join('')}</ul><p class="aboutbox"><strong>About the demo:</strong> ${esc(dt.about)}</p><nav class="demo-views" aria-label="On this page"><a class="chip" href="#demo">Live demo</a>${dt.sections.map((q) => `<a class="chip" href="#${q.id}">${esc(q.title.replace('Try it: ', ''))}</a>`).join('')}</nav></div></section>` : '';
+  const demoBody = dt ? `<div class="dk">${statsSec}${frameSec}${dt.sections.map((q, i) => renderSection(slug, { ...q, alt: i % 2 === 0 })).join('')}</div>` : `${frameSec}<section class="sec alt"><div class="wrap"><h2>What to try</h2><ol class="flow">${li(d.tryIt)}</ol></div></section><section class="sec"><div class="wrap"><h2>Operations and functions</h2><p>Everything this product does, as shown in the demo. Click a group to open it.</p>${fnList(demoGroups(slug))}</div></section>`;
+  page(path, `${x.title} live demo | ${site.name}`, `Try ${x.title} in your browser: ${d.lead}`.slice(0, 155),
+    `${head(`${x.title} live demo`, d.lead)}${demoBody}${cta}`,
     [['Products', '/products/'], [x.title, ppath], ['Live demo', path]]);
 }
 page('/platforms/', `Platforms | ${site.name}`, 'Explore the security and cloud platforms InfoXteK designs, deploys and supports.',
@@ -222,7 +227,7 @@ const layout = (p) => {
 ${p.crumbs.length ? `<nav class="crumbs wrap" aria-label="Breadcrumb">${crumbs.map((c, i) => (i < crumbs.length - 1 ? `<a href="${c[1]}">${esc(c[0])}</a>` : `<span aria-current="page">${esc(c[0])}</span>`)).join(' / ')}</nav>` : ''}
 <main id="main">${withArt(p)}</main>
 <footer class="foot"><div class="wrap"><strong>${esc(site.name)}</strong><p>${esc(site.description)}</p><p class="small-print">&copy; ${new Date().getUTCFullYear()} ${esc(site.name)}. Version ${VERSION}.</p></div></footer>
-${glScripts(p.body)}<script src="/assets/site.js?v=${VERSION}" defer></script></body></html>`;
+${glScripts(p.body)}${p.body.includes('data-opsx') ? `<script src="/assets/ops-explorer.js?v=${VERSION}" defer></script>` : ''}<script src="/assets/site.js?v=${VERSION}" defer></script></body></html>`;
 };
 
 rmSync(OUT, { recursive: true, force: true });

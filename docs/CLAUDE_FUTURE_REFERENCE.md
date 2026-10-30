@@ -1,4 +1,4 @@
-# InfoXteK: Complete Claude Reference (v3.3.0, port 3024)
+# InfoXteK: Complete Claude Reference (v3.3.1, port 3025)
 Living record from the start of the project. Update on every change. Repository and docs are the source of truth.
 
 ## 1. Identity
@@ -299,3 +299,10 @@ Read CLAUDE.md, docs/3D_ENGINE.md and this file. Do not start a long session: op
 - Scenario cards open the full demo in a new tab with `?scenario=<id>`. iFiNeX demo page unchanged (old layout).
 - The licensing text no longer prints the owner's email; it points to the contact page.
 - Not tested in a real browser. Build and static checks pass (36 html, 0 problems); counts verified in built html (113 operations, 173 options).
+
+## 28. v3.3.1 notes (PC Admin Tools demo rebuilt to match the owner's screenshots, port 3025)
+- Feedback: v3.3.0 PC page was wrong. Owner wants the V19 demo experience (scenario cards, virtual PC status tiles, Selected tab) plus every V19.1 landing section, for all 113 operations, looking like the owner's demo sites (dark).
+- Engine decision: the live demo keeps the V19.1 engine (demos/pc-admin-tools: demo-engine.js, demo-sims-1/2.js, ops-data.js, 113 ops, tool v4.0) because the older V19 bundle only has 90 operations (tool v3.8, 20 ids not in v4.0). The V19 look was recreated on top of it.
+- demos/pc-admin-tools/index.html + demo-ui.css + demo-ui.js patched: Live demo intro, simulation notice, 13 scenario cards (data-scen; ids pushwatch, quick, health, inline, rename, mapdrive, vss, longjobs, typo, rollback, validation, reboot, cleanup; the 5 new ones map V19 scenarios to v4.0 op ids), hidden select#scen/#scenGo kept for the engine and ?scenario= deep links, virtual PC tiles (name, network, link, DNS, uptime, clock; read from DemoEngine.T every second), Clear log / Copy log / Last log, Selected (n) tab, tool area 760px with the page scrolling. The "About" back link was removed.
+- Site page /products/pc-admin-tools/demo/: dark `.dk` wrapper, stats, amber about box, chip nav, frame (#demo), How it works (flow arrows), Three editions (version chips, "not updated" in amber), What it can do, 13 scenario cards (Open scenario links, flagship badge), All operations explorer (search, category chips with counts, sensitive / background job / N inputs badges, server-rendered 113 rows, filter in src/assets/ops-explorer.js loaded only where data-opsx exists), Run the real thing, Good to know, Version history timeline. Net-Monit page uses the same dark wrapper.
+- Not tested in a real browser (none available). Verified: build and check pass, 113 operation rows, 13 scenario links, inline demo script syntax, required element ids present.
