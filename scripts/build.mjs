@@ -256,7 +256,7 @@ ${p.crumbs.length ? `<nav class="crumbs wrap" aria-label="Breadcrumb">${crumbs.m
 <nav aria-label="Products"><h2>Products</h2><ul>${products.map((x) => '<li><a href="/products/' + x.slug + '/">' + esc(x.title) + '</a></li>').join('')}<li><a href="/platforms/">Platforms</a></li><li><a href="/products/">All products</a></li></ul></nav>
 <nav aria-label="Company"><h2>Company</h2><ul><li><a href="/why-choose-us/">Why choose us</a></li><li><a href="/industries/">Industries</a></li><li><a href="/tools-tips/">Tools &amp; tips</a></li><li><a href="/book-online/">Book online</a></li><li><a href="/contact/">Contact us</a></li><li><a href="/sitemap.xml">Sitemap</a></li></ul></nav></div>
 <div class="foot2-base"><span>&copy; ${new Date().getUTCFullYear()} ${esc(site.name)}</span><span>Third-party product names are trademarks of their respective owners and are used for identification only.</span></div></div></footer>
-${glScripts(p.body)}${p.body.includes('data-opsx') ? `<script src="/assets/ops-explorer.js?v=${VERSION}" defer></script>` : ''}<script src="/assets/site.js?v=${VERSION}" defer></script></body></html>`;
+<script src="/assets/motion.js?v=${VERSION}" defer></script>${glScripts(p.body)}${p.body.includes('data-opsx') ? `<script src="/assets/ops-explorer.js?v=${VERSION}" defer></script>` : ''}<script src="/assets/site.js?v=${VERSION}" defer></script></body></html>`;
 };
 
 rmSync(OUT, { recursive: true, force: true });
@@ -270,6 +270,13 @@ writeFileSync(`${OUT}/404.html`, newTab(layout({ path: '/404/', noindex: true, t
 cpSync('src/assets', `${OUT}/assets`, { recursive: true });
 writeFileSync(`${OUT}/assets/site.css`, readFileSync(`${OUT}/assets/site.css`, 'utf8') + Object.entries(accents).map(([k, [a, b]]) => `body[data-svc="${k}"]{--indigo:${a};--indigo-d:${a};--teal:${b}}`).join('\n') + services.map((_, i) => `.band[data-h="${i}"]::before{filter:hue-rotate(${i * 22}deg)}`).join('\n'));
 writeFileSync(`${OUT}/assets/site.css`, readFileSync(`${OUT}/assets/site.css`, 'utf8') + `\n.hero-media{background-image:url("${heroPlaceholder}")}`);
+{
+  const P = 'html:not(.motion-on)';
+  const fixSel = (sel) => sel.split(',').map((x) => { x = x.trim(); if (x === 'html') return P; if (x.startsWith('html.')) return P + x.slice(4); if (x.startsWith('.js ')) return P + x; return P + ' ' + x; }).join(',');
+  let css = readFileSync(`${OUT}/assets/site.css`, 'utf8');
+  css = css.replace(/@media\(prefers-reduced-motion:reduce\)\{((?:[^{}]+\{[^{}]*\})+)\}/g, (m, body) => '@media(prefers-reduced-motion:reduce){' + body.replace(/([^{}]+)\{([^{}]*)\}/g, (mm, sel, decl) => fixSel(sel) + '{' + decl + '}') + '}');
+  writeFileSync(`${OUT}/assets/site.css`, css);
+}
 if (existsSync('public')) cpSync('public', OUT, { recursive: true });
 // ---- v3.2.0: copy the demo bundles to dist/demos/<slug>/ and harden every demo page ----
 const DEMO_CSP = (extra = '') => `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'${extra}; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'`;

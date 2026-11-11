@@ -466,3 +466,5 @@ h1,h2,h3{letter-spacing:-.02em}
 
 .homehero .floaters{z-index:3}
 .homehero .floaters span{color:#e8ecff;background:rgba(15,24,64,.65);border-color:rgba(143,156,245,.55)}
+.motionbtn{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:60;max-width:calc(100vw - 32px);padding:10px 18px;border-radius:999px;border:1px solid rgba(255,255,255,.4);background:#14213d;color:#fff;font:600 .9rem/1.2 inherit;font-family:inherit;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.motionbtn:hover{background:#3b4cca}
