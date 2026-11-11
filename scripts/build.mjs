@@ -8,6 +8,7 @@ import { reasonDetails, industryDetails, tipDetails } from '../src/config/detail
 import { svcExtra, prodExtra } from '../src/config/svcdetails.mjs';
 import { demos } from '../src/config/demos.mjs';
 import { detail, pcScenarios } from '../src/config/demodetail.mjs';
+import { heroPlaceholder } from '../src/config/heroph.mjs';
 
 import { flows, panelFlows, autoFlow, validateFlow } from '../src/config/flows3d.mjs';
 const VERSION = JSON.parse(readFileSync('package.json', 'utf8')).version;
@@ -98,23 +99,44 @@ const renderSection = (slug, sct) => {
   }
   return `<section class="sec${sct.alt ? ' alt' : ''}" id="${sct.id}"><div class="wrap">${hd}${b}</div></section>`;
 };
+// v3.4.0: keep one "Illustrative ... Not live customer data." note per page, drop the repeats.
+const dedupeNotes = (html) => { let seen = false; return html.replace(/<p class="note">(Illustrative[^<]*?Not live (?:customer )?data\.)([^<]*)<\/p>/g, (m, a, rest) => { if (!seen) { seen = true; return m; } return rest.trim() ? '<p class="note">' + rest.trim() + '</p>' : ''; }); };
 const page = (path, title, description, body, crumbs = []) => pages.push({ path, title, description, body, crumbs });
 const head = (t, s = '', h = 0) => `<section class="band" data-h="${h}"><div class="wrap"><h1>${esc(t)}</h1>${s ? `<p class="lead">${esc(s)}</p>` : ''}</div></section>`;
 const cta = `<section class="cta"><div class="wrap"><h2>Talk to us about your IT</h2><p>Tell us what you need and we will suggest a sensible next step.</p><a class="btn" href="/contact/">Request a consultation</a></div></section>`;
 const reasonList = `<ol class="reasons">${reasons.map((r) => `<li><strong>${esc(r.title)}</strong><span>${esc(r.text)}</span></li>`).join('')}</ol>`;
 const cards = (arr, fn) => `<div class="grid">${arr.map(fn).join('')}</div>`;
 
-page('/', `${site.name} | ${site.tagline}`, site.description, `
-<section class="hero"><div class="netbg" aria-hidden="true"></div><div class="floaters" role="group" aria-label="Draggable skill chips"><span>AI</span><span>ZERO TRUST</span><span>XDR</span><span>DLP</span><span>LLM</span><span>MFA</span><span>SIEM</span><span>EDR</span><span>CLOUD</span><span>BACKUP</span><span>NAC</span><span>INTUNE</span></div><div class="wrap hero-grid">
-<div><h1>${esc(site.tagline)}</h1><p class="lead">${esc(site.description)}</p>
-<p class="actions"><a class="btn" href="/contact/">Request a consultation</a><a class="btn ghost" href="/services/">See our services</a></p></div>
-
-</div></section>
-<section class="vendors"><div class="wrap"><p>Platforms we design, deploy and support: click a highlighted one to explore it</p><div class="chips">${platforms.map((v) => { const q = platformInfo.find((z) => z.chip === v); return q ? `<a href="/platforms/${q.slug}/">${v}</a>` : `<span>${v}</span>`; }).join('')}</div></div></section>
-<section class="sec"><div class="wrap"><h2>Choose your service</h2>${svcRing('pick', false)}</div></section>
-<section class="sec alt"><div class="wrap"><h2>Why organizations choose us</h2>${reasonList}</div></section>
-${testimonials.length ? `<section class="sec"><div class="wrap"><h2>What clients say</h2>${cards(testimonials, (t) => `<blockquote class="card"><p>${esc(t.quote)}</p><footer>${esc(t.name)}, ${esc(t.role)}</footer></blockquote>`)}</div></section>` : ''}
-${cta}`);
+// ---- v3.4.0 home page (premium redesign) ----
+const slugify = (n) => n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const heroSrc = (ext) => [640, 1280, 1920].map((w) => '/img/hero-' + w + '.' + ext + ' ' + w + 'w').join(', ');
+const heroPic = (eager) => '<picture><source type="image/avif" srcset="' + heroSrc('avif') + '" sizes="100vw"><source type="image/webp" srcset="' + heroSrc('webp') + '" sizes="100vw"><img src="/img/hero-1280.jpg" srcset="' + heroSrc('jpg') + '" sizes="100vw" width="1920" height="1080" alt=""' + (eager ? ' fetchpriority="high" decoding="async"' : ' loading="lazy" decoding="async"') + '></picture>';
+// Brand logos: drop <slug>.svg into public/logos/ (slug = lowercase name, e.g. microsoft-azure.svg) and it replaces the text wordmark automatically.
+const marqueeItem = (name, linked) => { const sl = slugify(name), art = existsSync('public/logos/' + sl + '.svg') ? '<img src="/logos/' + sl + '.svg" height="28" width="96" alt="' + esc(name) + '">' : esc(name); return linked ? '<li><a href="/platforms/' + linked + '/" aria-label="' + esc(name) + ': explore this platform">' + art + '</a></li>' : '<li><span>' + art + '</span></li>'; };
+const marqueeSet = () => platforms.map((v) => { const q = platformInfo.find((z) => z.chip === v); return marqueeItem(v, q && q.slug); }).join('');
+const stat = (n, l) => '<li><b data-n="' + n + '">' + n + '</b><span>' + esc(l) + '</span></li>';
+const catPick = { 'IT & Security': ['cloud-solutions', 'cyber-security', 'disaster-recovery', 'managed-it'], 'Digital & Software': ['web-applications', 'mobile-applications', 'ai-solutions', 'ecommerce'] };
+const catLead = { 'IT & Security': 'Infrastructure, protection and support for the systems your business runs on.', 'Digital & Software': 'Websites, applications and AI that help you reach customers and work faster.' };
+const catCard = (g) => '<article class="cat"><h3>' + esc(g) + '</h3><p>' + esc(catLead[g]) + '</p><ul>' + catPick[g].map((sl) => { const x = services.find((q) => q.slug === sl); return '<li><a href="/services/' + sl + '/">' + icon(x.icon) + '<b>' + esc(x.title) + '</b><span>' + esc(x.summary) + '</span></a></li>'; }).join('') + '</ul><a class="more" href="/services/">See all ' + (g === 'IT & Security' ? 'IT & security' : 'digital & software') + ' services</a></article>';
+const whyIcons = ['gear', 'desktop', 'shield', 'chip', 'chat'];
+const procSteps = [['Discover', 'We listen, inventory your systems and agree what matters most.'], ['Design', 'We plan a right-sized solution with clear scope, risks and next steps.'], ['Deliver', 'We build, configure and test it, and document what we hand over.'], ['Support', 'We monitor, review and improve it as your business changes.']];
+const labCard = (x) => '<article><h3>' + esc(x.title) + '</h3><p>' + esc(x.summary) + '</p><div class="acts"><a class="btn small" href="/products/' + x.slug + '/demo/">Try the live demo</a><a class="btn small ghost" href="/products/' + x.slug + '/">Product details</a></div></article>';
+const proofSection = () => (testimonials.length
+  ? '<section class="sec"><div class="wrap"><div class="sec-head"><h2>What clients say</h2></div>' + cards(testimonials, (t) => '<blockquote class="card"><p>' + esc(t.quote) + '</p><footer>' + esc(t.name) + ', ' + esc(t.role) + '</footer></blockquote>') + '</div></section>'
+  : '<section class="sec"><div class="wrap"><div class="sec-head"><h2>Software we build ourselves</h2><p>Try the working demos without leaving this site.</p></div><div class="lab">' + products.map(labCard).join('') + '</div></div></section>');
+page('/', site.name + ' | ' + site.tagline, site.description, `
+<section class="homehero" aria-labelledby="hero-h1"><div class="hero-media" aria-hidden="true">${heroPic(true)}</div><div class="hero-shade" aria-hidden="true"></div>
+<div class="wrap hero-copy"><h1 id="hero-h1">${esc(site.tagline)}</h1><p class="lead">${esc(site.description)}</p>
+<p class="actions"><a class="btn lg" href="/contact/">Request a consultation</a><a class="btn lg ghost" href="/services/">See our services</a></p></div>
+<a class="scrollcue" href="#trust" aria-label="Scroll to the next section"><span></span></a></section>
+<section class="trust" id="trust" aria-label="InfoXteK at a glance"><ul class="trust-grid">${stat(services.length, 'services across IT, security and software')}${stat(platforms.length, 'platforms we design, deploy and support')}${stat(pcData.DEMO_OPS.length, 'admin operations in PC Admin Tools')}${stat(products.length, 'own products with a live demo')}</ul></section>
+<section class="marq" aria-label="Platforms we work with"><p>Platforms we design, deploy and support</p><div class="marq-vp"><ul class="marq-track">${marqueeSet()}${platforms.map((v) => marqueeItem(v, null)).join('').replace(/<li>/g, '<li class="clone" aria-hidden="true">')}</ul></div></section>
+<section class="sec"><div class="wrap"><div class="sec-head"><h2>Two ways we help</h2><p>Pick the area you need. Every service has its own page with the full detail.</p></div><div class="cats">${['IT & Security', 'Digital & Software'].map(catCard).join('')}</div></div></section>
+<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>Why organizations choose us</h2><p>Practical IT, explained plainly and built to last.</p></div><ul class="whys">${reasons.map((r, i) => '<li><span class="tile">' + icon(whyIcons[i % whyIcons.length]) + '</span><b>' + esc(r.title) + '</b><span>' + esc(r.text) + '</span></li>').join('')}</ul></div></section>
+<section class="sec"><div class="wrap"><div class="sec-head"><h2>How we work</h2><p>Four steps, whatever the size of the project.</p></div><ol class="proc">${procSteps.map(([t, d]) => '<li><b>' + t + '</b><span>' + d + '</span></li>').join('')}</ol></div></section>
+<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>Industries we support</h2></div><div class="inds">${industries.map((x) => '<a href="/industries/"><b>' + esc(x.name) + '</b><span>' + esc(x.summary) + '</span></a>').join('')}</div></div></section>
+${proofSection()}
+<section class="cta-img"><div class="hero-media" aria-hidden="true">${heroPic(false)}</div><div class="wrap"><h2>Talk to us about your IT</h2><p>Tell us what you need and we will suggest a sensible next step.</p><a class="btn lg" href="/contact/">Request a consultation</a></div></section>`);
 
 page('/why-choose-us/', `Why Choose Us | ${site.name}`, 'Experienced, proactive and tailored IT support built for long-term partnerships.',
   `${head('Why choose us', 'Five reasons clients stay with us.')}<section class="sec"><div class="wrap">${ring3d('why', [{ name: 'Five reasons', items: reasons.map((r) => ({ t: r.title, d: r.text, i: 'gear', det: reasonDetails[r.title] })) }])}</div></section>${cta}`, [['Why Choose Us', '/why-choose-us/']]);
@@ -208,7 +230,8 @@ const glScripts = (b) => { const ring = b.includes('class="ring3d"'), flow = b.i
 const layout = (p) => {
   const crumbs = [['Home', '/'], ...p.crumbs];
   const jsonld = [
-    { '@context': 'https://schema.org', '@type': 'Organization', name: site.name, url: site.url, logo: `${site.url}/logo-512.png`, image: `${site.url}/logo-512.png` },
+    { '@context': 'https://schema.org', '@type': 'Organization', '@id': `${site.url}/#org`, name: site.name, url: site.url, logo: `${site.url}/logo-512.png`, image: `${site.url}/og-image.png`, description: site.description, email: contact.email, ...(contact.phone ? { telephone: contact.phone } : {}), contactPoint: [{ '@type': 'ContactPoint', contactType: 'sales', email: contact.email }] },
+    ...(((p.path.match(/^\/services\/([^/]+)\/$/) || [])[1] && services.find((q) => q.slug === (p.path.match(/^\/services\/([^/]+)\/$/) || [])[1])) ? [(() => { const q = services.find((z) => z.slug === (p.path.match(/^\/services\/([^/]+)\/$/) || [])[1]); return { '@context': 'https://schema.org', '@type': 'Service', name: q.title, description: q.summary, serviceType: q.title, url: url(p.path), provider: { '@id': `${site.url}/#org` } }; })()] : []),
     { '@context': 'https://schema.org', '@type': 'WebSite', name: site.name, url: site.url },
     ...(p.crumbs.length ? [{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: crumbs.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c[0], item: url(c[1]) })) }] : []),
   ];
@@ -217,16 +240,21 @@ const layout = (p) => {
 <html lang="${site.locale}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="${esc(csp)}"><meta name="referrer" content="strict-origin-when-cross-origin">${p.noindex ? '<meta name="robots" content="noindex">' : ''}
 <title>${esc(p.title)}</title><meta name="description" content="${esc(p.description)}"><link rel="canonical" href="${url(p.path)}">
-<meta property="og:type" content="website"><meta property="og:site_name" content="${esc(site.name)}"><meta property="og:title" content="${esc(p.title)}"><meta property="og:description" content="${esc(p.description)}"><meta property="og:url" content="${url(p.path)}"><meta property="og:image" content="${site.url}/logo-512.png"><meta name="twitter:card" content="summary">
-<meta name="theme-color" content="#3b4cca"><link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" href="/favicon-48.png" sizes="48x48"><link rel="icon" type="image/png" href="/favicon-96.png" sizes="96x96"><link rel="icon" type="image/png" href="/favicon-192.png" sizes="192x192"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="manifest" href="/site.webmanifest"><link rel="stylesheet" href="/assets/site.css?v=${VERSION}">
+<meta property="og:type" content="website"><meta property="og:site_name" content="${esc(site.name)}"><meta property="og:title" content="${esc(p.title)}"><meta property="og:description" content="${esc(p.description)}"><meta property="og:url" content="${url(p.path)}"><meta property="og:image" content="${site.url}/og-image.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="${esc(site.name)}: ${esc(site.tagline)}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${esc(p.title)}"><meta name="twitter:description" content="${esc(p.description)}"><meta name="twitter:image" content="${site.url}/og-image.png">
+<meta name="theme-color" content="#3b4cca"><link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" href="/favicon-48.png" sizes="48x48"><link rel="icon" type="image/png" href="/favicon-96.png" sizes="96x96"><link rel="icon" type="image/png" href="/favicon-192.png" sizes="192x192"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="manifest" href="/site.webmanifest"><link rel="preload" href="/fonts/inter-400.woff" as="font" type="font/woff" crossorigin><link rel="preload" href="/fonts/inter-600.woff" as="font" type="font/woff" crossorigin>${p.path === '/' ? `<link rel="preload" as="image" type="image/avif" imagesrcset="${heroSrc('avif')}" imagesizes="100vw" fetchpriority="high">` : ''}<link rel="stylesheet" href="/assets/site.css?v=${VERSION}">
 <script type="application/ld+json">${ld(jsonld)}</script></head>
-<body data-style="${styleMap[p.path] || 'flat'}" data-svc="${(p.path.match(/^\/services\/([^/]+)\/$/) || [])[1] || ''}"><a class="skip" href="#main">Skip to content</a>
+<body class="${p.path === '/' ? 'home' : ''}" data-style="${styleMap[p.path] || 'flat'}" data-svc="${(p.path.match(/^\/services\/([^/]+)\/$/) || [])[1] || ''}"><a class="skip" href="#main">Skip to content</a>
 <header class="top"><div class="wrap bar"><a class="logo" href="/" aria-label="${esc(site.name)} home"><img src="/assets/logo.png" width="34" height="44" alt=""><span>Info<b>X</b>te<b>K</b></span></a>
-<button class="menu" aria-expanded="false" aria-controls="nav">Menu</button>
+<a class="btn small bookm" href="/book-online/">Book Online</a><button class="menu" aria-expanded="false" aria-controls="nav">Menu</button>
 <nav id="nav" aria-label="Main">${nav.map((n) => `<a href="${n.path}"${cur(n.path)}>${esc(n.label)}</a>`).join('')}<a class="btn small" href="/book-online/"${cur('/book-online/')}>Book Online</a></nav></div></header>
 ${p.crumbs.length ? `<nav class="crumbs wrap" aria-label="Breadcrumb">${crumbs.map((c, i) => (i < crumbs.length - 1 ? `<a href="${c[1]}">${esc(c[0])}</a>` : `<span aria-current="page">${esc(c[0])}</span>`)).join(' / ')}</nav>` : ''}
 <main id="main">${withArt(p)}</main>
-<footer class="foot"><div class="wrap"><strong>${esc(site.name)}</strong><p>${esc(site.description)}</p><p class="small-print">&copy; ${new Date().getUTCFullYear()} ${esc(site.name)}. Version ${VERSION}.</p></div></footer>
+<footer class="foot2"><div class="wrap"><div class="foot2-grid">
+<div><strong>${esc(site.name)}</strong><p>${esc(site.description)}</p><p><a href="mailto:${esc(contact.email)}">${esc(contact.email)}</a></p>${contact.phone ? '<p>' + esc(contact.phone) + '</p>' : ''}${contact.address ? '<p>' + esc(contact.address) + '</p>' : ''}${contact.social && contact.social.length ? '<p>' + contact.social.map((x) => '<a href="' + esc(x.href) + '">' + esc(x.label) + '</a>').join(' &middot; ') + '</p>' : ''}</div>
+<nav aria-label="Services"><h2>Services</h2><ul>${['cloud-solutions', 'managed-it', 'network-solutions', 'disaster-recovery', 'cyber-security', 'ai-solutions', 'web-applications', 'mobile-applications'].map((sl) => { const x = services.find((q) => q.slug === sl); return '<li><a href="/services/' + sl + '/">' + esc(x.title) + '</a></li>'; }).join('')}<li><a href="/services/">All services</a></li></ul></nav>
+<nav aria-label="Products"><h2>Products</h2><ul>${products.map((x) => '<li><a href="/products/' + x.slug + '/">' + esc(x.title) + '</a></li>').join('')}<li><a href="/platforms/">Platforms</a></li><li><a href="/products/">All products</a></li></ul></nav>
+<nav aria-label="Company"><h2>Company</h2><ul><li><a href="/why-choose-us/">Why choose us</a></li><li><a href="/industries/">Industries</a></li><li><a href="/tools-tips/">Tools &amp; tips</a></li><li><a href="/book-online/">Book online</a></li><li><a href="/contact/">Contact us</a></li><li><a href="/sitemap.xml">Sitemap</a></li></ul></nav></div>
+<div class="foot2-base"><span>&copy; ${new Date().getUTCFullYear()} ${esc(site.name)}</span><span>Third-party product names are trademarks of their respective owners and are used for identification only.</span></div></div></footer>
 ${glScripts(p.body)}${p.body.includes('data-opsx') ? `<script src="/assets/ops-explorer.js?v=${VERSION}" defer></script>` : ''}<script src="/assets/site.js?v=${VERSION}" defer></script></body></html>`;
 };
 
@@ -235,11 +263,12 @@ mkdirSync(`${OUT}/assets`, { recursive: true });
 for (const p of pages) {
   const dir = p.path === '/' ? OUT : `${OUT}${p.path}`;
   mkdirSync(dir, { recursive: true });
-  writeFileSync(`${dir}/index.html`, newTab(brandize(layout(p))));
+  writeFileSync(`${dir}/index.html`, dedupeNotes(newTab(brandize(layout(p)))));
 }
 writeFileSync(`${OUT}/404.html`, newTab(layout({ path: '/404/', noindex: true, title: `Page not found | ${site.name}`, description: 'Page not found.', crumbs: [], body: `${head('Page not found', 'That page does not exist or has moved.')}<section class="sec"><div class="wrap"><a class="btn" href="/">Back to home</a></div></section>` })));
 cpSync('src/assets', `${OUT}/assets`, { recursive: true });
 writeFileSync(`${OUT}/assets/site.css`, readFileSync(`${OUT}/assets/site.css`, 'utf8') + Object.entries(accents).map(([k, [a, b]]) => `body[data-svc="${k}"]{--indigo:${a};--indigo-d:${a};--teal:${b}}`).join('\n') + services.map((_, i) => `.band[data-h="${i}"]::before{filter:hue-rotate(${i * 22}deg)}`).join('\n'));
+writeFileSync(`${OUT}/assets/site.css`, readFileSync(`${OUT}/assets/site.css`, 'utf8') + `\n.hero-media{background-image:url("${heroPlaceholder}")}`);
 if (existsSync('public')) cpSync('public', OUT, { recursive: true });
 // ---- v3.2.0: copy the demo bundles to dist/demos/<slug>/ and harden every demo page ----
 const DEMO_CSP = (extra = '') => `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'${extra}; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'`;

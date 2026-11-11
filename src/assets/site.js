@@ -386,3 +386,21 @@ addEventListener('keydown', (e) => { if (/INPUT|TEXTAREA|SELECT/.test(e.target.t
   const io = new IntersectionObserver((es) => es.forEach((e) => { const el = e.target; if (el._dead) return; if (e.isIntersecting) show(el); else hide(el); }), { rootMargin: '320px', threshold: 0 });
   els.forEach((el) => { if (!el._dead) io.observe(el); });
 })();
+
+/* v3.4.0: header shrinks on scroll; trust-bar counters count up once when scrolled into view (final value is already in the HTML) */
+(() => {
+  const top = document.querySelector('header.top');
+  if (top) {
+    let q = false; const f = () => { q = false; top.classList.toggle('sm', window.scrollY > 24); };
+    window.addEventListener('scroll', () => { if (!q) { q = true; requestAnimationFrame(f); } }, { passive: true }); f();
+  }
+  const nums = document.querySelectorAll('.trust-grid b[data-n]');
+  if (!nums.length || !('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const io = new IntersectionObserver((es) => es.forEach((e) => {
+    if (!e.isIntersecting) return; io.unobserve(e.target);
+    const el = e.target, end = Number(el.dataset.n), t0 = performance.now(), dur = 900;
+    const step = (t) => { const k = Math.min(1, (t - t0) / dur); el.textContent = String(Math.round(end * (1 - Math.pow(1 - k, 3)))); if (k < 1) requestAnimationFrame(step); };
+    el.textContent = '0'; requestAnimationFrame(step);
+  }), { threshold: 0.6 });
+  nums.forEach((n) => io.observe(n));
+})();

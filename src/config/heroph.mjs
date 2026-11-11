@@ -1,0 +1,1 @@
+export const heroPlaceholder = 'data:image/webp;base64,UklGRlgAAABXRUJQVlA4IEwAAADQAwCdASogABIAPu1kqk2ppaQiMAgBMB2JYwDFB46CiaH3FD2lebAA/u+ntD6jMHiUG/U1RdbJgZTe9Y9V44ACUGRgTAgfvfGm5AAA';

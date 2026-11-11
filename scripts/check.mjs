@@ -82,5 +82,26 @@ for (const g of glFiles) { const src = readFileSync(g, 'utf8'); glBytes += src.l
 if (glBytes > 150000) fail(`3D engine total ${glBytes} bytes is over the 150 KB budget`);
 if (glFiles.length !== 3) fail(`expected 3 engine files, found ${glFiles.length}`);
 console.log(`3D checks: ${flowCount} flow blocks validated, engine ${glBytes} bytes in ${glFiles.length} files`);
+
+// v3.4.0 redesign assertions
+{
+  const home = readFileSync('dist/index.html', 'utf8');
+  if (!/<img[^>]*fetchpriority="high"[^>]*width="1920"[^>]*height="1080"|<img[^>]*width="1920"[^>]*height="1080"[^>]*fetchpriority="high"/.test(home)) fail('home hero img needs fetchpriority="high" plus width/height');
+  if (!home.includes('type="image/avif"') || !home.includes('type="image/webp"')) fail('home hero needs AVIF and WebP sources');
+  if (!home.includes('rel="preload" as="image"')) fail('home is missing the hero preload');
+  if (/class="(ring3d|flow3d)"/.test(home) || /assets\/gl-/.test(home)) fail('home must not load the 3D engine');
+  for (const f of ['dist/og-image.png', 'dist/fonts/inter-400.woff', 'dist/fonts/inter-600.woff', 'dist/fonts/inter-700.woff', 'dist/img/hero-640.avif', 'dist/img/hero-1280.webp', 'dist/img/hero-1920.jpg']) if (!existsSync(f)) fail(`${f} missing`);
+  { const b = readFileSync('dist/og-image.png'); if (b.readUInt32BE(16) !== 1200 || b.readUInt32BE(20) !== 630) fail('og-image.png must be 1200x630'); }
+  for (const f of html) {
+    const s = readFileSync(f, 'utf8');
+    if (/Version\s+\d+\.\d+\.\d+/.test(s.replace(/<script[\s\S]*?<\/script>/g, ''))) fail(`${f} shows a version number`);
+    if (!s.includes('name="twitter:card" content="summary_large_image"')) fail(`${f} needs twitter:card summary_large_image`);
+    if (!s.includes('og:image" content="https://infoXtek.com/og-image.png"')) fail(`${f} needs the 1200x630 og:image`);
+    if ((s.match(/<p class="note">Illustrative/g) || []).length > 1) fail(`${f} repeats the Illustrative note`);
+    for (const m of s.matchAll(/<img\b[^>]*>/g)) { if (!/\balt="/.test(m[0])) fail(`${f} img without alt`); if (!/\bwidth="/.test(m[0]) || !/\bheight="/.test(m[0])) fail(`${f} img without width/height (CLS)`); }
+    if (!s.includes('<header class="top">') && !s.includes('<header class="top"')) fail(`${f} missing header landmark`);
+    if (!s.includes('<main id="main">') || !s.includes('<footer')) fail(`${f} missing main/footer landmarks`);
+  }
+}
 console.log(`security assertions done, ${bad} total problems`); process.exit(bad ? 1 : 0);
 
