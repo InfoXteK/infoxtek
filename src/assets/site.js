@@ -67,7 +67,7 @@ if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.querySelect
   });
 })();
 document.querySelectorAll('.floaters span').forEach((el) => {
-  const hero = el.closest('.hero'); if (!hero) return;
+  const hero = el.closest('.hero, .homehero'); if (!hero) return;
   el.tabIndex = 0; el.setAttribute('role', 'button'); el.setAttribute('aria-label', el.textContent + ' skill chip: drag or fling it, or use the arrow keys');
   let on = false, sx, sy, ox, oy, lx, ly, vx = 0, vy = 0, raf = 0;
   const place = (x, y) => { el.style.left = Math.max(0, Math.min(hero.clientWidth - el.offsetWidth, x)) + 'px'; el.style.top = Math.max(0, Math.min(hero.clientHeight - el.offsetHeight, y)) + 'px'; };

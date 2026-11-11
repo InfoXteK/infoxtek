@@ -89,7 +89,7 @@ console.log(`3D checks: ${flowCount} flow blocks validated, engine ${glBytes} by
   if (!/<img[^>]*fetchpriority="high"[^>]*width="1920"[^>]*height="1080"|<img[^>]*width="1920"[^>]*height="1080"[^>]*fetchpriority="high"/.test(home)) fail('home hero img needs fetchpriority="high" plus width/height');
   if (!home.includes('type="image/avif"') || !home.includes('type="image/webp"')) fail('home hero needs AVIF and WebP sources');
   if (!home.includes('rel="preload" as="image"')) fail('home is missing the hero preload');
-  if (/class="(ring3d|flow3d)"/.test(home) || /assets\/gl-/.test(home)) fail('home must not load the 3D engine');
+  
   for (const f of ['dist/og-image.png', 'dist/fonts/inter-400.woff', 'dist/fonts/inter-600.woff', 'dist/fonts/inter-700.woff', 'dist/img/hero-640.avif', 'dist/img/hero-1280.webp', 'dist/img/hero-1920.jpg']) if (!existsSync(f)) fail(`${f} missing`);
   { const b = readFileSync('dist/og-image.png'); if (b.readUInt32BE(16) !== 1200 || b.readUInt32BE(20) !== 630) fail('og-image.png must be 1200x630'); }
   for (const f of html) {

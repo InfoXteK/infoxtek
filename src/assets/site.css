@@ -463,3 +463,6 @@ h1,h2,h3{letter-spacing:-.02em}
 .bookm{display:none}
 @media(max-width:820px){.bookm{display:inline-block;margin-left:auto}.bar .menu{margin-left:0}.bar{gap:8px}}
 @media(min-width:1000px){.whys{grid-template-columns:repeat(5,1fr)}}
+
+.homehero .floaters{z-index:3}
+.homehero .floaters span{color:#e8ecff;background:rgba(15,24,64,.65);border-color:rgba(143,156,245,.55)}

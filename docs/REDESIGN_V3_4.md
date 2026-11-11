@@ -1,7 +1,7 @@
 # v3.4.0 redesign: audit, assets to supply, how to measure
 
 ## Audit of v3.3.1 (top 10, ranked by impact)
-1. Home page was 118 KB of HTML with the whole 3D service map and 16 detail panels, so the first screen waited on heavy markup and JS. Fixed: home is 19.5 KB and loads no 3D engine.
+1. Home page was 118 KB of HTML with the whole 3D service map and 16 detail panels, so the first screen waited on heavy markup and JS. (A first draft removed the 3D map and chips from home; reverted, all features kept, so home is large again.)
 2. No full-screen hero or image; first view was a text block with floating chips. Fixed: 100svh hero with AVIF/WebP/JPEG, blurred placeholder, preload, `fetchpriority="high"`.
 3. Home structure was a service ring, a reasons list and a CTA. Fixed: hero, trust bar, platform marquee, two category cards, why, process, industries, products with live demos, final CTA, footer.
 4. Platform names were plain chips. Fixed: grayscale auto-scrolling marquee (colour on hover); real SVG logos need to be supplied (see below).
@@ -32,7 +32,7 @@
 ## Measuring (nothing here is a Lighthouse score)
 Lighthouse is not installed in the build sandbox, so no Lighthouse before/after numbers exist. Run it yourself on the live site: Chrome DevTools > Lighthouse > Mobile > Navigation, on https://infoXtek.com/ in a private window. Use PageSpeed Insights for the Core Web Vitals field data.
 Measured locally in headless Chromium (no throttling, localhost, not comparable to Lighthouse): home LCP 588 ms desktop and 176 ms at 390 px, CLS 0, no horizontal overflow, 0 console errors.
-Static sizes: home HTML 118.7 KB before, 19.5 KB after (5.1 KB gzipped); site.css 64 KB (15 KB gzipped); site.js 56 KB (16.5 KB gzipped); hero AVIF 9.7 KB at 640 w, 25 KB at 1280 w, 39 KB at 1920 w.
+Static sizes: home HTML about 118 KB (3D map restored, so unchanged from v3.3.1); site.css 64 KB (15 KB gzipped); site.js 56 KB (16.5 KB gzipped); hero AVIF 9.7 KB at 640 w, 25 KB at 1280 w, 39 KB at 1920 w.
 
 ## Not possible on GitHub Pages
 Custom response headers (Brotli choice, `Cache-Control: immutable`) cannot be set. GitHub Pages serves gzip and its own cache lifetime. Put Cloudflare (free) in front if you want Brotli and long caching.
