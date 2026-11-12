@@ -174,8 +174,8 @@ b.bx{color:#2b86d1;font-weight:inherit}.bgart{opacity:.6}
 :where(body[data-svc]) .band{background:linear-gradient(115deg,color-mix(in srgb,var(--indigo) 16%,#fff),color-mix(in srgb,var(--teal) 16%,#fff));padding:4.2rem 0 3.2rem}
 body[data-svc] .band .wrap{text-shadow:0 1px 0 rgba(255,255,255,.6)}
 /* v2.2 3D layer: depth scenes, tilt cards, 3D hero stack */
-.scene{perspective:1000px}.deep{position:relative;transform-style:preserve-3d;transition:transform .18s ease-out;transform:rotateX(var(--tx,0deg)) rotateY(var(--ty,0deg))}
-.deep svg{width:100%;height:auto;display:block}.envl{position:absolute;inset:0;height:100%;opacity:.4;color:var(--indigo);transform:translateZ(-60px) scale(1.18);pointer-events:none}.deep .main{position:relative;transform:translateZ(0)}
+.scene{perspective:1000px}.deep{position:relative;transition:transform .18s ease-out;transform:rotateX(var(--tx,0deg)) rotateY(var(--ty,0deg))}
+.deep svg{width:100%;height:auto;display:block}.envl{position:absolute;inset:0;height:100%;opacity:.4;color:var(--indigo);transform:scale(1.18);pointer-events:none}.deep .main{position:relative}
 .ctl{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.8rem}.ctl button{font:600 .85rem system-ui,sans-serif;border:1px solid var(--indigo);background:transparent;color:var(--indigo);border-radius:999px;padding:.3rem .9rem;cursor:pointer}.ctl button:hover,.ctl button:focus-visible{background:var(--indigo);color:#fff}
 .cap{margin:.5rem 0 0;color:var(--muted);font-size:.9rem;min-height:1.4rem}.scene.ix .logs{display:none}
 .card{transform-style:preserve-3d}.card:hover{transform:perspective(900px) translateZ(16px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));box-shadow:0 22px 40px rgba(20,33,61,.22)}.js .rv.in.card:hover{transform:perspective(900px) translateZ(16px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))}

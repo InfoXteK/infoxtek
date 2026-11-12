@@ -84,7 +84,7 @@ document.querySelectorAll('.scene').forEach((sc) => {
   const logs = [...sc.querySelectorAll('.logs li')].map((l) => l.textContent), T = (sc.dataset.t || '').split(',').map(Number);
   sc.classList.add('ix');
   const ctl = document.createElement('div'); ctl.className = 'ctl';
-  const cap = document.createElement('p'); cap.className = 'cap'; cap.setAttribute('aria-live', 'polite'); cap.textContent = 'Click a step (or press 1 to 4) to freeze the scene at that moment, press P to pause or play, and move your pointer over it to tilt it in 3D.';
+  const cap = document.createElement('p'); cap.className = 'cap'; cap.setAttribute('aria-live', 'polite'); cap.textContent = '';
   const play = document.createElement('button'); play.type = 'button'; play.textContent = 'Pause'; let paused = false;
   const setP = (p) => { paused = p; play.textContent = p ? 'Play' : 'Pause'; try { p ? svg.pauseAnimations() : svg.unpauseAnimations(); } catch {} };
   play.onclick = () => { setP(!paused); if (!paused) cap.textContent = 'Playing.'; };
@@ -122,7 +122,6 @@ document.querySelectorAll('.ring3d').forEach((root) => {
     let GLR = null, glc = null, raf = 0, awake = 0;
     const failGL = () => { try { if (GLR) GLR.dispose(); } catch {} GLR = null; if (glc) glc.remove(); glc = null; cv.classList.remove('g3hud'); root.dataset.gl = '2d'; try { rs(); } catch {} };
     if (window.IXGL && IXGL.galaxy && IXGL.supported()) { try { glc = document.createElement('canvas'); glc.className = 'g3gl'; glc.setAttribute('aria-hidden', 'true'); box.insertBefore(glc, cv); GLR = IXGL.galaxy(glc, { onFail: failGL }); cv.classList.add('g3hud'); root.dataset.gl = 'webgl2'; } catch { GLR = null; if (glc) glc.remove(); glc = null; root.dataset.gl = '2d'; } } else root.dataset.gl = '2d';
-    const tip = document.createElement('p'); tip.className = 'tip gtip'; tip.textContent = 'Drag to orbit. One click on a sphere (or a button below the map) opens its full details underneath. Arrow keys move between nodes, Enter opens.'; sel.after(tip);
     const chips = document.createElement('div'); chips.className = 'gchips'; chips.setAttribute('role', 'group'); chips.setAttribute('aria-label', 'Quick select: choose an item'); box.after(chips);
     const hh = sel.querySelector('h3'), pp = sel.querySelector('p'), bb = sel.querySelector('.btn');
     const dtls = root.querySelector('.dtls'), arts = dtls ? [...dtls.querySelectorAll('.dtl')] : [];
